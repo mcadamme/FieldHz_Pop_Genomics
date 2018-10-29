@@ -19,7 +19,7 @@ data$year <- regmatches(data$file_names, regexpr("20[[:digit:]]+", data$file_nam
 data$samp_num <- (1:265)
 
 mean_read_count <- mean(data$read_counts)
-stdev_read_count <- sd(data$read_counts)
+sum_read_count <- sum(data$read_counts)
 y.low <- rep(mean_read_count*0.1, times = 265)
 y.high <- rep(max(data$read_counts), times = 265)
 
