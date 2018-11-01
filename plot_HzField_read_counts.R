@@ -1,8 +1,9 @@
 #This is the script I used to plot read counts for all Hz populations
 #MF 10/29/2018
 
-#To get the line counts, I used the following command in BASH:
+#To get the line counts, I used the following commands in BASH:
 #for file in *.fq.gz; do zcat $file | wc -l >> file_line_count; done
+#for file in *.fq.gz; do zcat $file | echo $file >> file_list; done
 
 setwd("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/AMD_libs1thru8_extended_frags/renamed_samples/")
 
@@ -16,12 +17,13 @@ colnames(data) <- c("file_names", "line_counts")
 data$read_counts <- (data$line_counts/4)
 
 data$year <- regmatches(data$file_names, regexpr("20[[:digit:]]+", data$file_names))
-data$samp_num <- (1:265)
+data$samp_num <- (1:nrow(data))
 
 mean_read_count <- mean(data$read_counts)
+sd_read_count <- sd(data$read_counts)
 sum_read_count <- sum(data$read_counts)
-y.low <- rep(mean_read_count*0.1, times = 265)
-y.high <- rep(max(data$read_counts), times = 265)
+y.low <- rep(mean_read_count*0.1, times = nrow(data))
+y.high <- rep(max(data$read_counts), times = nrow(data))
 
 exclude_from_analysis <- subset(data, read_counts < (mean_read_count * 0.1))
 exclude_from_analysis #all have fewer than 40,000 reads 
