@@ -1,5 +1,5 @@
 #this is my script to analyze my H. zea ddRADseq polymorphism data. 
-
+#M.Fritz 11/23/18
 
 library(LEA);library(OutFLANK);library(adegenet);library(vcfR)
 
@@ -34,6 +34,8 @@ vcfann <- as.data.frame(getFIX(vcf2002and2007))
 outliers_2002and2007 <- vcfann[outliers1,]
 nrow(outliers_2002and2007)
 length(unique(outliers_2002and2007$CHROM))
+outliers_2002and2007$MARK <- paste(outliers_2002and2007$CHROM, outliers_2002and2007$POS, sep = "_")
+
 
 #loading dataset for 2007 and 2012
 Field_Hzea_2007and2012.geno_in <- read.fwf("FieldHzea2007and2012.geno", width=rep(1,143))
@@ -56,6 +58,8 @@ vcfann <- as.data.frame(getFIX(vcf2007and2012))
 outliers_2007and2012 <- vcfann[outliers2,]
 nrow(outliers_2007and2012)
 length(unique(outliers_2007and2012$CHROM))
+outliers_2007and2012$MARK <- paste(outliers_2007and2012$CHROM, outliers_2007and2012$POS, sep = "_")
+
 
 
 #2012 through 2016
@@ -79,52 +83,64 @@ vcfann <- as.data.frame(getFIX(vcf2012and2016))
 outliers_2012and2016 <- vcfann[outliers3,]
 nrow(outliers_2012and2016)
 length(unique(outliers_2012and2016$CHROM))
+outliers_2012and2016$MARK <- paste(outliers_2012and2016$CHROM, outliers_2012and2016$POS, sep = "_")
 
 
-#2012 through 2016
-Field_Hzea_2012and2016.geno_in <- read.fwf("FieldHzea2012and2016.geno", width=rep(1,118))
-Field_Hzea_2012and2016.geno <- t(Field_Hzea_2012and2016.geno_in)
-Field_Hzea_2012and2016_meta <- read.table("/home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012and2016.txt")
 
-colnames(Field_Hzea_2012and2016_meta) <- c("samp_names")
-Field_Hzea_2012and2016_meta$pop <- regmatches(Field_Hzea_2012and2016_meta$samp_names, regexpr("20[[:digit:]]+", Field_Hzea_2012and2016_meta$samp_names))
+#2002 through 2016
+Field_Hzea_2002and2016.geno_in <- read.fwf("FieldHzea2002and2016.geno", width=rep(1,116))
+Field_Hzea_2002and2016.geno <- t(Field_Hzea_2002and2016.geno_in)
+Field_Hzea_2002and2016_meta <- read.table("/home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2016.txt")
+
+colnames(Field_Hzea_2002and2016_meta) <- c("samp_names")
+Field_Hzea_2002and2016_meta$pop <- regmatches(Field_Hzea_2002and2016_meta$samp_names, regexpr("20[[:digit:]]+", Field_Hzea_2002and2016_meta$samp_names))
 
 #OutFLANK analysis for 2002 and 2016
 OF_2002and2016_SNPs <- MakeDiploidFSTMat(Field_Hzea_2002and2016.geno, locusNames=seq(1, 27590, by=1), popNames=Field_Hzea_2002and2016_meta$pop) 
 OF_out4 <- OutFLANK(FstDataFrame=OF_2002and2016_SNPs, LeftTrimFraction=0.05, RightTrimFraction=0.05, Hmin=0.1, NumberOfSamples=2, qthreshold=0.05)
-OutFLANKResultsPlotter(OF_out4, withOutliers=T, NoCorr=T, Hmin=0.1, binwidth=0.005, Zoom = TRUE, titletext="Scan for selective sweeps 2012 & 2016")
+OutFLANKResultsPlotter(OF_out4, withOutliers=T, NoCorr=T, Hmin=0.1, binwidth=0.005, Zoom = TRUE, titletext="Scan for selective sweeps 2002 & 2016")
 
-outliers3 <- which(OF_out3$results$OutlierFlag=="TRUE")
+outliers4 <- which(OF_out4$results$OutlierFlag=="TRUE")
 print(outliers3)
 
-vcf2012and2016 <- read.vcfR("thinned_FieldHzea2012and2016.recode.vcf")
-vcfann <- as.data.frame(getFIX(vcf2012and2016))
-outliers_2012and2016 <- vcfann[outliers3,]
-nrow(outliers_2012and2016)
-length(unique(outliers_2012and2016$CHROM))
+vcf2002and2016 <- read.vcfR("thinned_FieldHzea2002and2016.recode.vcf")
+vcfann <- as.data.frame(getFIX(vcf2002and2016))
+outliers_2002and2016 <- vcfann[outliers4,]
+nrow(outliers_2002and2016)
+length(unique(outliers_2002and2016$CHROM))
+outliers_2002and2016$MARK <- paste(outliers_2002and2016$CHROM, outliers_2002and2016$POS, sep = "_")
 
+#Outlier Analysis Figures for Pub
 
-#Outlier Analysis Figure for Pub
+#2002&2016 qthreshold 0.05
+png("Outflank_Analysis_2002and2016_q0.05.png", units = "px", height = 600, width = 800)
+par(mar = c(5,6,4,2))
+plot(OF_out4$results$He, OF_out4$results$FST, pch=20, col="grey", ylab = "FST", xlab = "Expected Heterozygosity", 
+     ylim = c(0, 0.5), cex.axis = 2, cex.lab = 2.2)
+points(OF_out4$results$He[OF_out4$results$qvalues<0.05], OF_out4$results$FST[OF_out4$results$qvalues<0.05], pch=21, col="black")
+
+dev.off()
 
 #qthreshold 0.05
 png("Outflank_Analysis_multipanel_years_q0.05.png", units = "px", height = 1200, width = 800)
 
 par(mfrow = c(3,1))
+par(mar = c(5,6,4,2))
 
 plot(OF_out1$results$He, OF_out1$results$FST, pch=20, col="grey", ylab = "FST", xlab = "Expected Heterozygosity", 
-     ylim = c(0, 0.45), cex.axis = 1.5, cex.lab = 1.2)
+     ylim = c(0, 0.45), cex.axis = 2, cex.lab = 2.2)
 points(OF_out1$results$He[OF_out1$results$qvalues<0.05], OF_out1$results$FST[OF_out1$results$qvalues<0.05], pch=21, col="black")
-title("A", cex.main = 1.5, adj  = 0.05, line = -3)
+title("A", cex.main = 3, adj  = 0.05, line = -5)
 
 plot(OF_out2$results$He, OF_out2$results$FST, pch=20, col="grey", ylab = "FST", xlab = "Expected Heterozygosity", 
-     ylim = c(0, 0.45), cex.axis = 1.5, cex.lab = 1.2)
+     ylim = c(0, 0.45), cex.axis = 2, cex.lab = 2.2)
 points(OF_out2$results$He[OF_out2$results$qvalues<0.05], OF_out2$results$FST[OF_out2$results$qvalues<0.05], pch=21, col="black")
-title("B", cex.main = 1.5, adj  = 0.05, line = -3)
+title("B", cex.main = 3, adj  = 0.05, line = -5)
 
 plot(OF_out3$results$He, OF_out3$results$FST, pch=20, col="grey", ylab = "FST", xlab = "Expected Heterozygosity", 
-     ylim = c(0, 0.45), cex.axis = 1.5, cex.lab = 1.2)
+     ylim = c(0, 0.45), cex.axis = 2, cex.lab = 2.2)
 points(OF_out3$results$He[OF_out3$results$qvalues<0.05], OF_out3$results$FST[OF_out3$results$qvalues<0.05], pch=21, col="black")
-title("C", cex.main = 1.5, adj  = 0.05, line = -3)
+title("C", cex.main = 3, adj  = 0.05, line = -5)
 
 dev.off()
 
@@ -132,20 +148,22 @@ dev.off()
 png("Outflank_Analysis_multipanel_years_q0.01.png", units = "px", height = 1200, width = 800)
 
 par(mfrow = c(3,1))
+par(mar = c(5,6,4,2))
+
 plot(OF_out1$results$He, OF_out1$results$FST, pch=20, col="grey", ylab = "FST", xlab = "Expected Heterozygosity", 
-     ylim = c(0, 0.45), cex.axis = 1.5, cex.lab = 1.2)
+     ylim = c(0, 0.45), cex.axis = 2, cex.lab = 2.2)
 points(OF_out1$results$He[OF_out1$results$qvalues<0.01], OF_out1$results$FST[OF_out1$results$qvalues<0.01], pch=21, col="black")
-title("A", cex.main = 1.5, adj  = 0.05, line = -3)
+title("A", cex.main = 3, adj  = 0.05, line = -5)
 
 plot(OF_out2$results$He, OF_out2$results$FST, pch=20, col="grey", ylab = "FST", xlab = "Expected Heterozygosity", 
-     ylim = c(0, 0.45), cex.axis = 1.5, cex.lab = 1.2)
+     ylim = c(0, 0.45), cex.axis = 2, cex.lab = 2.2)
 points(OF_out2$results$He[OF_out2$results$qvalues<0.01], OF_out2$results$FST[OF_out2$results$qvalues<0.01], pch=21, col="black")
-title("B", cex.main = 1.5, adj  = 0.05, line = -3)
+title("B", cex.main = 3, adj  = 0.05, line = -5)
 
 plot(OF_out3$results$He, OF_out3$results$FST, pch=20, col="grey", ylab = "FST", xlab = "Expected Heterozygosity", 
-     ylim = c(0, 0.45), cex.axis = 1.5, cex.lab = 1.2)
+     ylim = c(0, 0.45), cex.axis = 2, cex.lab = 2.2)
 points(OF_out3$results$He[OF_out3$results$qvalues<0.01], OF_out3$results$FST[OF_out3$results$qvalues<0.01], pch=21, col="black")
-title("C", cex.main = 1.5, adj  = 0.05, line = -3)
+title("C", cex.main = 3, adj  = 0.05, line = -5)
 
 dev.off()
 
