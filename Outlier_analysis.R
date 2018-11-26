@@ -32,6 +32,9 @@ print(outliers1)
 vcf2002and2007 <- read.vcfR("thinned_FieldHzea2002and2007.recode.vcf")
 vcfann <- as.data.frame(getFIX(vcf2002and2007))
 outliers_2002and2007 <- vcfann[outliers1,]
+
+#write.table(outliers_2002and2007, file = "outliers_2002and2007.txt", col.names = T, row.names = F)
+
 nrow(outliers_2002and2007)
 length(unique(outliers_2002and2007$CHROM))
 outliers_2002and2007$MARK <- paste(outliers_2002and2007$CHROM, outliers_2002and2007$POS, sep = "_")
@@ -56,6 +59,9 @@ print(outliers2)
 vcf2007and2012 <- read.vcfR("thinned_FieldHzea2007and2012.recode.vcf")
 vcfann <- as.data.frame(getFIX(vcf2007and2012))
 outliers_2007and2012 <- vcfann[outliers2,]
+
+#write.table(outliers_2007and2012, file = "outliers_2007and2012.txt", col.names = T, row.names = F)
+
 nrow(outliers_2007and2012)
 length(unique(outliers_2007and2012$CHROM))
 outliers_2007and2012$MARK <- paste(outliers_2007and2012$CHROM, outliers_2007and2012$POS, sep = "_")
@@ -81,6 +87,9 @@ print(outliers3)
 vcf2012and2016 <- read.vcfR("thinned_FieldHzea2012and2016.recode.vcf")
 vcfann <- as.data.frame(getFIX(vcf2012and2016))
 outliers_2012and2016 <- vcfann[outliers3,]
+
+#write.table(outliers_2012and2016, file = "outliers_2012and2016.txt", col.names = T, row.names = F)
+
 nrow(outliers_2012and2016)
 length(unique(outliers_2012and2016$CHROM))
 outliers_2012and2016$MARK <- paste(outliers_2012and2016$CHROM, outliers_2012and2016$POS, sep = "_")
@@ -101,11 +110,14 @@ OF_out4 <- OutFLANK(FstDataFrame=OF_2002and2016_SNPs, LeftTrimFraction=0.05, Rig
 OutFLANKResultsPlotter(OF_out4, withOutliers=T, NoCorr=T, Hmin=0.1, binwidth=0.005, Zoom = TRUE, titletext="Scan for selective sweeps 2002 & 2016")
 
 outliers4 <- which(OF_out4$results$OutlierFlag=="TRUE")
-print(outliers3)
+print(outliers4)
 
 vcf2002and2016 <- read.vcfR("thinned_FieldHzea2002and2016.recode.vcf")
 vcfann <- as.data.frame(getFIX(vcf2002and2016))
 outliers_2002and2016 <- vcfann[outliers4,]
+
+#write.table(outliers_2002and2016, file = "outliers_2002and2016.txt", col.names = T, row.names = F)
+
 nrow(outliers_2002and2016)
 length(unique(outliers_2002and2016$CHROM))
 outliers_2002and2016$MARK <- paste(outliers_2002and2016$CHROM, outliers_2002and2016$POS, sep = "_")
@@ -168,22 +180,28 @@ title("C", cex.main = 3, adj  = 0.05, line = -5)
 dev.off()
 
 
-#subsetting by top sig outliers
-hioutliers3 <- which(OF_out3$results$OutlierFlag=="TRUE" & OF_out3$results$FST > 0.15)
-print(hioutliers3)
-hi_outliers_2002and2016 <- vcfann[hioutliers3,]
-length(unique(hi_outliers_2002and2016$CHROM))
+#subsetting by top sig outliers in two by-year comparisons
 
-outliers_firsttwo <- merge(outliers_2002and2007,outliers_2002and2012, by = "CHROM")
-length(unique(outliers_firsttwo$CHROM))
-print(unique(outliers_firsttwo$CHROM))
+outliers_firsttwo <- merge(outliers_2002and2007,outliers_2002and2016, by = "MARK")
+length(unique(outliers_firsttwo$MARK))
+print(unique(outliers_firsttwo$MARK))
 
-outliers_lasttwo <- merge(outliers_2002and2012,outliers_2002and2016, by = "CHROM")
-length(unique(outliers_lasttwo$CHROM))
-print(unique(outliers_lasttwo$CHROM))
+outliers_nexttwo <- merge(outliers_2007and2012,outliers_2002and2016, by = "MARK")
+length(unique(outliers_nexttwo$MARK))
+print(unique(outliers_nexttwo$MARK))
 
-outliers_all <- merge(outliers_firsttwo,outliers_lasttwo, by = "CHROM")
-length(unique(outliers_all$CHROM))
-print(unique(outliers_all$CHROM))
+outliers_lasttwo <- merge(outliers_2012and2016,outliers_2002and2016, by = "MARK")
+length(unique(outliers_lasttwo$MARK))
+print(unique(outliers_lasttwo$MARK))
+
+##looking at shared outliers across mult by-year comparisons
+outliers_all1 <- merge(outliers_firsttwo,outliers_nexttwo, by = "MARK")
+length(unique(outliers_all1$MARK))
+print(unique(outliers_all1$MARK))
+
+outliers_all2 <- merge(outliers_lasttwo,outliers_nexttwo, by = "MARK")
+length(unique(outliers_all2$MARK))
+print(unique(outliers_all2$MARK))
+#this outlier has weird changes in allele frequency over time, inconsistent with a selective sweep.
 
 
