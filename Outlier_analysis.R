@@ -185,14 +185,23 @@ dev.off()
 outliers_firsttwo <- merge(outliers_2002and2007,outliers_2002and2016, by = "MARK")
 length(unique(outliers_firsttwo$MARK))
 print(unique(outliers_firsttwo$MARK))
+length(unique(outliers_firsttwo$CHROM.x))
+print(unique(outliers_firsttwo$CHROM.x))
+
 
 outliers_nexttwo <- merge(outliers_2007and2012,outliers_2002and2016, by = "MARK")
 length(unique(outliers_nexttwo$MARK))
 print(unique(outliers_nexttwo$MARK))
+length(unique(outliers_nexttwo$CHROM.x))
+print(unique(outliers_nexttwo$CHROM.x))
+
 
 outliers_lasttwo <- merge(outliers_2012and2016,outliers_2002and2016, by = "MARK")
 length(unique(outliers_lasttwo$MARK))
 print(unique(outliers_lasttwo$MARK))
+length(unique(outliers_lasttwo$CHROM.x))
+print(unique(outliers_lasttwo$CHROM.x))
+
 
 ##looking at shared outliers across mult by-year comparisons
 outliers_all1 <- merge(outliers_firsttwo,outliers_nexttwo, by = "MARK")
@@ -204,4 +213,40 @@ length(unique(outliers_all2$MARK))
 print(unique(outliers_all2$MARK))
 #this outlier has weird changes in allele frequency over time, inconsistent with a selective sweep.
 
+#getting scaffold names for outliers
+#loading identifier file
+scaf_names <- read.table("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/scaffold_and_contig_names.txt",
+                         header = T)
 
+outliers_firsttwo_withIDs <- merge(outliers_firsttwo, scaf_names, by.x = "CHROM.x", by.y = "CHROM")
+firsttwo_scafandpos <- outliers_firsttwo_withIDs[,c(1,3,16)]
+
+
+outliers_nexttwo_withIDs <- merge(outliers_nexttwo, scaf_names, by.x = "CHROM.x", by.y = "CHROM")
+nexttwo_scafandpos <- outliers_nexttwo_withIDs[,c(1,3,16)]
+#write.table(nexttwo_scafandpos, file = "Sig_outliers_nexttwo.txt")
+
+outliers_lasttwo_withIDs <- merge(outliers_lasttwo, scaf_names, by.x = "CHROM.x", by.y = "CHROM")
+lasttwo_scafandpos <- outliers_lasttwo_withIDs[,c(1,3,16)]
+#write.table(lasttwo_scafandpos, file = "Sig_outliers_lasttwo.txt")
+
+
+#Now pulling out the parts of the gff3 file that are important
+gff3 <- read.table("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/HzOGS2-15205-fixed_note-added.gff3",
+                   sep="\t", stringsAsFactors = F)
+head(gff3)
+
+firsttwo_scafandpos_withAnnot <- merge(firsttwo_scafandpos, gff3, by.x = "Scaf_ID", by.y = "V1")
+firsttwo_scafandpos_withAnnot$POS.x <- as.integer(as.character(firsttwo_scafandpos_withAnnot$POS.x))
+firsttwo_scafandpos_withAnnot <- subset(firsttwo_scafandpos_withAnnot, V3 == "gene" & V5 > (POS.x -50000) & V4 < (POS.x + 50000))
+#write.table(firsttwo_scafandpos_withAnnot, file = "Sig_outliers_firsttwo.txt", row.names = F)
+
+nexttwo_scafandpos_withAnnot <- merge(nexttwo_scafandpos, gff3, by.x = "Scaf_ID", by.y = "V1")
+nexttwo_scafandpos_withAnnot$POS.x <- as.integer(as.character(nexttwo_scafandpos_withAnnot$POS.x))
+nexttwo_scafandpos_withAnnot <- subset(nexttwo_scafandpos_withAnnot, V3 == "gene" & V5 > (POS.x -50000) & V4 < (POS.x + 50000))
+#write.table(nexttwo_scafandpos_withAnnot, file = "Sig_outliers_nexttwo.txt", row.names = F)
+
+lasttwo_scafandpos_withAnnot <- merge(lasttwo_scafandpos, gff3, by.x = "Scaf_ID", by.y = "V1")
+lasttwo_scafandpos_withAnnot$POS.x <- as.integer(as.character(lasttwo_scafandpos_withAnnot$POS.x))
+lasttwo_scafandpos_withAnnot <- subset(lasttwo_scafandpos_withAnnot, V3 == "gene" & V5 > (POS.x -50000) & V4 < (POS.x + 50000))
+#write.table(lasttwo_scafandpos_withAnnot, file = "Sig_outliers_lasttwo.txt", row.names = F)
