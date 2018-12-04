@@ -41,6 +41,43 @@ vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ117720.1_only/FieldHzea2016 --chr KZ117720.1 --site-mean-depth
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ117720.1_only/FieldHzea2016 --chr KZ117720.1 --geno-depth
 
+#looking at KZ118207.1
+mkdir KZ118207.1_only
+
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2002 --chr KZ118207.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2002 --chr KZ118207.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2002 --chr KZ118207.1 --geno-depth
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2007 --chr KZ118207.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2007 --chr KZ118207.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2007 --chr KZ118207.1 --geno-depth
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2012 --chr KZ118207.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2012 --chr KZ118207.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2012 --chr KZ118207.1 --geno-depth
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2016 --chr KZ118207.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2016 --chr KZ118207.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118207.1_only/FieldHzea2016 --chr KZ118207.1 --geno-depth
+
+#looking at KZ118195.1
+mkdir KZ118195.1_only
+
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2002 --chr KZ118195.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2002 --chr KZ118195.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2002 --chr KZ118195.1 --geno-depth
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2007 --chr KZ118195.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2007 --chr KZ118195.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2007 --chr KZ118195.1 --geno-depth
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2012 --chr KZ118195.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2012 --chr KZ118195.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2012 --chr KZ118195.1 --geno-depth
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2016 --chr KZ118195.1 --freq
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2016 --chr KZ118195.1 --site-mean-depth
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118195.1_only/FieldHzea2016 --chr KZ118195.1 --geno-depth
 
 #looking only at KZ117463.1_only (with Cad86c) with some filtering
 
