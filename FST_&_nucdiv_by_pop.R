@@ -74,6 +74,12 @@ scatter(dapc3, ratio.pca=0.3, bg="white", pch=20,  cell=0,
         mstree=T, scree.da=TRUE, posi.pca="topright",
         leg=TRUE, posi.leg = "bottomleft", txt.leg=paste("Cluster",1:4))
 
+#looking at loadings
+loadingplot(dapc2$var.contr, axis = 2, thres = 0.07, lab.jitter = 1)
+dapc2$posterior
+
+big_contrib <- dapc2$var.contr > 0.002
+
 #When I allow for more than 2 clusters, it seems as though there are a few individuals from 2002 that do cluster together
 #and away from the other individuals in the overall population. 
 #Perhaps those individuals are migrants from South America, whereas the others are all from North American populations that have
