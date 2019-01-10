@@ -1,4 +1,6 @@
 #script to trim off the low-quality ends of my reads with Trimmomatic v. 0.38.
+#12/11/18
+#MF
 
 cd /media/megan/"New Volume"/Raw_Sequence_Data/H.zea_WGRS_DivelySamples/GouldFritz/
 
