@@ -180,23 +180,67 @@ title("C", cex.main = 3, adj  = 0.05, line = -5)
 dev.off()
 
 
-#subsetting by top sig outliers in two by-year comparisons
+####getting genes nearby outliers
+#loading identifier file
+scaf_names <- read.table("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/scaffold_and_contig_names.txt",
+                         header = T)
 
-outliers_firsttwo <- merge(outliers_2002and2007,outliers_2002and2016, by = "MARK")
+#adding scaffold names to outlier dataframes
+outliers_2002and2007_withIDs <- merge(outliers_2002and2007, scaf_names, by = "CHROM")
+outliers_2007and2012_withIDs <- merge(outliers_2007and2012, scaf_names, by = "CHROM")
+outliers_2012and2016_withIDs <- merge(outliers_2012and2016, scaf_names, by = "CHROM")
+outliers_2002and2016_withIDs <- merge(outliers_2002and2016, scaf_names, by = "CHROM")
+
+
+
+#Now pulling out the parts of the gff3 file that are important
+gff3 <- read.table("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/HzOGS2-15205-fixed_note-added.gff3",
+                   sep="\t", stringsAsFactors = F)
+head(gff3)
+
+###getting nearby genes
+
+#2002 and 2007
+outliers_2002and2007_withAnnot <- merge(outliers_2002and2007_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
+outliers_2002and2007_withAnnot$POS <- as.integer(as.character(outliers_2002and2007_withAnnot$POS))
+outliers_2002and2007_withAnnot <- subset(outliers_2002and2007_withAnnot, V3 == "gene" & V5 > (POS -50000) & V4 < (POS + 50000))
+#write.table(outliers_2002and2007_withAnnot, file = "Sig_outliers_withAnnot_2002and2007.txt", row.names = F)
+
+#2007 and 2012
+outliers_2007and2012_withAnnot <- merge(outliers_2007and2012_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
+outliers_2007and2012_withAnnot$POS <- as.integer(as.character(outliers_2007and2012_withAnnot$POS))
+outliers_2007and2012_withAnnot <- subset(outliers_2007and2012_withAnnot, V3 == "gene" & V5 > (POS -50000) & V4 < (POS + 50000))
+#write.table(outliers_2007and2012_withAnnot, file = "Sig_outliers_withAnnot_2007and2012.txt", row.names = F)
+
+#2012 and 2016
+outliers_2012and2016_withAnnot <- merge(outliers_2012and2016_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
+outliers_2012and2016_withAnnot$POS <- as.integer(as.character(outliers_2012and2016_withAnnot$POS))
+outliers_2012and2016_withAnnot <- subset(outliers_2012and2016_withAnnot, V3 == "gene" & V5 > (POS -50000) & V4 < (POS + 50000))
+#write.table(outliers_2012and2016_withAnnot, file = "Sig_outliers_withAnnot_2012and2016.txt", row.names = F)
+
+#2002 and 2016
+outliers_2002and2016_withAnnot <- merge(outliers_2002and2016_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
+outliers_2002and2016_withAnnot$POS <- as.integer(as.character(outliers_2002and2016_withAnnot$POS))
+outliers_2002and2016_withAnnot <- subset(outliers_2002and2016_withAnnot, V3 == "gene" & V5 > (POS -50000) & V4 < (POS + 50000))
+#write.table(outliers_2002and2016_withAnnot, file = "Sig_outliers_withAnnot_2002and2016.txt", row.names = F)
+
+
+#subsetting by top sig outliers in two by-year comparisons
+outliers_firsttwo <- merge(outliers_2002and2007_withAnnot,outliers_2002and2016_withAnnot, by = "MARK")
 length(unique(outliers_firsttwo$MARK))
 print(unique(outliers_firsttwo$MARK))
 length(unique(outliers_firsttwo$CHROM.x))
 print(unique(outliers_firsttwo$CHROM.x))
 
 
-outliers_nexttwo <- merge(outliers_2007and2012,outliers_2002and2016, by = "MARK")
+outliers_nexttwo <- merge(outliers_2007and2012_withAnnot,outliers_2002and2016_withAnnot, by = "MARK")
 length(unique(outliers_nexttwo$MARK))
 print(unique(outliers_nexttwo$MARK))
 length(unique(outliers_nexttwo$CHROM.x))
 print(unique(outliers_nexttwo$CHROM.x))
 
 
-outliers_lasttwo <- merge(outliers_2012and2016,outliers_2002and2016, by = "MARK")
+outliers_lasttwo <- merge(outliers_2012and2016_withAnnot,outliers_2002and2016_withAnnot, by = "MARK")
 length(unique(outliers_lasttwo$MARK))
 print(unique(outliers_lasttwo$MARK))
 length(unique(outliers_lasttwo$CHROM.x))
@@ -213,40 +257,65 @@ length(unique(outliers_all2$MARK))
 print(unique(outliers_all2$MARK))
 #this outlier has weird changes in allele frequency over time, inconsistent with a selective sweep.
 
-#getting scaffold names for outliers
-#loading identifier file
-scaf_names <- read.table("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/scaffold_and_contig_names.txt",
-                         header = T)
-
-outliers_firsttwo_withIDs <- merge(outliers_firsttwo, scaf_names, by.x = "CHROM.x", by.y = "CHROM")
-firsttwo_scafandpos <- outliers_firsttwo_withIDs[,c(1,3,16)]
 
 
-outliers_nexttwo_withIDs <- merge(outliers_nexttwo, scaf_names, by.x = "CHROM.x", by.y = "CHROM")
-nexttwo_scafandpos <- outliers_nexttwo_withIDs[,c(1,3,16)]
-#write.table(nexttwo_scafandpos, file = "Sig_outliers_nexttwo.txt")
+######Here I'm examining outliers for the wgs experiment using the wcFst file
+wgs_data1 <- read.table("/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/FieldHzea_wcFST_all", header = F)
+wgs_Hi_wcFst <- subset(wgs_data1, V5 > 0.1)
+head(wgs_Hi_wcFst)
 
-outliers_lasttwo_withIDs <- merge(outliers_lasttwo, scaf_names, by.x = "CHROM.x", by.y = "CHROM")
-lasttwo_scafandpos <- outliers_lasttwo_withIDs[,c(1,3,16)]
-#write.table(lasttwo_scafandpos, file = "Sig_outliers_lasttwo.txt")
+#getting scaf names
+wgs_withIDs <- merge(wgs_Hi_wcFst, scaf_names, by.x = "V1", by.y = "CHROM")
+
+wgs_wc_withAnnot <- merge(wgs_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
+str(wgs_wc_withAnnot)
+
+wgs_wc_withAnnot <- subset(wgs_wc_withAnnot, V3.y == "gene" & V5.y > (V2.x -50000) & V4.y < (V3.x + 50000))
+#write.table(wgs_wc_withAnnot, file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/Hi_wcFst_annotated.txt", row.names = F)
+
+#looking at the intersection of the two experiments
+#sig_outliers_bothExp1 <- merge(outliers_2002and2007_withAnnot, wgs_wc_withAnnot, by = "V9")
+#sig_outliers_bothExp2 <- merge(outliers_2007and2012_withAnnot, wgs_wc_withAnnot, by = "V9")
+sig_outliers_bothExp3 <- merge(outliers_2012and2016_withAnnot, wgs_wc_withAnnot, by = "V9")
+#sig_outliers_bothExp4 <- merge(outliers_2002and2016_withAnnot, wgs_wc_withAnnot, by = "V9")
+
+#print(unique(sig_outliers_bothExp1$V9))
+#print(unique(sig_outliers_bothExp2$V9))
+print(unique(sig_outliers_bothExp3$V9))
+#print(unique(sig_outliers_bothExp4$V9))
+
+#write.table(unique(sig_outliers_bothExp1$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_wcFst0.1_bothExp1.txt", row.names = F)
+#write.table(unique(sig_outliers_bothExp2$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_wcFst0.1_bothExp2.txt", row.names = F)
+write.table(unique(sig_outliers_bothExp3$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_wcFst0.1_bothExp3.txt", row.names = F)
+#write.table(unique(sig_outliers_bothExp4$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_wcFst0.1_bothExp4.txt", row.names = F)
+
+######Now examining outliers for the wgs experiment using the pFst file
+wgs_data2 <- read.table("/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/FieldHzea_pFST_all", header = F)
+wgs_Hi_pFst <- subset(wgs_data2, V3 < 0.05)
+
+#getting scaf names
+wgs_withIDs_pfst <- merge(wgs_Hi_pFst, scaf_names, by.x = "V1", by.y = "CHROM")
+
+wgs_pfst_withAnnot <- merge(wgs_withIDs_pfst, gff3, by.x = "Scaf_ID", by.y = "V1")
+
+str(wgs_pfst_withAnnot)
+
+wgs_pfst_withAnnot <- subset(wgs_pfst_withAnnot, V3.y == "gene" & V5 > (V2.x -50000) & V4 < (V3.x + 50000))
+#write.table(wgs_pfst_withAnnot, file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/Hi_pfst_annotated.txt", row.names = F)
 
 
-#Now pulling out the parts of the gff3 file that are important
-gff3 <- read.table("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/HzOGS2-15205-fixed_note-added.gff3",
-                   sep="\t", stringsAsFactors = F)
-head(gff3)
+#looking at the intersection of the two experiments
+#sig_outliers_bothExp1_pfst <- merge(outliers_2002and2007_withAnnot, wgs_pfst_withAnnot, by = "V9")
+#sig_outliers_bothExp2_pfst <- merge(outliers_2007and2012_withAnnot, wgs_pfst_withAnnot, by = "V9")
+sig_outliers_bothExp3_pfst <- merge(outliers_2012and2016_withAnnot, wgs_pfst_withAnnot, by = "V9")
+#sig_outliers_bothExp4_pfst <- merge(outliers_2002and2016_withAnnot, wgs_pfst_withAnnot, by = "V9")
 
-firsttwo_scafandpos_withAnnot <- merge(firsttwo_scafandpos, gff3, by.x = "Scaf_ID", by.y = "V1")
-firsttwo_scafandpos_withAnnot$POS.x <- as.integer(as.character(firsttwo_scafandpos_withAnnot$POS.x))
-firsttwo_scafandpos_withAnnot <- subset(firsttwo_scafandpos_withAnnot, V3 == "gene" & V5 > (POS.x -50000) & V4 < (POS.x + 50000))
-#write.table(firsttwo_scafandpos_withAnnot, file = "Sig_outliers_firsttwo.txt", row.names = F)
+#print(unique(sig_outliers_bothExp1$V9))
+#print(unique(sig_outliers_bothExp2$V9))
+print(unique(sig_outliers_bothExp3_pfst$V9))
+#print(unique(sig_outliers_bothExp4$V9))
 
-nexttwo_scafandpos_withAnnot <- merge(nexttwo_scafandpos, gff3, by.x = "Scaf_ID", by.y = "V1")
-nexttwo_scafandpos_withAnnot$POS.x <- as.integer(as.character(nexttwo_scafandpos_withAnnot$POS.x))
-nexttwo_scafandpos_withAnnot <- subset(nexttwo_scafandpos_withAnnot, V3 == "gene" & V5 > (POS.x -50000) & V4 < (POS.x + 50000))
-#write.table(nexttwo_scafandpos_withAnnot, file = "Sig_outliers_nexttwo.txt", row.names = F)
-
-lasttwo_scafandpos_withAnnot <- merge(lasttwo_scafandpos, gff3, by.x = "Scaf_ID", by.y = "V1")
-lasttwo_scafandpos_withAnnot$POS.x <- as.integer(as.character(lasttwo_scafandpos_withAnnot$POS.x))
-lasttwo_scafandpos_withAnnot <- subset(lasttwo_scafandpos_withAnnot, V3 == "gene" & V5 > (POS.x -50000) & V4 < (POS.x + 50000))
-#write.table(lasttwo_scafandpos_withAnnot, file = "Sig_outliers_lasttwo.txt", row.names = F)
+#write.table(unique(sig_outliers_bothExp1_pfst$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_pFst0.1_bothExp1.txt", row.names = F)
+#write.table(unique(sig_outliers_bothExp2_pfst$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_pFst0.1_bothExp2.txt", row.names = F)
+write.table(unique(sig_outliers_bothExp3_pfst$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_pFst0.05_bothExp3.txt", row.names = F)
+#write.table(unique(sig_outliers_bothExp4_pfst$V9), file = "/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v2/sig_outliers_pFst0.1_bothExp4.txt", row.names = F)
