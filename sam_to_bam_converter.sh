@@ -23,6 +23,11 @@ do
 
 done
 
-#getting a list of sam files
+#getting a list of bam files
 ls *.bam > Hzea_BamFiles.txt
+
+#moving sam files to new directory to avoid confusion
+mkdir sam_files
+
+mv *.sam ./sam_files
 
