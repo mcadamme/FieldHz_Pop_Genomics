@@ -9,7 +9,7 @@ mkdir mpileupANDvcftools_output
 
 bcftools mpileup -f ./Hzea_genome/GCA_002150865.1_Hzea_1.0_genomic.fna -b ./Hzea_BamFiles.txt -I -d 70 --threads 6 -O u -o ./mpileupANDvcftools_output/FieldHzea.bcf
 
-bcftools call -vmO v -o ./mpileupANDvcftools_output/FieldHzea_variantsonly.vcf ./mpileupANDvcftools_output/FieldHzea.bcf #SNP calling and conversion to vcf formatcf
+bcftools call -vmO v -o ./mpileupANDvcftools_output/FieldHzea_variantsonly.vcf ./mpileupANDvcftools_output/FieldHzea.bcf #SNP calling and conversion to vcf format
 
 #here I filtered my called SNPs in preparation for analysis in R
 
