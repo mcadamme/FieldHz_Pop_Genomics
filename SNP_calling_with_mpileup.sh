@@ -13,7 +13,7 @@ bcftools call -vmO v -o ./mpileupANDvcftools_output/FieldHzea_variantsonly.vcf /
 
 #here I filtered my called SNPs in preparation for analysis in R
 
-vcftools --vcf ./mpileupANDvcftools_output/FieldHzea_variantsonly.vcf --recode --out thinned_FieldHzea_variantsonly.vcf --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/allpops_no_low.txt
+vcftools --vcf ./mpileupANDvcftools_output/FieldHzea_variantsonly.vcf --recode --out ./mpileupANDvcftools_output/thinned_FieldHzea_variantsonly.vcf --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/allpops_no_low.txt
  
 
 
