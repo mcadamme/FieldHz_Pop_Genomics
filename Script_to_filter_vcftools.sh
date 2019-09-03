@@ -251,21 +251,21 @@ cat /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2007.txt /home/me
 
 
 
-vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2007 --thin 50 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2007.txt --recode
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2007 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2007.txt --recode
 
-vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2012 --thin 50 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2012.txt --recode
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2012 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2012.txt --recode
 
-vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2016 --thin 50 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2016.txt --recode
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2016 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2016.txt --recode
 
-vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2007and2012 --thin 50 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007and2012.txt --recode
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2007and2012 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007and2012.txt --recode
 
-vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2007and2016 --thin 50 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007and2016.txt --recode
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2007and2016 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007and2016.txt --recode
 
-vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2012and2016 --thin 50 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012and2016.txt --recode
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2012and2016 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012and2016.txt --recode
 
 
 #full set thinned and filtered.
-vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --thin 50 --out thinned_FieldHzea_allpops --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/allpops_no_low.txt --recode
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --thin 200 --out thinned_FieldHzea_allpops --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/allpops_no_low.txt --recode
 
 ###Now using Stacks dataset
 
