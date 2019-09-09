@@ -4,6 +4,7 @@ cd /media/megan/"New Volume"/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/mpi
 
 #I first examined contigs with important candidate genes for Bt resistance to identify markers present, if any. 
 
+
 #first looking only at KZ118424.1 (with tetraspannin) with some filtering
 mkdir KZ118424.1_only
 
@@ -14,6 +15,18 @@ vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118424.1_only/FieldHzea2012 --chr KZ118424.1 --freq
                                                                                                                                                              
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118424.1_only/FieldHzea2016 --chr KZ118424.1 --freq
+
+#looking at KZ118590.1 with ABCB1
+mkdir KZ118590.1_only
+
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --out ./KZ118590.1_only/FieldHzea2002 --chr KZ118590.1 --freq
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt --out ./KZ118590.1_only/FieldHzea2007 --chr KZ118590.1 --freq
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt --out ./KZ118590.1_only/FieldHzea2012 --chr KZ118590.1 --freq
+                                                                                                                                                             
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118590.1_only/FieldHzea2016 --chr KZ118590.1 --freq
+
 
 #looking at KZ118207.1 with ABCA2
 mkdir KZ118207.1_only
@@ -97,7 +110,7 @@ vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt --out ./KZ118301.1_only/FieldHzea2016 --chr KZ118301.1 --freq
 
 
-###Looking at all scaffolds - do I need the extra thin command?
+###Looking at all scaffolds
 #2002 samples
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --thin 200 --out FieldHzea2002 --freq
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --thin 200 --out FieldHzea2002 --site-pi
@@ -135,6 +148,7 @@ vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out 2002and2012 -
 
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out 2002and2016 --thin 200 --weir-fst-pop /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt --weir-fst-pop /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2016_noreps_or_low.txt
 
+
 ##getting pairwise datasets for R analysis
 ##generating combined popfiles
 cat /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002_noreps_or_low.txt /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2007_noreps_or_low.txt > /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2007.txt
@@ -147,7 +161,7 @@ cat /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012_noreps_or_low.txt /
 cat /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2007.txt /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2012and2016.txt > /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/allpops_no_low.txt
 
 
-
+#popfiles for pairwise comparisons
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2007 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2007.txt --recode
 
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --out thinned_FieldHzea2002and2012 --thin 200 --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/2002and2012.txt --recode
