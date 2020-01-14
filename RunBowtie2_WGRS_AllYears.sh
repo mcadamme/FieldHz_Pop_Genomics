@@ -1,4 +1,4 @@
-#script to align H.zea WGRS reads with bowtie2
+#script to align H.zea WGRS reads with bowtie2 v.2.2.6
 #01/14/2019
 #MLF
 
