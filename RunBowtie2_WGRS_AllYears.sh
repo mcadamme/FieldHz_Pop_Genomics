@@ -1,11 +1,11 @@
 #script to align H.zea WGRS reads with bowtie2 v.2.2.6
-#01/14/2019
+#01/14/2020
 #MLF
 
 cd /media/megan/"New Volume"/
 
 mkdir Hzea_WGRS_Bowtie2_output
-mkdir ./Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142019
+mkdir ./Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142020
 
 #end-to-end alignments with highest sensitivity
 
@@ -26,7 +26,7 @@ bowtie2 -x ./Hzea_genome/Hzea_genome -1 ./Raw_Sequence_Data/filter_trimmed_Hzea_
 
 bowtie2 -x ./Hzea_genome/Hzea_genome -1 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_8_S8_forward_paired.fastq.gz -2 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_8_S8_reverse_paired.fastq.gz --very-sensitive --threads 8 -S ./Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142019/HZ_2002_08.sam
 
-bowtie2 -x ./Hzea_genome/Hzea_genome -1 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_9_S9_forward_paired.fastq.gz -2 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_9_S9_reverse_paired.fastq.gz --very-sensitive --threads 8 -S ./Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142019/HZ_2002_9_S9_paired.sam
+bowtie2 -x ./Hzea_genome/Hzea_genome -1 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_9_S9_forward_paired.fastq.gz -2 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_9_S9_reverse_paired.fastq.gz --very-sensitive --threads 8 -S ./Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142019/HZ_2002_09.sam
 
 bowtie2 -x ./Hzea_genome/Hzea_genome -1 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_10_S10_forward_paired.fastq.gz -2 ./Raw_Sequence_Data/filter_trimmed_Hzea_WGRS_Field_allyears/AMD_2002_10_S10_reverse_paired.fastq.gz --very-sensitive --threads 8 -S ./Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142019/HZ_2002_10.sam
 
