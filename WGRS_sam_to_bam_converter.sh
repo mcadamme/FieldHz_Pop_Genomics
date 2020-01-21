@@ -70,9 +70,18 @@ do
 
 done
 
-#sanity check - no dups left
+
+#sanity check - dups left?
 /home/megan/src/gatk-4.0.12.0/gatk MarkDuplicates -I HZ_2002_01_marked.bam -M HZ_2002_01_marked.metrics --REMOVE_DUPLICATES false -O HZ_2002_01_marked.uns.bam
 rm HZ_2002_01_marked.uns.bam
+
+
+#getting num mapped reads
+for sample in *_marked.bam
+do
+	echo $sample
+	samtools view -F 0x40 ./$sample | cut -f1 | sort | uniq | wc -l >> num_mapped_reads.txt
+done
 
 
 #getting a list of bam files
