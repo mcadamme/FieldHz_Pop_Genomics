@@ -2,8 +2,7 @@
 
 setwd("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments")
 
-library(adegenet); library(pegas); library(ade4); library(vcfR); library(StAMPP)
-
+library(adegenet); library(pegas); library(ade4); library(vcfR); library(StAMPP); library(ape); library(parallel)
 
 #first reading in data produced by BCFtools
 data <- read.vcfR(file = "./mpileupANDvcftools_output/thinned_FieldHzea_allpops.recode.vcf")
@@ -16,82 +15,34 @@ pop(Hz.genlight)<-regmatches(indNames(Hz.genlight), regexpr("20[[:digit:]]+", in
 head(pop(Hz.genlight)) #checking to see output makes sense
 
 Hz.genlight@ploidy <- as.integer(ploidy(Hz.genlight)) 
+
+#Getting a prelim look at SNPs in BCFtools dataset.
+glPlot(Hz.genlight, posi="topleft")
+
+
+#calculating Fst values
 Hz.fst<-stamppFst(Hz.genlight, nboots = 500, percent =95, nclusters=4) 
 
 Hz.fst$Fsts
 Hz.fst$Pvalues
 
 #Original command to get line plot. At prompt, put in 225 PCs and 4 clusters
-Hz_grp <- find.clusters(Hz.genlight, max.n.clust=20)
+#Hz_grp <- find.clusters(Hz.genlight, max.n.clust=20)
 
-#Plotting k-means analysis
+
+#Plotting k-means analysis for publication
 png(filename = "./mpileupANDvcftools_output/kmeans.png", units = "px", height = 500, width = 500)
 par(mar = c(5,5,4,1))
 plot(Hz_grp$Kstat, col = "blue", pch = 16, cex.lab = 1.5, cex.axis = 1.5, type = "b", ylab = "BIC", xlab = "Number of Clusters" )
 dev.off()
 
-#Checking output of find clusters for 3 different "numbers of clusters" to validate pairwise Fst results with PCA
-Hz_grp2 <- find.clusters(Hz.genlight, max.n.clust=20, n.pca = 225, n.clust = 2) #chose to retain 225 PCs & 2 clusters - BtRes and BtSus.
-Hz_grp3 <- find.clusters(Hz.genlight, max.n.clust=20, n.pca = 225, n.clust = 3)
-Hz_grp4 <- find.clusters(Hz.genlight, max.n.clust=20, n.pca = 225, n.clust = 4) #chose to retain 225 PCs & 4 clusters - 1 per original pop.
 
+#this also shows very little clustering by group.
+tre <- nj(dist(as.matrix(Hz.genlight)))
+plot(tre, type = "fan", cex = 0.8, show.tip = FALSE)
+tiplabels(pch=20, col=myCol, cex=3)
+title("NJ tree of H. zea individuals collected over time")
 
-#these plots show why one or two clusters are the best fit. 
-#R cannot assign individuals of a single original population to their own inferred population.
-#Most individuals are similar enough that they get assigned to the first two inferred populations, even when 4 clusters are specified.
-
-png(filename = "./mpileupANDvcftools_output/nclusts.png", units = "px", height = 600, width = 400)
-par(mfrow = c(3,1))
-nclust2 <- table.value(table(pop(Hz.genlight), Hz_grp2$grp), col.lab=paste("inf", 1:2), clabel.col = 1.8, clabel.row = 1.8, clegend = 1.5,
-            row.lab=paste("ori", 1:4)) 
-nclust3 <- table.value(table(pop(Hz.genlight), Hz_grp3$grp), col.lab=paste("inf", 1:3), clabel.col = 1.8, clabel.row = 1.8, clegend = 1.5,
-                       row.lab=paste("ori", 1:4))
-nclust4 <- table.value(table(pop(Hz.genlight), Hz_grp4$grp), col.lab=paste("inf", 1:4), clabel.col = 1.8, clabel.row = 1.8, clegend = 1.5,
-                       row.lab=paste("ori", 1:4))
-
-dev.off()
-
-#This is the PCA showing the plots of the populations discriminated using PC1 and PC2
-
-dapc1 <- dapc(Hz.genlight, Hz_grp2$grp, n.pca = 225, n.da = 10)
-dapc1
-scatter(dapc1)
-
-dapc2 <- dapc(Hz.genlight, Hz_grp3$grp, n.pca = 225, n.da = 10)
-dapc2
-scatter(dapc2)
-
-dapc3 <- dapc(Hz.genlight, Hz_grp4$grp, n.pca = 225, n.da = 10)
-dapc3
-scatter(dapc3)
-
-myCol <- c("darkblue","darkgreen","orange","purple")
-
-scatter(dapc1, ratio.pca=0.3, bg="white", pch=20,  cell=0,
-        cstar=0, col=myCol[1:2], solid=.4, cex=3, clab=0,
-        mstree=T, scree.da=TRUE, posi.pca="topright",
-        leg=TRUE, posi.leg = "topleft", txt.leg=paste("Cluster",1:2))
-
-scatter(dapc2, ratio.pca=0.3, bg="white", pch=20,  cell=0,
-        cstar=0, col=myCol[1:3], solid=.4, cex=3, clab=0,
-        mstree=T, scree.da=TRUE, posi.pca="topright",
-        leg=TRUE, posi.leg = "topleft", txt.leg=paste("Cluster",1:3))
-
-scatter(dapc3, ratio.pca=0.3, bg="white", pch=20,  cell=0,
-        cstar=0, col=myCol, solid=.4, cex=3, clab=0,
-        mstree=T, scree.da=TRUE, posi.pca="topright",
-        leg=TRUE, posi.leg = "bottomleft", txt.leg=paste("Cluster",1:4))
-
-#looking at loadings
-loadingplot(dapc2$var.contr, axis = 2, thres = 0.07, lab.jitter = 1)
-dapc2$posterior
-
-big_contrib <- dapc2$var.contr > 0.002
-
-#When I allow for more than 2 clusters, it seems as though there are a few individuals from 2002 that do cluster together
-#and away from the other individuals in the overall population. 
-#Perhaps those individuals are migrants from South America, whereas the others are all from North American populations that have
-#overwintered.  The two individuals are HZ_2002_8_37, and HZ_2002_early_33.  
 
 #Nucleotide diversity plus confidence intervals for all pops
 #loading datasets
@@ -99,6 +50,11 @@ pi_2002 <- read.table("./mpileupANDvcftools_output/FieldHzea2002.sites.pi", head
 pi_2007 <- read.table("./mpileupANDvcftools_output/FieldHzea2007.sites.pi", header = T)
 pi_2012 <- read.table("./mpileupANDvcftools_output/FieldHzea2012.sites.pi", header = T)
 pi_2016 <- read.table("./mpileupANDvcftools_output/FieldHzea2016.sites.pi", header = T)
+
+het_2002 <-read.table("./mpileupANDvcftools_output/FieldHzea2002.het", header = T)
+het_2007 <-read.table("./mpileupANDvcftools_output/FieldHzea2007.het", header = T)
+het_2012 <-read.table("./mpileupANDvcftools_output/FieldHzea2012.het", header = T)
+het_2016 <-read.table("./mpileupANDvcftools_output/FieldHzea2016.het", header = T)
 
 #bootstrapping function
 boot.fn <- function(x, N=5000) {
@@ -120,108 +76,14 @@ mean(pi_2016$PI)
 boot.fn(pi_2016$PI)
 
 
-#now reading in Stacks genotypes
-data_stacks <- read.vcfR(file = "./stacks_output/thinned_FieldHzea_allpops.recode.vcf")
-head(data_stacks)
-data_stacks@fix[1:10,1:5]
+mean(het_2002$F)
+boot.fn(het_2002$F)
 
-Hz_stacks.genlight <- vcfR2genlight(data_stacks, n.cores=2)
+mean(het_2007$F)
+boot.fn(het_2007$F)
 
-pop(Hz_stacks.genlight)<-regmatches(indNames(Hz_stacks.genlight), regexpr("20[[:digit:]]+", indNames(Hz_stacks.genlight)))
-head(pop(Hz_stacks.genlight)) #checking to see output makes sense
+mean(het_2012$F)
+boot.fn(het_2012$F)
 
-Hz_stacks.genlight@ploidy <- as.integer(ploidy(Hz_stacks.genlight)) 
-Hz_stacks.fst<-stamppFst(Hz_stacks.genlight, nboots = 500, percent =95, nclusters=4) 
-
-Hz_stacks.fst$Fsts
-Hz_stacks.fst$Pvalues
-
-#Also used 225 PCs and 4 clusters for this
-Hz_grp_stacks <- find.clusters(Hz_stacks.genlight, max.n.clust=20)
-
-png(filename = "./stacks_output/kmeans.png", units = "px", height = 500, width = 500)
-par(mar = c(5,5,4,1))
-plot(Hz_grp_stacks$Kstat, col = "blue", pch = 16, cex.lab = 1.5, cex.axis = 1.5, type = "b", ylab = "BIC", xlab = "Number of Clusters" )
-dev.off()
-
-#Checking output of find clusters for 3 different "numbers of clusters" to validate pairwise Fst results with PCA
-Hz_grp2_stacks <- find.clusters(Hz_stacks.genlight, max.n.clust=20, n.pca = 225, n.clust = 2) #chose to retain 225 PCs & 2 clusters - BtRes and BtSus.
-Hz_grp3_stacks <- find.clusters(Hz_stacks.genlight, max.n.clust=20, n.pca = 225, n.clust = 3)
-Hz_grp4_stacks <- find.clusters(Hz_stacks.genlight, max.n.clust=20, n.pca = 225, n.clust = 4) #chose to retain 225 PCs & 4 clusters - 1 per original pop.
-
-
-#these plots show why one or two clusters are the best fit. 
-#R cannot assign individuals of a single original population to their own inferred population.
-#Most individuals are similar enough that they get assigned to the first two inferred populations, even when 4 clusters are specified.
-
-png(filename = "./stacks_output/nclusts.png", units = "px", height = 600, width = 400)
-par(mfrow = c(3,1))
-nclust2 <- table.value(table(pop(Hz_stacks.genlight), Hz_grp2_stacks$grp), col.lab=paste("inf", 1:2), clabel.col = 1.8, clabel.row = 1.8, clegend = 1.5,
-                       row.lab=paste("ori", 1:4)) 
-nclust3 <- table.value(table(pop(Hz_stacks.genlight), Hz_grp3_stacks$grp), col.lab=paste("inf", 1:3), clabel.col = 1.8, clabel.row = 1.8, clegend = 1.5,
-                       row.lab=paste("ori", 1:4))
-nclust4 <- table.value(table(pop(Hz_stacks.genlight), Hz_grp4_stacks$grp), col.lab=paste("inf", 1:4), clabel.col = 1.8, clabel.row = 1.8, clegend = 1.5,
-                       row.lab=paste("ori", 1:4))
-
-dev.off()
-
-#This is the PCA showing the plots of the populations discriminated using PC1 and PC2
-
-dapc1_stacks <- dapc(Hz_stacks.genlight, Hz_grp2_stacks$grp, n.pca = 225, n.da = 10)
-dapc1_stacks
-scatter(dapc1_stacks)
-
-dapc2_stacks <- dapc(Hz_stacks.genlight, Hz_grp3_stacks$grp, n.pca = 225, n.da = 10)
-dapc2_stacks
-scatter(dapc2_stacks)
-
-dapc3_stacks <- dapc(Hz_stacks.genlight, Hz_grp4_stacks$grp, n.pca = 225, n.da = 10)
-dapc3_stacks
-scatter(dapc3_stacks)
-
-myCol <- c("darkblue","darkgreen","orange","purple")
-
-scatter(dapc1_stacks, ratio.pca=0.3, bg="white", pch=20,  cell=0,
-        cstar=0, col=myCol[1:2], solid=.4, cex=3, clab=0,
-        mstree=T, scree.da=TRUE, posi.pca="topright",
-        leg=TRUE, posi.leg = "topleft", txt.leg=paste("Cluster",1:2))
-
-scatter(dapc2_stacks, ratio.pca=0.3, bg="white", pch=20,  cell=0,
-        cstar=0, col=myCol[1:3], solid=.4, cex=3, clab=0,
-        mstree=T, scree.da=TRUE, posi.pca="topright",
-        leg=TRUE, posi.leg = "topleft", txt.leg=paste("Cluster",1:3))
-
-scatter(dapc3_stacks, ratio.pca=0.3, bg="white", pch=20,  cell=0,
-        cstar=0, col=myCol, solid=.4, cex=3, clab=0,
-        mstree=T, scree.da=TRUE, posi.pca="topright",
-        leg=TRUE, posi.leg = "bottomleft", txt.leg=paste("Cluster",1:4))
-
-#looking at loadings
-loadingplot(dapc2_stacks$var.contr, axis = 2, thres = 0.07, lab.jitter = 1)
-dapc2_stacks$posterior
-
-big_contrib <- dapc2_stacks$var.contr > 0.002
-
-#When I allow for more than 2 clusters, it seems as though there are a few individuals from 2002 that do cluster together
-#and away from the other individuals in the overall population. 
-#Perhaps those individuals are migrants from South America, whereas the others are all from North American populations that have
-#overwintered.  The two individuals are HZ_2002_8_37, and HZ_2002_early_33.  
-
-#Nucleotide diversity plus confidence intervals for all pops
-#loading datasets
-stacks_pi_2002 <- read.table("./stacks_output/FieldHzea2002.sites.pi", header = T)
-stacks_pi_2007 <- read.table("./stacks_output/FieldHzea2007.sites.pi", header = T)
-stacks_pi_2012 <- read.table("./stacks_output/FieldHzea2012.sites.pi", header = T)
-stacks_pi_2016 <- read.table("./stacks_output/FieldHzea2016.sites.pi", header = T)
-
-mean(stacks_pi_2002$PI)
-boot.fn(stacks_pi_2002$PI)
-
-mean(stacks_pi_2007$PI)
-boot.fn(stacks_pi_2007$PI)
-
-mean(stacks_pi_2012$PI)
-boot.fn(stacks_pi_2012$PI)
-
-mean(stacks_pi_2016$PI)
-boot.fn(stacks_pi_2016$PI)
+mean(het_2016$F)
+boot.fn(het_2016$F)
