@@ -17,6 +17,11 @@ bcftools call -vmO v -o ./FieldHzea_variantsonly.vcf ./FieldHzea.bcf #SNP callin
 #filtering my called SNPs in preparation for analysis
 vcftools --vcf ./FieldHzea_variantsonly.vcf --recode --out ./thinned_FieldHzea_variantsonly.vcf --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --remove-indels
 
+vcftools --vcf ./thinned_FieldHzea_variantsonly.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2002.txt  --out  thinned_FieldHzea_variantsonly_2002.freq --freq
+
+vcftools --vcf ./thinned_FieldHzea_variantsonly.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2012.txt  --out  thinned_FieldHzea_variantsonly_2012.freq --freq
+
+vcftools --vcf ./thinned_FieldHzea_variantsonly.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2017.txt  --out  thinned_FieldHzea_variantsonly_2017.freq --freq
 
 #running vcftools on bcftools output to filter and get pop stats.
 #I first examined contigs with important candidate genes for Bt resistance to identify markers present, if any. 
@@ -219,6 +224,20 @@ vcftools --vcf ./FieldHzea_variantsonly.vcf --recode --out ./KZ117131.1_only/KZ1
 
 /home/megan/src/vcflib/bin/smoother --file ./KZ117131.1_only/KZ117131.1_wcFst_2002_2017 -o wcFst -w 10000 > ./KZ117131.1_only/KZ117131.1_wcFst_2002_2017.smoothed
 
+#looking at KZ117237.1 with venom dipeptidyl peptidase 4-like
+mkdir KZ117237.1_only
+
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2002.txt --out ./KZ117237.1_only/FieldHzea2002 --chr KZ117237.1 --freq                                                                                                         
+                                                                                                                                                      
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2012.txt --out ./KZ117237.1_only/FieldHzea2012 --chr KZ117237.1 --freq
+
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2017.txt --out ./KZ117237.1_only/FieldHzea2017 --chr KZ117237.1 --freq
+
+vcftools --vcf ./FieldHzea_variantsonly.vcf --recode --out ./KZ117237.1_only/KZ117237.1_thinned_FieldHzea_variantsonly.vcf --chr KZ117237.1 --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --remove-indels
+
+/home/megan/src/vcflib/bin/wcFst --target 24,25,26,27,28,29,30,31,32,33,34  --background 0,1,2,3,4,5,6,7,8,9,10,11,12 --file ./KZ117237.1_only/KZ117237.1_thinned_FieldHzea_variantsonly.vcf.recode.vcf --type PL > ./KZ117237.1_only/KZ117237.1_wcFst_2002_2017
+
+/home/megan/src/vcflib/bin/smoother --file ./KZ117237.1_only/KZ117237.1_wcFst_2002_2017 -o wcFst -w 10000 > ./KZ117237.1_only/KZ117237.1_wcFst_2002_2017.smoothed
 
 
 #whole genome sliding window wcfst analysis 2002 & 2017 - diff window sizes
@@ -227,11 +246,20 @@ vcftools --vcf ./FieldHzea_variantsonly.vcf --recode --out ./KZ117131.1_only/KZ1
 
 /home/megan/src/vcflib/bin/smoother --file ./2002and2017_wcFST_all -o wcFst -w 5000 > ./2002and2017_5kb_wcFST_all.smoothed
 
+R --vanilla < /home/megan/src/vcflib/bin/plotSmoothed.R --args ./2002and2017_5kb_wcFST_all.smoothed wcFst
+
 /home/megan/src/vcflib/bin/smoother --file ./2002and2017_wcFST_all -o wcFst -w 10000 > ./2002and2017_10kb_wcFST_all.smoothed
 
-/home/megan/src/vcflib/bin/smoother --file ./2002and2017_wcFST_all -o wcFst -w 20000 -s 5000> ./2002and2017_20kb_wcFST_all.smoothed
+R --vanilla < /home/megan/src/vcflib/bin/plotSmoothed.R --args ./2002and2017_10kb_wcFST_all.smoothed wcFst
 
-/home/megan/src/vcflib/bin/smoother --file ./2002and2017_wcFST_all -o wcFst -w 40000 -s 5000 > ./2002and2017_40kb_wcFST_all.smoothed
+/home/megan/src/vcflib/bin/smoother --file ./2002and2017_wcFST_all -o wcFst -w 20000 -s 5000 > ./2002and2017_20kb_wcFST_all.smoothed
+
+R --vanilla < /home/megan/src/vcflib/bin/plotSmoothed.R --args ./2002and2017_20kb_wcFST_all.smoothed wcFst
+
+/home/megan/src/vcflib/bin/smoother --file ./2002and2017_wcFST_all -o wcFst -w 40000 -s 10000 > ./2002and2017_40kb_wcFST_all.smoothed
+
+R --vanilla < /home/megan/src/vcflib/bin/plotSmoothed.R --args ./2002and2017_40kb_wcFST_all.smoothed wcFst
+
 
 #whole genome sliding window wcfst analysis 2002 & 2012 - diff window sizes
 
@@ -243,7 +271,7 @@ vcftools --vcf ./FieldHzea_variantsonly.vcf --recode --out ./KZ117131.1_only/KZ1
 
 /home/megan/src/vcflib/bin/smoother --file ./2002and2012_wcFST_all -o wcFst -w 20000 -s 5000 > ./2002and2012_20kb_wcFST_all.smoothed
 
-/home/megan/src/vcflib/bin/smoother --file ./2002and2012_wcFST_all -o wcFst -w 40000 -s 5000 > ./2002and2012_40kb_wcFST_all.smoothed
+/home/megan/src/vcflib/bin/smoother --file ./2002and2012_wcFST_all -o wcFst -w 40000 -s 10000 > ./2002and2012_40kb_wcFST_all.smoothed
 
 #whole genome sliding window wcfst analysis 2012 & 2017 - diff window sizes
 
@@ -255,6 +283,6 @@ vcftools --vcf ./FieldHzea_variantsonly.vcf --recode --out ./KZ117131.1_only/KZ1
 
 /home/megan/src/vcflib/bin/smoother --file ./2012and2017_wcFST_all -o wcFst -w 20000 -s 5000 > ./2012and2017_20kb_wcFST_all.smoothed
 
-/home/megan/src/vcflib/bin/smoother --file ./2012and2017_wcFST_all -o wcFst -w 40000 -s 5000 > ./2012and2017_20kb_wcFST_all.smoothed
+/home/megan/src/vcflib/bin/smoother --file ./2012and2017_wcFST_all -o wcFst -w 40000 -s 10000 > ./2012and2017_40kb_wcFST_all.smoothed
 
 
