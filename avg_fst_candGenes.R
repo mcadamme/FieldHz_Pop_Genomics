@@ -18,6 +18,10 @@ cad86c <- read.table("./KZ117463.1_only/KZ117463.1_wcFst_2002_2017", header = F)
 map4K4 <- read.table("./KZ118817.1_only/KZ118817.1_wcFst_2002_2017", header = F)
 tspan1 <- read.table("./KZ118424.1_only/KZ118424.1_wcFst_2002_2017", header = F)
 
+carbQ <- read.table("./KZ118395.1_only/KZ118395.1_wcFst_2002_2017", header = F)
+cyp333b <- read.table("./KZ117131.1_only/KZ117131.1_wcFst_2002_2017", header = F)
+venpep <- read.table("./KZ117237.1_only/KZ117237.1_wcFst_2002_2017", header = F)
+
 #getting gene regions
 alp_gene <- subset(alp, V2 > 1946 & V2 < 16347)
 mean(alp_gene$V5)
@@ -63,6 +67,18 @@ tspan1_gene <- subset(tspan1, V2 > 106132 & V2 < 117025)
 mean(tspan1_gene$V5)
 nrow(tspan1_gene)
 
+carbQ_gene <- subset(carbQ, V2 > 151736 & V2 < 160706)
+mean(carbQ_gene$V5)
+nrow(carbQ_gene)
+
+cyp333b_gene <- subset(cyp333b, V2 > 32819 & V2 < 39355)
+mean(cyp333b_gene$V5)
+nrow(cyp333b_gene)
+
+venpep_gene <- subset(venpep, V2 > 266124 & V2 < 298863)
+mean(venpep_gene$V5)
+nrow(venpep_gene)
+
 #loading data to plot sliding window averaged fst - 10kb windows with 1kb step size
 
 alp_win <- read.table("./KZ117832.1_only/KZ117832.1_wcFst_2002_2017.smoothed", header = F)
@@ -76,6 +92,11 @@ cad2_win <- read.table("./KZ118195.1_only/KZ118195.1_wcFST_2002_2017.smoothed", 
 cad86c_win <- read.table("./KZ117463.1_only/KZ117463.1_wcFst_2002_2017.smoothed", header = F)
 map4K4_win <- read.table("./KZ118817.1_only/KZ118817.1_wcFst_2002_2017.smoothed", header = F)
 tspan1_win <- read.table("./KZ118424.1_only/KZ118424.1_wcFst_2002_2017.smoothed", header = F)
+
+carbQ_win <- read.table("./KZ118395.1_only/KZ118395.1_wcFst_2002_2017.smoothed", header = F)
+cyp333b_win <- read.table("./KZ117131.1_only/KZ117131.1_wcFst_2002_2017.smoothed", header = F)
+venpep_win <- read.table("./KZ117237.1_only/KZ117237.1_wcFst_2002_2017.smoothed", header = F)
+
 
 
 #Manhattan FST plot function
@@ -102,12 +123,6 @@ window_name <- function(dataset_win, dataset_gene){
 }
 
 #dataset names get changed here - then must go rename file
-window_name(cad86c_win, cad86c_gene)
+window_name(tspan1_win, tspan1_gene)
    
 
-
-
-
-
-window_name(alp_win)
-manHatPlot(new_data,alp_win$V1, alp_win$V2, alp_win$V5, "./alp_wcfst_10kb_1kb", gene$V6)
