@@ -1,0 +1,35 @@
+#This is the script that I used to get consensus sequences for each individual for carboxypeptidase Q and cyp333b3 genes.
+#MF 03172020
+
+mkdir /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ118395.1
+mkdir /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ117131.1 
+
+cd /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142020
+
+#carboxyQ
+for file in *_marked.bam
+do
+	echo $file
+	describer=$(echo ${file} | sed 's/_marked.bam//')
+	echo $describer
+	echo $file > /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/temp_individ.txt
+
+bcftools mpileup -b /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/temp_individ.txt -f /media/megan/"New Volume"/Hzea_genome/GCA_002150865.1_Hzea_1.0_genomic.fna -R /home/megan/scripts/Field_HZ_Pop_Genomics/bed_files/Output_positions_consensus_fasta2.bed -I -q 5 | bcftools call -c | vcfutils.pl vcf2fq -d 3 -D 100 > /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ118395.1/$describer.fq
+
+seqtk seq -A -l 70 /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ118395.1/$describer.fq > /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ118395.1/$describer.fa
+
+done
+
+#cyp333b3
+for file in *_marked.bam
+do
+	echo $file
+	describer=$(echo ${file} | sed 's/_marked.bam//')
+	echo $describer
+	echo $file > /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/temp_individ.txt
+
+bcftools mpileup -b /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/temp_individ.txt -f /media/megan/"New Volume"/Hzea_genome/GCA_002150865.1_Hzea_1.0_genomic.fna -R /home/megan/scripts/Field_HZ_Pop_Genomics/bed_files/Output_positions_consensus_fasta.bed -I -q 5 | bcftools call -c | vcfutils.pl vcf2fq -d 3 -D 100 > /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ117131.1/$describer.fq
+
+seqtk seq -A -l 70 /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ117131.1/$describer.fq > /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/consensus_seqs_KZ117131.1/$describer.fa
+
+done
