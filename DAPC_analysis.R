@@ -159,11 +159,7 @@ p <- p + theme(axis.title.x=element_blank(),
                strip.text.x = element_text(size = 12, color = "black", face = "bold"))
 p
 
-
-
-
-#getting chromosomes and positions of DAPC outliers
-#dapc_out_pos <- names(dapc1$pca.cent)[which(dapc1$var.load[,1]>quantile(dapc1$var.load[,1], 0.995))]
+loadingplot(dapc1$var.load, lab.jitter=1, threshold = quantile(dapc1$var.load, prob=0.999))
 
 
 #This is a DAPC using the clusters derived from the k-means analysis
@@ -197,7 +193,8 @@ p <- p + theme(axis.title.x=element_blank(),
 p
 
 #getting SNPs that distinguish between these two pops
-loadingplot(dapc2$var.load, lab.jitter=1, threshold = quantile(dapc2$var.load, prob=0.999))
+loadingplot(dapc2$var.load, lab.jitter=1, threshold = quantile(dapc2$var.load, prob=0.995))
+
 
 #DAPC3 specifies clustering into three populations by kmeans analysis.
 
