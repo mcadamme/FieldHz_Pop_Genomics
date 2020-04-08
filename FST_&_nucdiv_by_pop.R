@@ -1,6 +1,6 @@
 #script to get pairwise pop-level FST values.
 
-setwd("/media/megan/New Volume/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments")
+setwd("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments")
 
 library(adegenet); library(pegas); library(ade4); library(vcfR); library(StAMPP); library(ape); library(parallel)
 
@@ -25,24 +25,6 @@ Hz.fst<-stamppFst(Hz.genlight, nboots = 500, percent =95, nclusters=4)
 
 Hz.fst$Fsts
 Hz.fst$Pvalues
-
-#Original command to get line plot. At prompt, put in 225 PCs and 4 clusters
-#Hz_grp <- find.clusters(Hz.genlight, max.n.clust=20)
-
-
-#Plotting k-means analysis for publication
-png(filename = "./mpileupANDvcftools_output/kmeans.png", units = "px", height = 500, width = 500)
-par(mar = c(5,5,4,1))
-plot(Hz_grp$Kstat, col = "blue", pch = 16, cex.lab = 1.5, cex.axis = 1.5, type = "b", ylab = "BIC", xlab = "Number of Clusters" )
-dev.off()
-
-
-#this also shows very little clustering by group.
-tre <- nj(dist(as.matrix(Hz.genlight)))
-plot(tre, type = "fan", cex = 0.8, show.tip = FALSE)
-tiplabels(pch=20, col=myCol, cex=3)
-title("NJ tree of H. zea individuals collected over time")
-
 
 #Nucleotide diversity plus confidence intervals for all pops
 #loading datasets
