@@ -26,13 +26,14 @@ vcftools --vcf ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variants
 
 /home/megan/src/vcflib/bin/smoother --file ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_pFST_all -o pFst > ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_all.smoothed
 
-R --vanilla < /home/megan/src/vcflib/bin/plotSmoothed.R --args ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_all.smoothed pFst
 
 #sliding window wcfst analysis
 
 /home/megan/src/vcflib/bin/wcFst --target 0,1,2,3,4,5,6,7  --background 8,9,10,11,12,13,14,15 --file ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf.recode.vcf --type PL > ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcFST_all
 
-/home/megan/src/vcflib/bin/smoother --file ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcFST_all -o wcFst > ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcST_all.smoothed
+/home/megan/src/vcflib/bin/smoother --file ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcFST_all -o wcFst  -w 10000 -s 1000 > ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcST_10kb_all.smoothed 
 
-R --vanilla < /home/megan/src/vcflib/bin/plotSmoothed.R --args ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcST_all.smoothed wcFst
+/home/megan/src/vcflib/bin/smoother --file ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcFST_all -o wcFst  -w 40000 -s 10000 > ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly_wcST_40kb_all.smoothed 
+
+
 
