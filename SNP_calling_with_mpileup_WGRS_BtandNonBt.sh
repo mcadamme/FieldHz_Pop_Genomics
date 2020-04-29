@@ -3,7 +3,7 @@
 #bcftools v. 1.9
 
 
-cd /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/BtandNonBt_alignmentFiles
+cd /media/megan/"New Volume1"/Hzea_WGRS_Bowtie2_output/BtandNonBt_alignmentFiles
 
 mkdir WGRS_mpileupANDvcftools_output
 
@@ -13,7 +13,12 @@ bcftools call -vmO v -o ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variant
 
 #filtering my called SNPs in preparation for analysis
 
-vcftools --vcf ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly.vcf --recode --out ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly.vcf --recode --out ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --remove-indels
+
+#Getting Allele frequencies for each pop
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/Bt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/thinned_FieldHzea_variantsonly_BtOnly.freq --freq
+
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/NonBt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/thinned_FieldHzea_variantsonly_NonBtOnly.freq --freq
 
 #sliding window pfst analysis
 
