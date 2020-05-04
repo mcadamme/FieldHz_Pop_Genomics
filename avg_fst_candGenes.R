@@ -3,7 +3,7 @@
 
 library(CMplot)
 
-setwd("/media/megan/New Volume/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/")
+setwd("/media/megan/New Volume1/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/")
 
 #loading data files to calculate average for each gene
 alp <- read.table("./KZ117832.1_only/KZ117832.1_wcFst_2002_2017", header = F)
@@ -67,9 +67,15 @@ tspan1_gene <- subset(tspan1, V2 > 106132 & V2 < 117025)
 mean(tspan1_gene$V5)
 nrow(tspan1_gene)
 
-carbQ_gene <- subset(carbQ, V2 > 151736 & V2 < 160706)
-mean(carbQ_gene$V5)
-nrow(carbQ_gene)
+#from blast
+carbQ_gene1 <- subset(carbQ, V2 > 8573 & V2 < 10730)
+mean(carbQ_gene1$V5)
+nrow(carbQ_gene1)
+
+#from annotation
+carbQ_gene2 <- subset(carbQ, V2 > 151736 & V2 < 160706)
+mean(carbQ_gene2$V5)
+nrow(carbQ_gene2)
 
 cyp333b_gene <- subset(cyp333b, V2 > 32819 & V2 < 39355)
 mean(cyp333b_gene$V5)
@@ -99,7 +105,7 @@ venpep_win <- read.table("./KZ117237.1_only/KZ117237.1_wcFst_2002_2017.smoothed"
 
 
 
-#Manhattan FST plot function
+#Manhattan FST plot function - for candidate genes
 window_name <- function(dataset_win, dataset_gene){
   win <- seq(1:(nrow(dataset_win)))
   print(win)
@@ -123,6 +129,33 @@ window_name <- function(dataset_win, dataset_gene){
 }
 
 #dataset names get changed here - then must go rename file
-window_name(tspan1_win, tspan1_gene)
+window_name(carbQ_win, carbQ_gene1)
    
+
+#Manhattan FST - for combined carboxyQ plot
+win <- seq(1:(nrow(carbQ_win)))
+print(win)
+
+new_data <- cbind(win,carbQ_win)
+new_data <- data.frame(new_data)
+contig_name <- as.character(carbQ_win[1,1])
+str(new_data)
+  
+gene1 <- subset(new_data, V2 > min(carbQ_gene1$V2) & V2 < max(carbQ_gene1$V2))
+head(gene1)
+  
+gene2 <- subset(new_data, V2 > min(carbQ_gene2$V2) & V2 < max(carbQ_gene2$V2))
+head(gene2)
+ 
+both_genes <- rbind(gene1,gene2) 
+HiLite <- as.numeric(as.character(both_genes$win))
+print(HiLite)
+  
+for_plot <- data.frame(cbind(win, new_data$V1, new_data$V2, new_data$V5))
+  print(for_plot)
+  
+CMplot(for_plot, plot.type="m", type = "l", r=1.6, cir.legend=TRUE, col = c("grey30"), cex = 0.8, ylim = c(-0.05,0.25),
+         file="jpg", memo="", dpi=300, threshold = NULL, LOG10 = F, highlight = HiLite, ylab = "FST", xlab = "Scaffold 569")
+  
+  
 
