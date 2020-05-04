@@ -1,6 +1,6 @@
 #generating CMplots and getting scaffolds with outliers.
 
-library(LEA);library(adegenet);library(vcfR);library(CMplot)
+library(LEA);library(adegenet);library(vcfR);library(ape);library(CMplot)
 
 
 setwd("/media/megan/New Volume1/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1")
@@ -158,28 +158,73 @@ scaf_names <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie
 
 
 #Now pulling out the parts of the gff3 file that are important
-gff3 <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/HzOGS2-15205-fixed_note-added.gff3", sep="\t", stringsAsFactors = F)
+gff3 <- read.gff("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/HzOGS2-15205_genesOnly.gff3") #, sep="\t", stringsAsFactors = F)
 head(gff3)
+
+gff3_genes <- subset(gff3, type == "gene")
+ordered_gff3_genes <- gff3_genes[order(gff3_genes$seqid),]
 
 
 #comparisons for pairs of years - all 40kb windows
+#2002-2017
 outliers_2002and2017_withIDs <- merge(hi_wcFST0, scaf_names, by.x = "V1", by.y = "CHROM")
 write.table(outliers_2002and2017_withIDs, file = "2002and2017_outlierScaffolds.txt")
-outliers_2002and2017_withAnnot <- merge(outliers_2002and2017_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
-sub_outliers_2002and2017_withAnnot <- subset(outliers_2002and2017_withAnnot, V3.y == "gene" & V5.y > (V2.x -50000) & V4.y < (V2.x + 50000))
+
+uniqScafs_2002and2017 <- as.character(unique(outliers_2002and2017_withIDs$Scaf_ID))
+
+all_genes_outliers_2002and2017 <- data.frame()
+
+for (item in 1:length(uniqScafs_2002and2017)){
+  sample <- uniqScafs_2002and2017[item]
+  print(sample)
+  Genes_2002and2017 <- ordered_gff3_genes[grepl(sample, ordered_gff3_genes$seqid), ]
+  all_genes_outliers_2002and2017 <- rbind(Genes_2002and2017,all_genes_outliers_2002and2017)
+}
+
+outliers_2002and2017_withAnnot <- merge(outliers_2002and2017_withIDs, all_genes_outliers_2002and2017, by.x = "Scaf_ID", by.y = "seqid")
+sub_outliers_2002and2017_withAnnot <- subset(outliers_2002and2017_withAnnot, end > (V2 - 50000) & start < (V3 + 50000))
 write.table(sub_outliers_2002and2017_withAnnot, file = "Genes_50kb_outliers_2002&2017.txt")
 
+
+#2002-2012
 outliers_2002and2012_withIDs <- merge(hi_wcFST4, scaf_names, by.x = "V1", by.y = "CHROM")
 write.table(outliers_2002and2012_withIDs, file = "2002and2012_outlierScaffolds.txt")
-outliers_2002and2012_withAnnot <- merge(outliers_2002and2012_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
-sub_outliers_2002and2012_withAnnot <- subset(outliers_2002and2012_withAnnot, V3.y == "gene" & V5.y > (V2.x -50000) & V4.y < (V2.x + 50000))
+
+uniqScafs_2002and2012 <- as.character(unique(outliers_2002and2012_withIDs$Scaf_ID))
+
+all_genes_outliers_2002and2012 <- data.frame()
+
+for (item in 1:length(uniqScafs_2002and2012)){
+  sample <- uniqScafs_2002and2012[item]
+  print(sample)
+  Genes_2002and2012 <- ordered_gff3_genes[grepl(sample, ordered_gff3_genes$seqid), ]
+  all_genes_outliers_2002and2012 <- rbind(Genes_2002and2012,all_genes_outliers_2002and2012)
+}
+
+outliers_2002and2012_withAnnot <- merge(outliers_2002and2012_withIDs, all_genes_outliers_2002and2012, by.x = "Scaf_ID", by.y = "seqid")
+sub_outliers_2002and2012_withAnnot <- subset(outliers_2002and2012_withAnnot, end > (V2 - 50000) & start < (V3 + 50000))
 write.table(sub_outliers_2002and2012_withAnnot, file = "Genes_50kb_outliers_2002&2012.txt")
 
+
+#2012-2017
 outliers_2012and2017_withIDs <- merge(hi_wcFST5, scaf_names, by.x = "V1", by.y = "CHROM")
-write.table(outliers_2012and2017_withIDs, file = "2012and2017_outlierScaffolds.txt")
-outliers_2012and2017_withAnnot <- merge(outliers_2012and2017_withIDs, gff3, by.x = "Scaf_ID", by.y = "V1")
-sub_outliers_2012and2017_withAnnot <- subset(outliers_2012and2017_withAnnot, V3.y == "gene" & V5.y > (V2.x -50000) & V4.y < (V2.x + 50000))
+write.table(outliers_2012and2017_withIDs, file = "2002and2012_outlierScaffolds.txt")
+
+uniqScafs_2012and2017 <- as.character(unique(outliers_2012and2017_withIDs$Scaf_ID))
+
+all_genes_outliers_2012and2017 <- data.frame()
+
+for (item in 1:length(uniqScafs_2012and2017)){
+  sample <- uniqScafs_2012and2017[item]
+  print(sample)
+  Genes_2012and2017 <- ordered_gff3_genes[grepl(sample, ordered_gff3_genes$seqid), ]
+  all_genes_outliers_2012and2017 <- rbind(Genes_2012and2017,all_genes_outliers_2012and2017)
+}
+
+outliers_2012and2017_withAnnot <- merge(outliers_2012and2017_withIDs, all_genes_outliers_2012and2017, by.x = "Scaf_ID", by.y = "seqid")
+sub_outliers_2012and2017_withAnnot <- subset(outliers_2012and2017_withAnnot, end > (V2 - 50000) & start < (V3 + 50000))
 write.table(sub_outliers_2012and2017_withAnnot, file = "Genes_50kb_outliers_2012&2017.txt")
+
 
 #shared outliers
 uniq_scafs_2002and2017 <- unique(sub_outliers_2002and2017_withAnnot$Scaf_ID)
@@ -242,4 +287,10 @@ CMplot(forPlot_BtandNonBt, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey3
        outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
        memo="BtandNonBt_10kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST7$V5), LOG10 = F, chr.labels=seq(1,2958), 
        highlight = hi_wcFST7$SnpName)
+
+
+#pulling out scaffolds for comparison
+uniq_temp_scaf <- unique(hi_wcFST0$V1)
+uniq_space_scaf <- unique(hi_wcFST6$V1)
+intersect(uniq_temp_scaf,uniq_space_scaf)
 
