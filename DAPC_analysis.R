@@ -167,6 +167,7 @@ loadingplot(dapc1$var.load, lab.jitter=1, threshold = quantile(dapc1$var.load, p
 #DAPC2 specifies clustering into two populations, and I wonder if it is predictive of Bt resistance. 
 dapc2 <- dapc(Hz.genlight, Hz_grp2$grp, n.pca = 8, n.da = 10, n.cores = 6, var.loadings = T)
 dapc2
+
 scatter(dapc2,scree.da=TRUE, bg="white", posi.pca="topright", legend=TRUE,txt.leg=paste("group", 1:2), col=myCol)
 
 dapc2.results <- as.data.frame(dapc2$posterior)
@@ -240,6 +241,164 @@ dapc4.results <- melt(dapc4.results)
 colnames(dapc4.results) <- c("Original_Pop","Sample","Assigned_Pop","Posterior_membership_probability")
 
 p <- ggplot(dapc4.results, aes(x=Sample, y=Posterior_membership_probability, fill=Assigned_Pop))
+p <- p + geom_bar(stat='identity') 
+p <- p + scale_fill_manual(values = myCol) 
+p <- p + facet_grid(~Original_Pop, scales = "free")
+p <- p + labs(y="Posterior Membership Probability", fill  = "Assigned Pop")
+p <- p + theme(axis.title.x=element_blank(),
+               axis.text.x=element_blank(),
+               axis.ticks.x=element_blank(),
+               axis.title.y = element_text(size = (16),margin = margin(t = 0, r = 15, b = 0, l = 0)),
+               axis.text.y = element_text(size = (12)),
+               legend.title = element_text(size = (14)),
+               legend.text = element_text(size = (12)),
+               strip.text.x = element_text(size = 12, color = "black", face = "bold"))
+p
+
+
+#Getting the top (1, 5, 10%) that contribute most to variance in DAPC2
+head(dapc2$var.contr)
+SNPmarker <- seq(from = 1, to = 14398, by = 1)
+
+VarContr <- data.frame(cbind(dapc2$var.contr, SNPmarker))
+SNP_ID_df <- data.frame(cbind(SNPmarker, as.character(Hz.genlight$chromosome), as.character(Hz.genlight$position)))
+
+n1 <- 1
+n5 <- 5
+n2p5 <- 2.5
+
+top1 <- subset(VarContr, LD1 > quantile(LD1, prob = 1 - n1/100))
+top5 <- subset(VarContr, LD1 > quantile(LD1, prob = 1 - n5/100))
+top2p5 <- subset(VarContr, LD1 > quantile(LD1, prob = 1 - n2p5/100))
+
+top1_withChr <- merge(top1, SNP_ID_df, by = "SNPmarker")
+top5_withChr <- merge(top5, SNP_ID_df, by = "SNPmarker")
+top2p5_withChr <- merge(top2p5, SNP_ID_df, by = "SNPmarker")
+
+#used to remove the SNPs from my genlight matrix
+write.table(data.frame(cbind(as.character(top1_withChr$V2), as.character(top1_withChr$V3))), file = "./mpileupANDvcftools_output/DAPC2_top1per.txt", row.names = F, col.names = F)
+write.table(data.frame(cbind(as.character(top5_withChr$V2), as.character(top5_withChr$V3))), file = "./mpileupANDvcftools_output/DAPC2_top5per.txt", row.names = F, col.names = F)
+write.table(data.frame(cbind(as.character(top2p5_withChr$V2), as.character(top2p5_withChr$V3))), file = "./mpileupANDvcftools_output/DAPC2_top2p5per.txt", row.names = F, col.names = F)
+
+
+#looking at structure after removing top 1% var contributing SNPs.
+#loading new dataset
+data1 <- read.vcfR(file = "./mpileupANDvcftools_output/top1_varContr_FieldHzea.recode.vcf")
+head(data1)
+data1@fix[1:10,1:5]
+
+Hz.genlight_dapc2_1 <- vcfR2genlight(data1, n.cores=2)
+
+pop(Hz.genlight_dapc2_1)<-regmatches(indNames(Hz.genlight_dapc2_1), regexpr("20[[:digit:]]+", indNames(Hz.genlight_dapc2_1)))
+head(pop(Hz.genlight_dapc2_1)) #checking to see output makes sense
+
+Hz.genlight_dapc2_1@ploidy <- as.integer(ploidy(Hz.genlight_dapc2_1)) 
+
+Hz_grp2_dapc2_1 <- find.clusters(Hz.genlight_dapc2_1, max.n.clust=10, n.pca = 225, n.cores = 6) #chose to retain 225 PCs & 2 clusters - BtRes and BtSus.
+2
+
+dapc2_top1 <- dapc(Hz.genlight_dapc2_1, Hz_grp2_dapc2_1$grp, n.pca = 8, n.da = 10, n.cores = 6, var.loadings = T)
+dapc2_top1
+
+scatter(dapc2_top1,scree.da=TRUE, bg="white", posi.pca="topright", legend=TRUE,txt.leg=paste("group", 1:2), col=myCol)
+
+dapc2_top1.results <- as.data.frame(dapc2_top1$posterior)
+dapc2_top1.results$pop <- Hz.genlight_dapc2_1$pop
+dapc2_top1.results$indNames <- Hz.genlight_dapc2_1$ind.names
+
+dapc2_top1.results <- melt(dapc2_top1.results)
+
+colnames(dapc2_top1.results) <- c("Original_Pop","Sample","Assigned_Pop","Posterior_membership_probability")
+
+p <- ggplot(dapc2_top1.results, aes(x=Sample, y=Posterior_membership_probability, fill=Assigned_Pop))
+p <- p + geom_bar(stat='identity') 
+p <- p + scale_fill_manual(values = myCol) 
+p <- p + facet_grid(~Original_Pop, scales = "free")
+p <- p + labs(y="Posterior Membership Probability", fill  = "Assigned Pop")
+p <- p + theme(axis.title.x=element_blank(),
+               axis.text.x=element_blank(),
+               axis.ticks.x=element_blank(),
+               axis.title.y = element_text(size = (16),margin = margin(t = 0, r = 15, b = 0, l = 0)),
+               axis.text.y = element_text(size = (12)),
+               legend.title = element_text(size = (14)),
+               legend.text = element_text(size = (12)),
+               strip.text.x = element_text(size = 12, color = "black", face = "bold"))
+p
+
+#after removing top 5% var contributing SNPs.
+
+data2 <- read.vcfR(file = "./mpileupANDvcftools_output/top5_varContr_FieldHzea.recode.vcf")
+head(data2)
+data2@fix[1:10,1:5]
+
+Hz.genlight_dapc2_2 <- vcfR2genlight(data2, n.cores=2)
+
+pop(Hz.genlight_dapc2_2)<-regmatches(indNames(Hz.genlight_dapc2_2), regexpr("20[[:digit:]]+", indNames(Hz.genlight_dapc2_2)))
+head(pop(Hz.genlight_dapc2_2)) #checking to see output makes sense
+
+Hz.genlight_dapc2_2@ploidy <- as.integer(ploidy(Hz.genlight_dapc2_2)) 
+
+Hz_grp2_dapc2_2 <- find.clusters(Hz.genlight_dapc2_2, max.n.clust=10, n.pca = 225, n.cores = 6) #chose to retain 225 PCs & 2 clusters - BtRes and BtSus.
+2
+
+dapc2_top5 <- dapc(Hz.genlight_dapc2_2, Hz_grp2_dapc2_2$grp, n.pca = 8, n.da = 10, n.cores = 6, var.loadings = T)
+dapc2_top5
+
+scatter(dapc2_top5,scree.da=TRUE, bg="white", posi.pca="topright", legend=TRUE,txt.leg=paste("group", 1:2), col=myCol)
+
+dapc2_top5.results <- as.data.frame(dapc2_top5$posterior)
+dapc2_top5.results$pop <- Hz.genlight_dapc2_2$pop
+dapc2_top5.results$indNames <- Hz.genlight_dapc2_2$ind.names
+
+dapc2_top5.results <- melt(dapc2_top5.results)
+
+colnames(dapc2_top5.results) <- c("Original_Pop","Sample","Assigned_Pop","Posterior_membership_probability")
+
+p <- ggplot(dapc2_top5.results, aes(x=Sample, y=Posterior_membership_probability, fill=Assigned_Pop))
+p <- p + geom_bar(stat='identity') 
+p <- p + scale_fill_manual(values = myCol) 
+p <- p + facet_grid(~Original_Pop, scales = "free")
+p <- p + labs(y="Posterior Membership Probability", fill  = "Assigned Pop")
+p <- p + theme(axis.title.x=element_blank(),
+               axis.text.x=element_blank(),
+               axis.ticks.x=element_blank(),
+               axis.title.y = element_text(size = (16),margin = margin(t = 0, r = 15, b = 0, l = 0)),
+               axis.text.y = element_text(size = (12)),
+               legend.title = element_text(size = (14)),
+               legend.text = element_text(size = (12)),
+               strip.text.x = element_text(size = 12, color = "black", face = "bold"))
+p
+
+
+#after removing top 2.5% var contributing SNPs.
+data3 <- read.vcfR(file = "./mpileupANDvcftools_output/top2p5_varContr_FieldHzea.recode.vcf")
+head(data3)
+data3@fix[1:10,1:5]
+
+Hz.genlight_dapc2_3 <- vcfR2genlight(data3, n.cores=2)
+
+pop(Hz.genlight_dapc2_3)<-regmatches(indNames(Hz.genlight_dapc2_3), regexpr("20[[:digit:]]+", indNames(Hz.genlight_dapc2_3)))
+head(pop(Hz.genlight_dapc2_3)) #checking to see output makes sense
+
+Hz.genlight_dapc2_3@ploidy <- as.integer(ploidy(Hz.genlight_dapc2_3)) 
+
+Hz_grp2_dapc2_3 <- find.clusters(Hz.genlight_dapc2_3, max.n.clust=10, n.pca = 225, n.cores = 6) #chose to retain 225 PCs & 2 clusters - BtRes and BtSus.
+2
+
+dapc2_top2p5 <- dapc(Hz.genlight_dapc2_3, Hz_grp2_dapc2_3$grp, n.pca = 8, n.da = 10, n.cores = 6, var.loadings = T)
+dapc2_top2p5
+
+scatter(dapc2_top2p5,scree.da=TRUE, bg="white", posi.pca="topright", legend=TRUE,txt.leg=paste("group", 1:2), col=myCol)
+
+dapc2_top2p5.results <- as.data.frame(dapc2_top2p5$posterior)
+dapc2_top2p5.results$pop <- Hz.genlight_dapc2_3$pop
+dapc2_top2p5.results$indNames <- Hz.genlight_dapc2_3$ind.names
+
+dapc2_top2p5.results <- melt(dapc2_top2p5.results)
+
+colnames(dapc2_top2p5.results) <- c("Original_Pop","Sample","Assigned_Pop","Posterior_membership_probability")
+
+p <- ggplot(dapc2_top2p5.results, aes(x=Sample, y=Posterior_membership_probability, fill=Assigned_Pop))
 p <- p + geom_bar(stat='identity') 
 p <- p + scale_fill_manual(values = myCol) 
 p <- p + facet_grid(~Original_Pop, scales = "free")
