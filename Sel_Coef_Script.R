@@ -1,7 +1,8 @@
 #This is the script that I used to examine changes in allele frequencies for significantly diverged SNPs.
 
+library(tidyr); library(ggplot2)
+
 #used equations on pg 28 of Falconer and Mackay and solved for s.
-library(scatterplot3d)
 
 #function for selection coefficient assuming dominance of p
 Dom.Sel.Coef = function (q.1, q.2, q.3, g.1, g.2) {
@@ -33,7 +34,7 @@ Rec.Sel.Coef = function (q.1, q.2, q.3, g.1, g.2) {
 print(z)
 }
 
-data <- read.csv("~/Desktop/Hz_ProtCoding_deltaq.csv", header = T)
+data <- read.csv("~/Desktop/Hz_ProtCoding_deltaq.csv", header = T) #top 5 sel ancestral, bottom sel alt.
 freqs_only <- data[,c(4:6)]
 
 first_gens <- c(60,60,60,60,60,60)
@@ -63,15 +64,34 @@ for (i in 1:nrow(freqs_gen)){
   Rec_df <- rbind(Rec_df,x)
 }
 
+All_data <- rbind(Dom_df, NoDom_df, Rec_df)
+dom <- rep(c("Dom", "NoDom", "Rec"), each = 6, times = 1)
+All_data2 <- cbind(All_data, dom)
+colnames(All_data2) <- c("2002", "2012", "dom")
 
-#To plot selection coefficients
-plot.Rec.Sel.Coef = function(q.1, q.2, g, s, dataframe) {
-  delta.q = (q.2-q.1)/g
-  df.name <- deparse(substitute(dataframe))
-  png(file = print(paste0(df.name,"Rec.png")), units = "px", height = 600, width = 900)
-  scatterplot3d(abs(delta.q), q.1, abs(s),highlight.3d = TRUE, col.axis = "blue", 
-                cex = 2.5, cex.axis = 1.5, angle = 15, cex.lab = 2, cex.main = 2, col.grid = "lightblue", 
-                main = "Recessiveness of p", xlab = "Delta q", ylab = "",
-                zlab = "Selection Coefficient", pch = 20, zlim = c(0,.8),xlim = c(0,0.025))
-  dev.off()
-}
+All_data_long <- gather(All_data2, sel_per, sel_coef, "2002":"2012", factor_key=TRUE)
+
+#without standard errors
+interaction.plot(All_data_long$sel_per, All_data_long$dom, All_data_long$sel_coef,
+                 fun = mean,  # summary statistic to be plotted for response variable
+                 type = "l",     # type of plot, here "l" for lines
+                 ylab = "Selection coefficient",
+                 xlab = "Selection period (Year)",
+                 col = c("blue4", "red4", "black"),
+                 lty = 1,  # line type
+                 lwd = 2,  # line width
+                 trace.label = "Degree of Dom",  # label for legend
+                 xpd = FALSE) #,  # 'clip' legend at border)
+
+#with standard errors
+df <- with(All_data_long, aggregate(sel_coef, list(dom=dom, sel_per=sel_per), mean))
+df$se <- with(All_data_long, aggregate(sel_coef, list(dom=dom, sel_per=sel_per), function(x) sd(x)/sqrt(6)))[,3]
+
+ggplot(df, aes(x=sel_per, y=x, colour=dom, group=dom)) + geom_line(aes(linetype=dom), size=.6) + 
+  geom_point(aes(shape=dom), size=3) + geom_errorbar(aes(ymax=x+se, ymin=x-se), width=.1) +
+  labs(x=expression("Selection Period"), y=expression("Selection coefficient (s)")) +
+  scale_color_manual(values=c("#868686FF","#0073C2FF","#ff1f39")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), axis.text=element_text(size=12), 
+        axis.title=element_text(size=14,face="bold"), panel.border = element_rect(colour = "black", fill=NA, size=2))
+
