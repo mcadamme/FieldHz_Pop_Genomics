@@ -47,6 +47,7 @@ vcfann <- as.data.frame(getFIX(vcf_allpops))
 outliers_allyears_df <- data.frame(OF_out$results, header = T)
 outliers_allyears_df_withpos <- cbind(vcfann[,c(1:2)],outliers_allyears_df)
 outliers_allyears <- subset(outliers_allyears_df_withpos, OutlierFlag == "TRUE")
+outliers_allyears$ChromPos <- paste(outliers_allyears$CHROM, "_", outliers_allyears$POS)
 
 outliers_allyears_uniqScafs <- unique(outliers_allyears$CHROM)
 outliers_allyears_uniqScafs
@@ -55,6 +56,14 @@ write.table(outliers_allyears, file = "FileS1_outliers_allyears.txt", col.names 
 
 min(outliers_allyears$FST)
 max(outliers_allyears$FST)
+
+#what percentage of these outliers were also in the top 5% of variance contributing SNPs from the DAPC?
+
+DAPC_top5 <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/mpileupANDvcftools_output/DAPC2_top5per.txt", header = F)
+colnames(DAPC_top5) <- c("CHROM", "POS")
+DAPC_top5$ChromPos <- paste(DAPC_top5$CHROM, "_", DAPC_top5$POS)
+
+merged_chromPos <- merge(outliers_allyears, DAPC_top5, by = "ChromPos")
 
 #all_years qval 0.05
 png("Fig2_Outflank_Analysis_allyears_qval0.05.png", units = "px", height = 600, width = 800)
