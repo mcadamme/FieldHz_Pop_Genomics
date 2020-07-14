@@ -57,14 +57,6 @@ write.table(outliers_allyears, file = "FileS1_outliers_allyears.txt", col.names 
 min(outliers_allyears$FST)
 max(outliers_allyears$FST)
 
-#what percentage of these outliers were also in the top 5% of variance contributing SNPs from the DAPC?
-
-DAPC_top5 <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/mpileupANDvcftools_output/DAPC2_top5per.txt", header = F)
-colnames(DAPC_top5) <- c("CHROM", "POS")
-DAPC_top5$ChromPos <- paste(DAPC_top5$CHROM, "_", DAPC_top5$POS)
-
-merged_chromPos <- merge(outliers_allyears, DAPC_top5, by = "ChromPos")
-
 #all_years qval 0.05
 png("Fig2_Outflank_Analysis_allyears_qval0.05.png", units = "px", height = 600, width = 800)
 par(mar = c(5,6,4,2))
@@ -73,6 +65,14 @@ plot(OF_out$results$He, OF_out$results$FST, pch=20, col="grey", ylab = "FST", xl
 points(OF_out$results$He[OF_out$results$qvalues<0.05], OF_out$results$FST[OF_out$results$qvalues<0.05], pch=21, col="black")
 
 dev.off()
+
+#what percentage of these outliers were also in the top 5% of variance contributing SNPs from the DAPC?
+DAPC_top5 <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/mpileupANDvcftools_output/DAPC2_top5per.txt", header = F)
+colnames(DAPC_top5) <- c("CHROM", "POS")
+DAPC_top5$ChromPos <- paste(DAPC_top5$CHROM, "_", DAPC_top5$POS)
+
+merged_chromPos <- merge(outliers_allyears, DAPC_top5, by = "ChromPos")
+
 
 #Analysis by pair of years - just for curiosity.  Did not go into paper.
 vcf2geno(input.file = "thinned_FieldHzea2002and2007.recode.vcf", output.file = "FieldHzea2002and2007.geno")
