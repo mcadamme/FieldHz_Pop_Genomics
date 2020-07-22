@@ -3,17 +3,17 @@
 
 cd /home/megan/ms_sims/FieldPops
 
-mkdir Ne_fivethou_NoSize Ne_twopointfivethou_NoSize Ne_tenthou_NoSize Ne_twentythou_NoSize
+mkdir N0_21thou N0_63thou N0_105thou N0_140thou
 
-#simulating present pop based on No = 5000, u = 2.9e-9 (from Keightly et al. 2015; used by Anderson et al. 2018), and r (4cM/Mb from Martin et al. 2019).  We take temporal samples (-eA), assuming that our field population has undergone 75 generations between sampling points (5 generations/year based on Pan et al. 2016 for 15 years).
-/home/megan/src/msdir/ms 24 20000 -t 2.32 -r 32 40000 -eA 0.00375 1 24 > ./Ne_fivethou_NoSize/Ne_fivethou_NoSize.txt
+#simulating 40,000 kb fragments, where present pop based on No = 21,000, u = 2.9e-9 (from Keightly et al. 2015; used by Anderson et al. 2018), and r (4cM/Mb from Martin et al. 2019).  We take temporal samples (-eA), assuming that our field population has undergone 75 generations between sampling points (6 generations/year based on Pan et al. 2016 for 15 years).
+/home/megan/src/msdir/ms 24 20000 -t 9.7 -r 134 40000 -eA 0.00089 1 24 > ./N0_21thou/N0_21thou.txt
 
-#allowing present population size at current time to vary - 2500
-/home/megan/src/msdir/ms 24 20000 -t 1.16 -r 16 40000 -eA 0.0075 1 24 > ./Ne_twopointfivethou_NoSize/Ne_twopointfivethou_NoSize.txt
+#allowing present population size at current time to vary - 63,000
+/home/megan/src/msdir/ms 24 20000 -t 29.2 -r 403 40000 -eA 0.00030 1 24 > ./N0_63thou/N0_63thou.txt
 
-#allowing present population size at current time to vary - 10000
-/home/megan/src/msdir/ms 24 20000 -t 4.64 -r 64 40000 -eA 0.0019 1 24 > ./Ne_tenthou_NoSize.txt
+#allowing present population size at current time to vary - 105,000
+/home/megan/src/msdir/ms 24 20000 -t 48.7 -r 672 40000 -eA 0.00018 1 24 > ./N0_105thou/N0_105thou.txt
 
-#allowing present population size at current time to vary - 20000
-/home/megan/src/msdir/ms 24 20000 -t 9.28 -r 128 40000 -eA 0.0009 1 24 > ./Ne_twentythou_NoSize.txt
+#allowing present population size at current time to vary - 140,000
+/home/megan/src/msdir/ms 24 20000 -t 64.9 -r 896 40000 -eA 0.00013 1 24 > ./N0_140thou/N0_140thou.txt
 
