@@ -4,10 +4,10 @@
 #splitting files into unique genotype matrices
 
 cd /PATH/TO/OUTPUT_DIR
-#example cd /home/megan/ms_sims/FieldPops/Ne_twentythou_NoSize
+#example cd /home/megan/ms_sims/FieldPops/N0_140thou
 
 cat /PATH/TO/IN_FILE | awk 'BEGIN {RS="//";FS="\n";OFS="\n"}{$1=$2=$3="";print $0 > NR ".txt"}'
-#example cat /home/megan/ms_sims/FieldPops/Ne_twentythou_NoSize.txt
+#example cat ./N0_140thou.txt | awk 'BEGIN {RS="//";FS="\n";OFS="\n"}{$1=$2=$3="";print $0 > NR ".txt"}'
 
 
 #adding delimiter for each snp
@@ -22,10 +22,10 @@ find . -name "*.txt" -type 'f' -size -10c -delete
 
 #Next, generating FST distributions - can run these in parallel.
 
-#R CMD BATCH /home/megan/scripts/Tabashnik_work/msms_sim_analysis_FSTvalsPart1.R
-#R CMD BATCH /home/megan/scripts/Tabashnik_work/msms_sim_analysis_FSTvalsPart2.R
-#R CMD BATCH /home/megan/scripts/Tabashnik_work/msms_sim_analysis_FSTvalsPart3.R
-#R CMD BATCH /home/megan/scripts/Tabashnik_work/msms_sim_analysis_FSTvalsPart4.R
+#R CMD BATCH /home/megan/scripts/Field_HZ_Pop_Genomics_ms_sims_scripts/msms_sim_analysis_FSTvalsPart1.R
+#R CMD BATCH /home/megan/scripts/Field_HZ_Pop_Genomics_ms_sims_scripts/msms_sim_analysis_FSTvalsPart2.R
+#R CMD BATCH /home/megan/scripts/Field_HZ_Pop_Genomics_ms_sims_scripts/msms_sim_analysis_FSTvalsPart3.R
+#R CMD BATCH /home/megan/scripts/Field_HZ_Pop_Genomics_ms_sims_scripts/msms_sim_analysis_FSTvalsPart4.R
 
 
 

@@ -2,7 +2,7 @@
 #03052020
 
 
-setwd("~/ms_sims/FieldPops/Ne_fivethou_noSize/")
+setwd("~/ms_sims/FieldPops/N0_21thou/")
 
 #Loading packages
 x <- c("adegenet", "hierfstat")
@@ -46,5 +46,5 @@ for(i in 1:length(file.names1)){
   }
 }
 
-
-write.table(out.file[1:10001], "FST_msSims1.out", row.names = F, col.names = F)
+write.table(out.file, "FST_msSims1.out", row.names = F, col.names = F)
+#write.table(out.file[1:10001], "FST_msSims1.out", row.names = F, col.names = F)
