@@ -37,8 +37,8 @@ print(z)
 data <- read.csv("~/Desktop/Hz_ProtCoding_deltaq.csv", header = T) #top 5 sel ancestral, bottom sel alt.
 freqs_only <- data[,c(4:6)]
 
-first_gens <- c(60,60,60,60,60,60)
-second_gens <- c(30,30,30,30,30,30)
+first_gens <- c(50,50,50,50,50,50)
+second_gens <- c(25,25,25,25,25,25)
 
 freqs_gen <- as.matrix(cbind(freqs_only, first_gens, second_gens))
 str(freqs_gen)
