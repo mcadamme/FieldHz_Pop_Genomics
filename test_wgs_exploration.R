@@ -127,7 +127,7 @@ forPlot_2002_2012 <- data.frame(cbind(wcFST_2002_2012$SnpName,wcFST_2002_2012$V1
        #outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
        #memo="2002and2012_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST4$V5), LOG10 = F, chr.labels=seq(1,2958), highlight = hi_wcFST4$SnpName)
 
-CMplot(forPlot_2002_2012, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST4$V5)),
+CMplot(forPlot_2002_2012, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,0.2),
        chr.den.col="pink", file="jpg", memo="2002and2012_40kb_wcFST", dpi=300, threshold = min(hi_wcFST4$V5), LOG10 = F, ylab = "FST", xlab = "",
        highlight = hi_wcFST4$SnpName)
 
@@ -154,7 +154,7 @@ forPlot_2012_2017 <- data.frame(cbind(wcFST_2012_2017$SnpName,wcFST_2012_2017$V1
        #memo="2012and2017_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST5$V5), LOG10 = F, chr.labels=seq(1,2958), highlight = hi_wcFST5$SnpName)
 
 
-CMplot(forPlot_2012_2017, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST5$V5)),
+CMplot(forPlot_2012_2017, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,0.2),
        chr.den.col="pink", file="jpg", memo="2012and2017_40kb_wcFST", dpi=300, threshold = min(hi_wcFST5$V5), LOG10 = F, ylab = "FST", xlab = "",
        highlight = hi_wcFST5$SnpName)
 
