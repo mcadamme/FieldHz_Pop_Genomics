@@ -28,11 +28,14 @@ forPlot_2002_2017 <- data.frame(cbind(wcFST_2002_2017$SnpName,wcFST_2002_2017$V1
 #2002-2017 Circular Manhattan plot function
 ##IMPORTANT - each CMplot has to be run and fig must be renamed one at a time.
 
-CMplot(forPlot_2002_2017, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$V5)),
-       outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
-       memo="2002and2017_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST0$V5), LOG10 = F, chr.labels=seq(1,2958), 
-       highlight = hi_wcFST0$SnpName)
+#CMplot(forPlot_2002_2017, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$V5)),
+       #outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
+       #memo="2002and2017_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST0$V5), LOG10 = F, chr.labels=seq(1,2958), 
+       #highlight = hi_wcFST0$SnpName)
 
+CMplot(forPlot_2002_2017, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$V5)),
+       chr.den.col="pink", file="jpg", memo="2002and2017_40kb_wcFST", dpi=300, threshold = min(hi_wcFST0$V5), LOG10 = F, ylab = "FST", xlab = "",
+       highlight = hi_wcFST0$SnpName)
 
 #20kb
 wcFST_2002_2017 <- read.table("2002and2017_20kb_wcFST_all.smoothed", header = F)
@@ -52,7 +55,7 @@ forPlot_2002_2017 <- data.frame(cbind(wcFST_2002_2017$SnpName,wcFST_2002_2017$V1
 #2002-2017 Circular Manhattan plot function
 ##IMPORTANT - each CMplot has to be run and fig must be renamed one at a time.
 
-CMplot(forPlot_2002_2017, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST1$V5)),
+CMplot(forPlot_2002_2017, plot.type="m", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST1$V5)),
        outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
        memo="2002and2017_20kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST1$V5), LOG10 = F, chr.labels=seq(1,2958), 
        highlight = hi_wcFST1$SnpName)
@@ -73,7 +76,7 @@ print(min(hi_wcFST2$V5))
 forPlot_2002_2017 <- data.frame(cbind(wcFST_2002_2017$SnpName,wcFST_2002_2017$V1, wcFST_2002_2017$V2, wcFST_2002_2017$V5))
 
 #2002-2017 Circular Manhattan plot function
-CMplot(forPlot_2002_2017, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST2$V5)),
+CMplot(forPlot_2002_2017, plot.type="m", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST2$V5)),
        outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
        memo="2002and2017_10kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST2$V5), LOG10 = F, chr.labels=seq(1,2958), 
        highlight = hi_wcFST2$SnpName)
@@ -95,7 +98,7 @@ print(min(hi_wcFST3$V5))
 forPlot_2002_2017 <- data.frame(cbind(wcFST_2002_2017$SnpName,wcFST_2002_2017$V1, wcFST_2002_2017$V2, wcFST_2002_2017$V5))
 
 #2002-2017 Circular Manhattan plot function
-CMplot(forPlot_2002_2017, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST3$V5)),
+CMplot(forPlot_2002_2017, plot.type="m", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST3$V5)),
        outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
        memo="2002and2017_5kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST3$V5), LOG10 = F, chr.labels=seq(1,2958), 
        highlight = hi_wcFST3$SnpName)
@@ -120,10 +123,13 @@ print(min(hi_wcFST4$V5))
 forPlot_2002_2012 <- data.frame(cbind(wcFST_2002_2012$SnpName,wcFST_2002_2012$V1, wcFST_2002_2012$V2, wcFST_2002_2012$V5))
 
 #2002-2012 Circular Manhattan plot function
-CMplot(forPlot_2002_2012, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,0.2),
-       outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
-       memo="2002and2012_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST4$V5), LOG10 = F, chr.labels=seq(1,2958), highlight = hi_wcFST4$SnpName)
+#CMplot(forPlot_2002_2012, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,0.2),
+       #outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
+       #memo="2002and2012_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST4$V5), LOG10 = F, chr.labels=seq(1,2958), highlight = hi_wcFST4$SnpName)
 
+CMplot(forPlot_2002_2012, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST4$V5)),
+       chr.den.col="pink", file="jpg", memo="2002and2012_40kb_wcFST", dpi=300, threshold = min(hi_wcFST4$V5), LOG10 = F, ylab = "FST", xlab = "",
+       highlight = hi_wcFST4$SnpName)
 
 #2012-2017 comparison
 #40kb
@@ -142,11 +148,15 @@ print(min(hi_wcFST5$V5))
 
 forPlot_2012_2017 <- data.frame(cbind(wcFST_2012_2017$SnpName,wcFST_2012_2017$V1, wcFST_2012_2017$V2, wcFST_2012_2017$V5))
 
-#2002-2012 Circular Manhattan plot function
-CMplot(forPlot_2012_2017, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,0.2),
-       outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
-       memo="2012and2017_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST5$V5), LOG10 = F, chr.labels=seq(1,2958), highlight = hi_wcFST5$SnpName)
+#2012-2017 Circular Manhattan plot function
+#CMplot(forPlot_2012_2017, plot.type="c", r=1.6, cir.legend=TRUE, col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,0.2),
+       #outward=TRUE, cir.legend.col="black", cir.chr.h=.2 ,chr.den.col="pink", file="jpg",
+       #memo="2012and2017_40kb_wcFST", dpi=300, cex.lab = 4, threshold = min(hi_wcFST5$V5), LOG10 = F, chr.labels=seq(1,2958), highlight = hi_wcFST5$SnpName)
 
+
+CMplot(forPlot_2012_2017, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST5$V5)),
+       chr.den.col="pink", file="jpg", memo="2012and2017_40kb_wcFST", dpi=300, threshold = min(hi_wcFST5$V5), LOG10 = F, ylab = "FST", xlab = "",
+       highlight = hi_wcFST5$SnpName)
 
 
 #Loading scafname and gff files for getting genes nearby outliers
@@ -227,14 +237,18 @@ write.table(sub_outliers_2012and2017_withAnnot, file = "Genes_50kb_outliers_2012
 
 
 #shared outliers
-uniq_scafs_2002and2017 <- unique(sub_outliers_2002and2017_withAnnot$Scaf_ID)
-uniq_scafs_2002and2017
+shared1 <- intersect(uniqScafs_2002and2017, uniqScafs_2002and2012)
+shared1
 
-uniq_scafs_2002and2012 <-unique(sub_outliers_2002and2012_withAnnot$Scaf_ID)
-uniq_scafs_2002and2012
+shared2 <- intersect(uniqScafs_2002and2017, uniqScafs_2012and2017)
+shared2
 
-uniq_scafs_2012and2017 <-unique(sub_outliers_2012and2017_withAnnot$Scaf_ID)
-uniq_scafs_2012and2017
+shared3 <- intersect(uniqScafs_2002and2012, uniqScafs_2012and2017)
+shared3
+
+shared_all <- intersect(shared1,shared2)
+shared_all
+
 
 #####Bt and Non-Bt Samples
 setwd("/media/megan/New Volume1/Hzea_WGRS_Bowtie2_output/BtandNonBt_alignmentFiles/WGRS_mpileupANDvcftools_output/")
