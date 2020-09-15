@@ -91,6 +91,7 @@ ggplot(df, aes(x=sel_per, y=x, colour=dom, group=dom)) + geom_line(aes(linetype=
   geom_point(aes(shape=dom), size=3) + geom_errorbar(aes(ymax=x+se, ymin=x-se), width=.1) +
   labs(x=expression("Selection Period"), y=expression("Selection coefficient (s)")) +
   scale_color_manual(values=c("#868686FF","#0073C2FF","#ff1f39")) +
+  scale_x_discrete(labels=c("2002" = "2002-2012", "2012" = "2012-2017")) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
         axis.line = element_line(colour = "black"), axis.text=element_text(size=12), 
         axis.title=element_text(size=14,face="bold"), panel.border = element_rect(colour = "black", fill=NA, size=2))
