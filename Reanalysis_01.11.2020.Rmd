@@ -1,0 +1,212 @@
+---
+title: "Linkage analysis for H.zea CHR13 marker with larval growth"
+author: "Katherine Taylor and Megan Fritz"
+date: "written Jan. 8, 2021"
+output: github_document
+---
+
+##First Mapping family - untreated vs. Cry1Ab leaf tissue incorporation assay
+A single F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue).  A second F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple).  While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
+
+```{r Family 1, include = FALSE}
+library(magrittr);library(dplyr);library(ggplot2);library(MASS); library(caTools)
+
+genotypes1 <- read.csv("~/Downloads/Tabash_Reanalysis/genotypes_BV-BA52_BZM_P11_A1.csv", header = T)
+
+phenotypes1 <- read.csv("~/Downloads/Tabash_Reanalysis/BV_BA52_P11_BZM_A1_Scored.csv", header = T)
+
+phenotypes1 <- phenotypes1 %>% 
+  mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
+
+BV_BA52_BZM_P11_A1 <- merge(phenotypes1, genotypes1, by = c("tray", "square", "row", "well"))
+
+BV_BA52_BZM_P11_A1_DD <- BV_BA52_BZM_P11_A1 %>%
+  filter (Treatment == "DD") %>%
+  filter (genotype_3749 != "", genotype_9409b != "")
+
+BV_BA52_BZM_P11_A1_CL <- BV_BA52_BZM_P11_A1 %>%
+  filter (Treatment == "CL") %>%
+  filter (genotype_9409b != "")
+```
+
+```{r Family 2, include = FALSE}
+genotypes2 <- read.csv("./genotypes_BV_CV98_03_BZF_I9_9.16.20.csv")
+
+phenotypes2 <- read.csv("./BV_CV98_O3_BZF_I9_Scored.csv")
+
+phenotypes2 <- phenotypes2 %>% 
+  mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
+
+BV_CV98_03_BZF_I9_DD <- merge(phenotypes2, genotypes2, by = c("tray", "square", "row", "well")) %>%
+  filter (genotype_3749 != "", genotype_9409b != "")
+```
+
+```{r joining two datasets just for plot, include = FALSE}
+
+joined <- data.frame(rbind(BV_BA52_BZM_P11_A1_DD[,c(6,7,12,16)], BV_BA52_BZM_P11_A1_CL[,c(6,7,12,16)], BV_CV98_03_BZF_I9_DD[,c(6,7,11,13)]))
+joined$TreatByFam <- paste(joined$Population, "", joined$Treatment)
+```
+
+```{r}
+#png("BV_BA52_BZM_P11_A1.png", units = "px", height = 600, width = 800)
+joined %>%
+  filter (genotype_9409b != "") %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
+  geom_boxplot(fatten = 1, alpha = 0.8, notch = TRUE) +
+  geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
+  labs(y = "Weight (mg)", x = "") +
+  scale_y_continuous(breaks = c(0, 100, 200, 300)) +
+  ylim(0,350) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"),
+                   labels = c("A", "A/V", "V")) +
+  scale_fill_manual(name="Treatment By Family",
+                         breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) +
+  scale_color_manual(name="Treatment By Family ",
+                         breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) 
+
+#dev.off()
+```
+
+## Counts of larvae with each genotype for Fred & test for mendelian seg
+```{r}
+#function for test of mendelian segregation
+mendel_seg <- function(obs_genos) {
+   exp_props <- c(0.25, 0.5, 0.25)
+   chisq.test(x = obs_genos, p = exp_props)
+   }
+
+geno9409_dist_BCO805_DD <- as.matrix(table(BV_BA52_BZM_P11_A1_DD$genotype_9409b))#allele freqs diag dose BC0805
+print(geno9409_dist_BCO805_DD[-1,])#AA is the derived genotype in the field
+mendel_seg(geno9409_dist_BCO805_DD[-1,])
+
+
+geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
+print(geno9409_dist_BCO805_CL[-1,])#AA is the derived genotype in the field
+mendel_seg(geno9409_dist_BCO805_CL[-1,])
+
+
+geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
+print(geno9409_dist_Obs_DD)#AA is the derived genotype in the field
+mendel_seg(geno9409_dist_Obs_DD)
+
+
+```
+## Anova and data transformation
+We check the assumptions with plots and a shapiro test and then run a boxcox test to determine the appropiate transformation. The lambda value of ~0.5 suggests a square root transformation for individuals on treated diet.  Nothing needed for controls.
+
+Progeny on treated diet
+
+```{r}
+fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
+
+shapiro.test(resid(fitDD))
+plot(fitDD)
+
+boxcox(fitDD, plotit = TRUE)
+```
+
+
+Progeny on untreated diet
+```{r}
+fitCL <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_CL)
+
+shapiro.test(resid(fitCL))#no transformation needed.
+plot(fitCL)
+
+boxcox(fitCL, plotit = TRUE)
+```
+
+For progeny on treated diet, trying a non-parametric test because the residuals are not normally distributed.
+```{r}
+
+kruskal.test(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
+
+
+```
+
+Then tried a parametric test with sqrt transformed responses.
+```{r}
+
+fit_BV_BA52_BZM_P11_A1_DD <- aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
+summary(fit_BV_BA52_BZM_P11_A1_DD)
+
+
+shapiro.test(resid(fit_BV_BA52_BZM_P11_A1_DD))#transformation worked
+```
+
+
+Just ran parametric test for individuals raised up on untreated diet.
+```{r}
+fit_BV_BA52_BZM_P11_A1_CL <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_CL)
+summary(fit_BV_BA52_BZM_P11_A1_CL)
+
+shapiro.test(resid(fit_BV_BA52_BZM_P11_A1_CL))#shows no transformation needed.
+
+```
+
+
+#What about a glm? 
+
+Blocking on square because individuals within the same square got diet from the same syringe.
+```{r}
+library(lme4)
+fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
+fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_BA52_BZM_P11_A1_DD)
+
+summary(fit_glmF)
+
+anova(fit_glmR, fit_glmF)#adding the blocking factor doesn't help.
+
+#forcing full model effects without the slope.
+fit_glmF2 <- lmer(sqrt(end_weight_mg) ~ 0 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
+summary(fit_glmF2)
+
+#now for the controls
+fit_glmF <- lmer(end_weight_mg ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_CL)
+fit_glmR <- lmer(end_weight_mg ~ 1 + (1|square), data = BV_BA52_BZM_P11_A1_CL)
+
+summary(fit_glmF)
+
+anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically significant differences in growth.
+
+
+```
+
+## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
+Removing small individuals BV_BA52_BZM_P11_A1_DD does not change the outcome.
+
+```{r, include = FALSE}
+BV_BA52_BZM_P11_A1_DD_20 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 20)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_20))
+
+BV_BA52_BZM_P11_A1_DD_25 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 25)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_25))
+
+BV_BA52_BZM_P11_A1_DD_30 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 30)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_30))
+
+BV_BA52_BZM_P11_A1_DD_35 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 35)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_35))
+
+BV_BA52_BZM_P11_A1_DD_40 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 40)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_40))
+
+
+
+```
+
+
+##Second Mapping family - Cry1A.105 + Cry2Ab2 leaf tissue incorporation assay
+  All larvae were allowed to feed for 7 days and then weighed.
