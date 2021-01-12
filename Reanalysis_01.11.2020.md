@@ -5,7 +5,7 @@ written Jan. 8, 2021
 
 ## First Mapping family - untreated vs. Cry1Ab leaf tissue incorporation assay
 
-A single F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (blue), the other half were placed on diet containing Cry1Ab treated leaf tissue (orange). A second F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple). While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
+A single F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue). A second F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple). While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
 ``` r
 #png("BV_BA52_BZM_P11_A1.png", units = "px", height = 600, width = 800)
@@ -85,6 +85,26 @@ mendel_seg(geno9409_dist_BCO805_CL[-1,])
     ## 
     ## data:  obs_genos
     ## X-squared = 1.6182, df = 2, p-value = 0.4453
+
+``` r
+geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
+print(as.matrix(geno9409_dist_Obs_DD))#AA is the derived genotype in the field
+```
+
+    ##    [,1]
+    ## AA   15
+    ## AG   37
+    ## GG   15
+
+``` r
+mendel_seg(geno9409_dist_Obs_DD)
+```
+
+    ## 
+    ##  Chi-squared test for given probabilities
+    ## 
+    ## data:  obs_genos
+    ## X-squared = 0.73134, df = 2, p-value = 0.6937
 
 ## Anova and data transformation
 

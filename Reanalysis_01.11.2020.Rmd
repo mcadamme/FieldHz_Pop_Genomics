@@ -88,7 +88,7 @@ mendel_seg(geno9409_dist_BCO805_CL[-1,])
 
 
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
-print(geno9409_dist_Obs_DD)#AA is the derived genotype in the field
+print(as.matrix(geno9409_dist_Obs_DD))#AA is the derived genotype in the field
 mendel_seg(geno9409_dist_Obs_DD)
 
 
