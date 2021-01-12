@@ -30,9 +30,9 @@ BV_BA52_BZM_P11_A1_CL <- BV_BA52_BZM_P11_A1 %>%
 ```
 
 ```{r Family 2, include = FALSE}
-genotypes2 <- read.csv("./genotypes_BV_CV98_03_BZF_I9_9.16.20.csv")
+genotypes2 <- read.csv("~/Downloads/Tabash_Reanalysis/genotypes_BV_CV98_03_BZF_I9_9.16.20.csv")
 
-phenotypes2 <- read.csv("./BV_CV98_O3_BZF_I9_Scored.csv")
+phenotypes2 <- read.csv("~/Downloads/Tabash_Reanalysis/BV_CV98_O3_BZF_I9_Scored.csv")
 
 phenotypes2 <- phenotypes2 %>% 
   mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
@@ -48,7 +48,7 @@ joined$TreatByFam <- paste(joined$Population, "", joined$Treatment)
 ```
 
 ```{r}
-#png("BV_BA52_BZM_P11_A1.png", units = "px", height = 600, width = 800)
+
 joined %>%
   filter (genotype_9409b != "") %>%
 ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
@@ -66,7 +66,7 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
                          breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
                          values=c("#E69F00", "#56B4E9", "#9932CC")) 
 
-#dev.off()
+
 ```
 
 ## Counts of larvae with each genotype for Fred & test for mendelian seg
@@ -177,7 +177,7 @@ anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically 
 ## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
 Removing small individuals BV_BA52_BZM_P11_A1_DD does not change the outcome.
 
-```{r, include = FALSE}
+```{r}
 BV_BA52_BZM_P11_A1_DD_20 <- BV_BA52_BZM_P11_A1_DD %>%
   filter (end_weight_mg > 20)
 
@@ -207,6 +207,3 @@ summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_4
 
 ```
 
-
-##Second Mapping family - Cry1A.105 + Cry2Ab2 leaf tissue incorporation assay
-  All larvae were allowed to feed for 7 days and then weighed.

@@ -8,7 +8,6 @@ written Jan. 8, 2021
 One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue). A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple). While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
 ``` r
-#png("BV_BA52_BZM_P11_A1.png", units = "px", height = 600, width = 800)
 joined %>%
   filter (genotype_9409b != "") %>%
 ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
@@ -37,10 +36,6 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
     ## notch went outside hinges. Try setting notch=FALSE.
 
 ![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-1-1.png)
-
-``` r
-#dev.off()
-```
 
 ## Counts of larvae with each genotype for Fred & test for mendelian seg
 
@@ -368,6 +363,59 @@ anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically 
 
 Removing small individuals BV\_BA52\_BZM\_P11\_A1\_DD does not change the outcome.
 
-## Second Mapping family - Cry1A.105 + Cry2Ab2 leaf tissue incorporation assay
+``` r
+BV_BA52_BZM_P11_A1_DD_20 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 20)
 
-All larvae were allowed to feed for 7 days and then weighed.
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_20))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)  
+    ## genotype_9409b  2  22.61   11.30   2.463 0.0936 .
+    ## Residuals      61 279.96    4.59                 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+BV_BA52_BZM_P11_A1_DD_25 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 25)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_25))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2  12.75   6.376   1.497  0.232
+    ## Residuals      59 251.28   4.259
+
+``` r
+BV_BA52_BZM_P11_A1_DD_30 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 30)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_30))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   5.69   2.844   0.715  0.493
+    ## Residuals      57 226.66   3.976
+
+``` r
+BV_BA52_BZM_P11_A1_DD_35 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 35)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_35))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   4.71   2.356   0.656  0.523
+    ## Residuals      55 197.64   3.593
+
+``` r
+BV_BA52_BZM_P11_A1_DD_40 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 40)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_40))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   2.77   1.386   0.395  0.676
+    ## Residuals      54 189.64   3.512
