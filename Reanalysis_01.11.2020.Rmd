@@ -5,11 +5,11 @@ date: "written Jan. 8, 2021"
 output: github_document
 ---
 
-##Two Mapping families - untreated vs. Cry1Ab leaf tissue incorporation assay
-One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue).  A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple).  While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
+##Mapping families on treated and untreated leaf tissue incorporated diet.
+One F2 mapping family was generated and progeny split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue).  A second F2 mapping family was generated and progeny were also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple).  While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
 ```{r Family 1, include = FALSE}
-library(magrittr);library(dplyr);library(ggplot2);library(MASS); library(caTools)
+library(magrittr);library(dplyr);library(ggplot2);library(MASS); library(caTools); library(lme4)
 
 genotypes1 <- read.csv("~/Downloads/Tabash_Reanalysis/genotypes_BV-BA52_BZM_P11_A1.csv", header = T)
 
@@ -52,14 +52,15 @@ joined$TreatByFam <- paste(joined$Population, "", joined$Treatment)
 joined %>%
   filter (genotype_9409b != "") %>%
 ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
-  geom_boxplot(fatten = 1, alpha = 0.8, notch = TRUE) +
+  geom_boxplot(fatten = 1, alpha = 0.8, notch = F) +
   geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
   labs(y = "Weight (mg)", x = "") +
   scale_y_continuous(breaks = c(0, 100, 200, 300)) +
   ylim(0,350) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
   scale_x_discrete(breaks  = c("GG", "AG", "AA"),
                    labels = c("A", "A/V", "V")) +
-  scale_fill_manual(name="Treatment By Family",
+    scale_fill_manual(name="Treatment By Family",
                          breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
                          values=c("#E69F00", "#56B4E9", "#9932CC")) +
   scale_color_manual(name="Treatment By Family ",
@@ -69,31 +70,31 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
 
 ```
 
-## Counts of larvae with each genotype for Fred & test for mendelian seg
+## Counts of larvae with each genotype & test for mendelian seg
+I tried the chisq.test function with and without simulate.p.value, the latter of which is supposed to be better for smaller sample sizes.  It did not change the outcome.
 ```{r}
-#function for test of mendelian segregation
-mendel_seg <- function(obs_genos) {
-   exp_props <- c(0.25, 0.5, 0.25)
-   chisq.test(x = obs_genos, p = exp_props)
-   }
+#test of mendelian segregation
+
+exp_props <- c(0.25, 0.5, 0.25)
 
 geno9409_dist_BCO805_DD <- as.matrix(table(BV_BA52_BZM_P11_A1_DD$genotype_9409b))#allele freqs diag dose BC0805
 print(geno9409_dist_BCO805_DD[-1,])#AA is the derived genotype in the field
-mendel_seg(geno9409_dist_BCO805_DD[-1,])
+chisq.test(geno9409_dist_BCO805_DD[-1,], exp_props, simulate.p.value = T)
 
 
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
 print(geno9409_dist_BCO805_CL[-1,])#AA is the derived genotype in the field
-mendel_seg(geno9409_dist_BCO805_CL[-1,])
+chisq.test(geno9409_dist_BCO805_CL[-1,], exp_props, simulate.p.value = T)
 
 
-geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
-print(as.matrix(geno9409_dist_Obs_DD))#AA is the derived genotype in the field
-mendel_seg(geno9409_dist_Obs_DD)
+geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD$genotype_9409b))#allele freqs control diet
+print(geno9409_dist_Obs_DD)#AA is the derived genotype in the field
+chisq.test(geno9409_dist_Obs_DD, exp_props, simulate.p.value = T)
 
 
 ```
-## Anova and data transformation
+
+## Anova and data transformation for Family 1 - Bv-BA52
 We check the assumptions with plots and a shapiro test and then run a boxcox test to determine the appropiate transformation. The lambda value of ~0.5 suggests a square root transformation for individuals on treated diet.  Nothing needed for controls.
 
 Progeny on treated diet
@@ -107,7 +108,6 @@ plot(fitDD)
 boxcox(fitDD, plotit = TRUE)
 ```
 
-
 Progeny on untreated diet
 ```{r}
 fitCL <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_CL)
@@ -117,6 +117,7 @@ plot(fitCL)
 
 boxcox(fitCL, plotit = TRUE)
 ```
+
 
 For progeny on treated diet, trying a non-parametric test because the residuals are not normally distributed.
 ```{r}
@@ -151,7 +152,7 @@ shapiro.test(resid(fit_BV_BA52_BZM_P11_A1_CL))#shows no transformation needed.
 
 Blocking on square because individuals within the same square got diet from the same syringe.
 ```{r}
-library(lme4)
+
 fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
 fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_BA52_BZM_P11_A1_DD)
 
@@ -174,7 +175,7 @@ anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically 
 
 ```
 
-## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
+## Excluding small individuals.  Some progeny from Family 1 were still alive at the end of the assay but with failure to thrive phenotypes, even in the controls.
 Removing small individuals BV_BA52_BZM_P11_A1_DD does not change the outcome.
 
 ```{r}
@@ -207,3 +208,115 @@ summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_4
 
 ```
 
+
+## Anova and data transformation for Family 2 - Bv-CV98
+Also check assumptions of normality with plots and a shapiro test and then run a boxcox test to determine the appropiate transformation. The lambda value of ~0.5 suggests a square root transformation for individuals on treated diet.  Nothing needed for controls.
+
+Progeny on treated diet
+
+```{r}
+fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+
+shapiro.test(resid(fitDD))#while this is not coming up with a p-value < 0.05, it still seems pretty close to non-normally distributed.
+plot(fitDD)
+
+boxcox(fitDD, plotit = TRUE)
+```
+
+
+
+Gonna try a non-parametric test because the residuals questionable.
+```{r}
+
+kruskal.test(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+
+
+```
+
+Then tried a parametric test with sqrt transformed responses.
+```{r}
+
+fit_BV_CV98_03_BZF_I9_DD <- aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+summary(fit_BV_CV98_03_BZF_I9_DD)
+
+
+shapiro.test(resid(fit_BV_CV98_03_BZF_I9_DD))#transformation worked
+```
+
+
+#A glm for Family 2?
+
+Blocking on square because individuals within the same square got diet from the same syringe.
+```{r}
+
+fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_CV98_03_BZF_I9_DD)
+fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_CV98_03_BZF_I9_DD)
+
+summary(fit_glmF)
+
+anova(fit_glmR, fit_glmF)#adding the blocking factor doesn't help.
+
+
+```
+
+
+## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
+Removing small individuals only impacts the outcome in one case - removal of progeny with weights of 30mg or less.
+
+```{r}
+BV_CV98_03_BZF_I9_DD_20 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 20)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_20))
+
+BV_CV98_03_BZF_I9_DD_25 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 25)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_25))
+
+BV_CV98_03_BZF_I9_DD_30 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 30)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_30))
+
+BV_CV98_03_BZF_I9_DD_35 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 35)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_35))
+
+BV_CV98_03_BZF_I9_DD_40 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 40)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_40))
+
+
+
+```
+
+## Final thing.  Since filtering out an end weight of 30 or less made a difference for the anova in Family 2 on ObsII, gonna make a plot with those filtered to see what it looks like.  The figure clearly shows that this randomly chosen cutoff value produces a trend in the data that is inconsistent with our field study.  Furthermore when we removed individuals with weights slightly higher (up to 40 mg or less), the model returns to no statistical significance. 
+```{r}
+
+joined_30 <- joined %>%
+  filter (end_weight_mg > 30)
+
+joined_30 %>%
+  filter (genotype_9409b != "") %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
+  geom_boxplot(fatten = 1, alpha = 0.8, notch = F) +
+  geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
+  labs(y = "Weight (mg)", x = "") +
+  scale_y_continuous(breaks = c(0, 100, 200, 300)) +
+  ylim(0,350) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"),
+                   labels = c("A", "A/V", "V")) +
+  scale_fill_manual(name="Treatment By Family",
+                         breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) +
+  scale_color_manual(name="Treatment By Family ",
+                         breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) 
+```
+
+##Conclusion
+All we can really say is that the AA genotype (which produces the V) has significantly faster larval growth on the diet containing untreated leaf tissue.  BUT there is a trend that heterozygotes look to growth larger on the diet containing treated leaf tissue for both one and two toxin cultivars.  
