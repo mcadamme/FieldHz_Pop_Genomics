@@ -164,9 +164,9 @@ BV_BA52_BZM_P11_A1_CL <- BV_BA52_BZM_P11_A1 %>%
 ```
 
 ```{r Family 2, include = FALSE}
-genotypes2 <- read.csv("./genotypes_BV_CV98_03_BZF_I9_9.16.20.csv")
+genotypes2 <- read.csv("~/Downloads/Tabash_Reanalysis/genotypes_BV_CV98_03_BZF_I9_9.16.20.csv")
 
-phenotypes2 <- read.csv("./BV_CV98_O3_BZF_I9_Scored.csv")
+phenotypes2 <- read.csv("~/Downloads/Tabash_Reanalysis/BV_CV98_O3_BZF_I9_Scored.csv")
 
 phenotypes2 <- phenotypes2 %>% 
   mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
@@ -186,9 +186,10 @@ joined$TreatByFam <- paste(joined$Population, "", joined$Treatment)
 joined %>%
   filter (genotype_9409b != "") %>%
 ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
-  geom_boxplot(fatten = 1, alpha = 0.8, notch = TRUE) +
+  geom_boxplot(fatten = 1, alpha = 0.8, notch = F) +
   geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
-  labs(y = "Weight (mg)", x = "") +
+  labs(y = "Weight (mg)", x = "", tag = "C") +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
   scale_y_continuous(breaks = c(0, 100, 200, 300)) +
   ylim(0,350) +
   scale_x_discrete(breaks  = c("GG", "AG", "AA"),
@@ -198,7 +199,9 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
                          values=c("#E69F00", "#56B4E9", "#9932CC")) +
   scale_color_manual(name="Treatment By Family ",
                          breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
-                         values=c("#E69F00", "#56B4E9", "#9932CC")) 
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) +
+  theme(axis.text=element_text(size=12),
+         axis.title=element_text(size=14,face="bold"))
 
 #dev.off()
 ```

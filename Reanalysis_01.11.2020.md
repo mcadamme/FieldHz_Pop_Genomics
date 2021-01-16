@@ -344,9 +344,10 @@ One F2 mapping family was generated and split into two groups at 48h after hatch
 joined %>%
   filter (genotype_9409b != "") %>%
 ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
-  geom_boxplot(fatten = 1, alpha = 0.8, notch = TRUE) +
+  geom_boxplot(fatten = 1, alpha = 0.8, notch = F) +
   geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
-  labs(y = "Weight (mg)", x = "") +
+  labs(y = "Weight (mg)", x = "", tag = "C") +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
   scale_y_continuous(breaks = c(0, 100, 200, 300)) +
   ylim(0,350) +
   scale_x_discrete(breaks  = c("GG", "AG", "AA"),
@@ -356,17 +357,13 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
                          values=c("#E69F00", "#56B4E9", "#9932CC")) +
   scale_color_manual(name="Treatment By Family ",
                          breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
-                         values=c("#E69F00", "#56B4E9", "#9932CC")) 
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) +
+  theme(axis.text=element_text(size=12),
+         axis.title=element_text(size=14,face="bold"))
 ```
 
     ## Scale for 'y' is already present. Adding another scale for 'y', which will
     ## replace the existing scale.
-
-    ## notch went outside hinges. Try setting notch=FALSE.
-    ## notch went outside hinges. Try setting notch=FALSE.
-    ## notch went outside hinges. Try setting notch=FALSE.
-    ## notch went outside hinges. Try setting notch=FALSE.
-    ## notch went outside hinges. Try setting notch=FALSE.
 
 ![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
@@ -374,14 +371,10 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
 #dev.off()
 ```
 
-## Counts of larvae with each genotype for Fred & test for mendelian seg
+## Counts of larvae with each genotype & test for mendelian seg
 
 ``` r
-#function for test of mendelian segregation
-mendel_seg <- function(obs_genos) {
-   exp_props <- c(0.25, 0.5, 0.25)
-   chisq.test(x = obs_genos, p = exp_props)
-   }
+exp_props <- c(0.25, 0.5, 0.25)
 
 geno9409_dist_BCO805_DD <- as.matrix(table(BV_BA52_BZM_P11_A1_DD$genotype_9409b))#allele freqs diag dose BC0805
 print(geno9409_dist_BCO805_DD[-1,])#AA is the derived genotype in the field
@@ -391,14 +384,15 @@ print(geno9409_dist_BCO805_DD[-1,])#AA is the derived genotype in the field
     ## 16 36 12
 
 ``` r
-mendel_seg(geno9409_dist_BCO805_DD[-1,])
+chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T)
 ```
 
     ## 
-    ##  Chi-squared test for given probabilities
+    ##  Chi-squared test for given probabilities with simulated p-value (based
+    ##  on 2000 replicates)
     ## 
-    ## data:  obs_genos
-    ## X-squared = 1.5, df = 2, p-value = 0.4724
+    ## data:  geno9409_dist_BCO805_DD[-1, ]
+    ## X-squared = 1.5, df = NA, p-value = 0.5007
 
 ``` r
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
@@ -409,18 +403,19 @@ print(geno9409_dist_BCO805_CL[-1,])#AA is the derived genotype in the field
     ## 17 23 15
 
 ``` r
-mendel_seg(geno9409_dist_BCO805_CL[-1,])
+chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T)
 ```
 
     ## 
-    ##  Chi-squared test for given probabilities
+    ##  Chi-squared test for given probabilities with simulated p-value (based
+    ##  on 2000 replicates)
     ## 
-    ## data:  obs_genos
-    ## X-squared = 1.6182, df = 2, p-value = 0.4453
+    ## data:  geno9409_dist_BCO805_CL[-1, ]
+    ## X-squared = 1.6182, df = NA, p-value = 0.4628
 
 ``` r
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
-print(as.matrix(geno9409_dist_Obs_DD))#AA is the derived genotype in the field
+print(geno9409_dist_Obs_DD)#AA is the derived genotype in the field
 ```
 
     ##    [,1]
@@ -429,14 +424,15 @@ print(as.matrix(geno9409_dist_Obs_DD))#AA is the derived genotype in the field
     ## GG   15
 
 ``` r
-mendel_seg(geno9409_dist_Obs_DD)
+chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
 ```
 
     ## 
-    ##  Chi-squared test for given probabilities
+    ##  Chi-squared test for given probabilities with simulated p-value (based
+    ##  on 2000 replicates)
     ## 
-    ## data:  obs_genos
-    ## X-squared = 0.73134, df = 2, p-value = 0.6937
+    ## data:  geno9409_dist_Obs_DD
+    ## X-squared = 0.73134, df = NA, p-value = 0.7101
 
 ## Anova and data transformation
 
@@ -592,7 +588,7 @@ summary(fit_glmF)
     ## gnty_9409GG -0.636  0.542
 
 ``` r
-anova(fit_glmR, fit_glmF)#adding the blocking factor doesn't help.
+anova(fit_glmR, fit_glmF)#adding the blocking factor doesn't change much.
 ```
 
     ## refitting model(s) with ML (instead of REML)
