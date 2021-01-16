@@ -3,6 +3,338 @@ Linkage analysis for H.zea CHR13 marker with larval growth
 Katherine Taylor and Megan Fritz
 written Jan. 8, 2021
 
+## Parental strains used for linkage analysis
+
+Summary statistics and distributions of 7 day larval weights for the strains used as grandparents for linkage analysis crosses. The Benzon strain was used as the susceptible strain (dark grey) and a field-collected population from MD was used as the resistant strain. Panel A shows the distributions of weights on a diagnostic dose of a diet with BC0805 (Cry1Ab) leaf tissue incorporation. Panel B shows the distributions of weights on Obsession II (Cry1A.105+Cry2Ab2) leaf tissue.
+
+``` r
+F0_growth %>% 
+   filter(end_weight_mg != "") %>% 
+   group_by(diet_strain, field) %>%
+   summarize(
+     count = n(),
+     mean = mean(end_weight_mg),
+     median = median(end_weight_mg),
+     sd = sd(end_weight_mg)
+   )
+```
+
+    ## # A tibble: 4 x 6
+    ## # Groups:   diet_strain [2]
+    ##   diet_strain field  count   mean median    sd
+    ##   <fct>       <chr>  <int>  <dbl>  <dbl> <dbl>
+    ## 1 O           Benzon   102   6.46    5.1  5.30
+    ## 2 O           Field    147  86.9    78.1 38.5 
+    ## 3 P           Benzon   101  19.9    15.3 13.2 
+    ## 4 P           Field    148 115.    114.  38.2
+
+``` r
+#parents on BC0805
+panelA <- F0_growth %>%
+   filter(diet_strain == "P", end_weight_mg != "") %>%
+   ggplot(aes(x = end_weight_mg, fill = field)) +
+   geom_histogram(alpha = 0.5, position = "identity", bins = 20, color="black") +
+   labs(x = "Weight (mg)", y = "Count", tag = "A") +
+   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+   scale_fill_manual(name="field",
+                          breaks = c("Benzon", "Field"),
+                           labels = c("Susceptible", "MD"),
+                          values = c("grey20", "grey80")) +
+   scale_y_continuous(limits = c(0, 55), breaks = c(0, 20, 40, 60)) +
+   theme(axis.text=element_text(size=12),
+         axis.title=element_text(size=14,face="bold"))+
+   theme(legend.position = "none") 
+
+panelA
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/summary%20statistics%20F0-1.png)
+
+``` r
+#Parents on ObsII
+panelB <- F0_growth %>%
+   filter(diet_strain == "O", end_weight_mg != "") %>%
+   ggplot(aes(x = end_weight_mg, fill = field)) +
+    geom_histogram(alpha = 0.5, position = "identity", bins = 20, color="black") +
+   labs(x = "Weight (mg)", y = "Count", tag = "B") +
+   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+   scale_fill_manual(name = "Population",
+                          breaks = c("Benzon", "Field"),
+                           labels = c("Susceptible", "MD"),
+                          values = c("grey20", "grey80"))  +
+   scale_y_continuous(limits = c(0, 55), breaks = c(0, 20, 40, 60)) + theme(legend.position = "none") +
+   theme(axis.text=element_text(size=12),
+         axis.title=element_text(size=14,face="bold")) 
+ 
+panelB
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/summary%20statistics%20F0-2.png)
+
+## Testing for differences in final weight between the parental strains
+
+``` r
+#subsetting the data by diet treatment
+F0_BC0805 <- subset(F0_growth, diet_strain == "P")
+F0_ObsII <- subset(F0_growth, diet_strain == "O")
+
+
+#BC0805 treatment first.
+fitF0_P <- aov(end_weight_mg ~ field, data = F0_BC0805)
+summary(fitF0_P)#shows statistically significant differences between parental pops
+```
+
+    ##              Df Sum Sq Mean Sq F value Pr(>F)    
+    ## field         1 538020  538020   572.7 <2e-16 ***
+    ## Residuals   247 232045     939                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 2 observations deleted due to missingness
+
+``` r
+shapiro.test(resid(fitF0_P))#BC0805 dataset meets assumptions of normality, but barely.
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  resid(fitF0_P)
+    ## W = 0.9897, p-value = 0.07405
+
+``` r
+boxcox(fitF0_P, plotit = TRUE)
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-1.png)
+
+``` r
+#fitting a glm
+fitF0_P1 <- glm(end_weight_mg ~ 1 + field, data = F0_BC0805, family = "gaussian")
+summary(fitF0_P1)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = end_weight_mg ~ 1 + field, family = "gaussian", 
+    ##     data = F0_BC0805)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -93.767  -16.098   -2.967   18.533   97.533  
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   19.898      3.050   6.524 3.84e-10 ***
+    ## fieldField    94.669      3.956  23.931  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for gaussian family taken to be 939.4549)
+    ## 
+    ##     Null deviance: 770065  on 248  degrees of freedom
+    ## Residual deviance: 232045  on 247  degrees of freedom
+    ##   (2 observations deleted due to missingness)
+    ## AIC: 2415.1
+    ## 
+    ## Number of Fisher Scoring iterations: 2
+
+``` r
+fitF0_P2 <- glm(end_weight_mg ~ 1 + field, data = F0_BC0805, family = "Gamma")
+summary(fitF0_P2)#this is the better fit according to AIC
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = end_weight_mg ~ 1 + field, family = "Gamma", data = F0_BC0805)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -1.8572  -0.3830  -0.0476   0.2601   1.4262  
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  0.050256   0.002471   20.34   <2e-16 ***
+    ## fieldField  -0.041528   0.002496  -16.64   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for Gamma family taken to be 0.2441351)
+    ## 
+    ##     Null deviance: 218.37  on 248  degrees of freedom
+    ## Residual deviance:  68.06  on 247  degrees of freedom
+    ##   (2 observations deleted due to missingness)
+    ## AIC: 2340.4
+    ## 
+    ## Number of Fisher Scoring iterations: 5
+
+``` r
+#looking at distributions again
+plot(fitF0_P1)
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-4.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-5.png)
+
+``` r
+plot(fitF0_P2)#this does look better....
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-6.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-7.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-8.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-9.png)
+
+``` r
+#model comparison with and without field.
+fitF0_P2red <- glm(end_weight_mg ~ 1, data = F0_BC0805, family = "Gamma")
+
+lrtest(fitF0_P2red,fitF0_P2)#statistically sig diff again
+```
+
+    ## Likelihood ratio test
+    ## 
+    ## Model 1: end_weight_mg ~ 1
+    ## Model 2: end_weight_mg ~ 1 + field
+    ##   #Df  LogLik Df  Chisq Pr(>Chisq)    
+    ## 1   2 -1324.5                         
+    ## 2   3 -1167.2  1 314.57  < 2.2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+#ObsII treatment second
+fitF0_O <- aov(end_weight_mg ~ field, data = F0_ObsII)
+summary(fitF0_O) #statistically significant differences between strains.
+```
+
+    ##              Df Sum Sq Mean Sq F value Pr(>F)    
+    ## field         1 389935  389935     440 <2e-16 ***
+    ## Residuals   247 218896     886                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+shapiro.test(resid(fitF0_O))#ObsII does not meet assumptions of normality.
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  resid(fitF0_O)
+    ## W = 0.93289, p-value = 3.22e-09
+
+``` r
+boxcox(fitF0_O, plotit = TRUE)
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-10.png)
+
+``` r
+#trying a log10 transformation first
+fitF0_OL <- aov(log10(end_weight_mg) ~ field, data = F0_ObsII)
+summary(fitF0_OL)
+```
+
+    ##              Df Sum Sq Mean Sq F value Pr(>F)    
+    ## field         1  86.34   86.34    1188 <2e-16 ***
+    ## Residuals   247  17.95    0.07                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+shapiro.test(resid(fitF0_OL))#helps alot, but still does not quite meet assumptions of normality
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  resid(fitF0_OL)
+    ## W = 0.98083, p-value = 0.001924
+
+``` r
+#fitting a glm
+fitF0_O1 <- glm(end_weight_mg ~ 1 + field, data = F0_ObsII, family = "gaussian")
+summary(fitF0_O1)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = end_weight_mg ~ 1 + field, family = "gaussian", 
+    ##     data = F0_ObsII)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -77.034  -17.734   -2.264    7.166  107.266  
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)    6.464      2.948   2.193   0.0292 *  
+    ## fieldField    80.471      3.836  20.976   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for gaussian family taken to be 886.2194)
+    ## 
+    ##     Null deviance: 608831  on 248  degrees of freedom
+    ## Residual deviance: 218896  on 247  degrees of freedom
+    ## AIC: 2400.6
+    ## 
+    ## Number of Fisher Scoring iterations: 2
+
+``` r
+fitF0_O2 <- glm(end_weight_mg ~ 1 + field, data = F0_ObsII, family = "Gamma")
+summary(fitF0_O2)#this is the better fit according to AIC
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = end_weight_mg ~ 1 + field, family = "Gamma", data = F0_ObsII)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -1.6041  -0.4540  -0.1569   0.2915   2.4930  
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  0.154710   0.009573   16.16   <2e-16 ***
+    ## fieldField  -0.143207   0.009591  -14.93   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for Gamma family taken to be 0.3905234)
+    ## 
+    ##     Null deviance: 380.882  on 248  degrees of freedom
+    ## Residual deviance:  88.101  on 247  degrees of freedom
+    ## AIC: 2073.9
+    ## 
+    ## Number of Fisher Scoring iterations: 6
+
+``` r
+#looking at distributions again
+plot(fitF0_O1)
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-11.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-12.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-13.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-14.png)
+
+``` r
+plot(fitF0_O2)#this does look better....
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-15.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-16.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-17.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/statistical%20analysis%20F0-18.png)
+
+``` r
+#model comparison with and without field.
+fitF0_O2red <- glm(end_weight_mg ~ 1, data = F0_ObsII, family = "Gamma")
+
+lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff again
+```
+
+    ## Likelihood ratio test
+    ## 
+    ## Model 1: end_weight_mg ~ 1
+    ## Model 2: end_weight_mg ~ 1 + field
+    ##   #Df  LogLik Df  Chisq Pr(>Chisq)    
+    ## 1   2 -1238.9                         
+    ## 2   3 -1034.0  1 409.97  < 2.2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
 ## Two Mapping families - untreated vs. Cry1Ab leaf tissue incorporation assay
 
 One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue). A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple). While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
@@ -226,11 +558,6 @@ Blocking on square because individuals within the same square got diet from the 
 
 ``` r
 library(lme4)
-```
-
-    ## Loading required package: Matrix
-
-``` r
 fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
 fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_BA52_BZM_P11_A1_DD)
 

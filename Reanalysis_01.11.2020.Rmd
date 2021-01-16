@@ -5,12 +5,146 @@ date: "written Jan. 8, 2021"
 output: github_document
 ---
 
+##Parental strains used for linkage analysis
+Summary statistics and distributions of 7 day larval weights for the strains used as grandparents for linkage analysis crosses. The Benzon strain was used as the susceptible strain (dark grey) and a field-collected population from MD was used as the resistant strain.  Panel A shows the distributions of weights on a diagnostic dose of a diet with BC0805 (Cry1Ab) leaf tissue incorporation.  Panel B shows the distributions of weights on Obsession II (Cry1A.105+Cry2Ab2) leaf tissue.
+
+```{r loading libraries, include = FALSE}
+
+x <- c("magrittr", "lme4", "dplyr", "MASS", "ggplot2", "gridExtra", "grid", "lmtest") 
+
+lapply(x, FUN = function(X) {
+   do.call("library", list(X)) 
+ })
+
+```
+
+```{r loading parental strain dataset, include = F}
+
+F0_growth <- read.csv("~/Downloads/Tabash_Reanalysis/Family_cross_F0_growth_phenotypes.csv")
+
+F0_growth <- F0_growth %>% 
+   mutate(end_weight_mg = end_weight * 1000)
+F0_growth <- F0_growth %>% 
+   mutate(field = case_when(family == "Benzon" ~ "Benzon", TRUE ~ "Field"))
+
+str(F0_growth)
+```
+
+```{r summary statistics F0}
+F0_growth %>% 
+   filter(end_weight_mg != "") %>% 
+   group_by(diet_strain, field) %>%
+   summarize(
+     count = n(),
+     mean = mean(end_weight_mg),
+     median = median(end_weight_mg),
+     sd = sd(end_weight_mg)
+   )
+
+#parents on BC0805
+panelA <- F0_growth %>%
+   filter(diet_strain == "P", end_weight_mg != "") %>%
+   ggplot(aes(x = end_weight_mg, fill = field)) +
+   geom_histogram(alpha = 0.5, position = "identity", bins = 20, color="black") +
+   labs(x = "Weight (mg)", y = "Count", tag = "A") +
+   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+   scale_fill_manual(name="field",
+                          breaks = c("Benzon", "Field"),
+                           labels = c("Susceptible", "MD"),
+                          values = c("grey20", "grey80")) +
+   scale_y_continuous(limits = c(0, 55), breaks = c(0, 20, 40, 60)) +
+   theme(axis.text=element_text(size=12),
+         axis.title=element_text(size=14,face="bold"))+
+   theme(legend.position = "none") 
+
+panelA
+
+
+#Parents on ObsII
+panelB <- F0_growth %>%
+   filter(diet_strain == "O", end_weight_mg != "") %>%
+   ggplot(aes(x = end_weight_mg, fill = field)) +
+    geom_histogram(alpha = 0.5, position = "identity", bins = 20, color="black") +
+   labs(x = "Weight (mg)", y = "Count", tag = "B") +
+   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+   scale_fill_manual(name = "Population",
+                          breaks = c("Benzon", "Field"),
+                           labels = c("Susceptible", "MD"),
+                          values = c("grey20", "grey80"))  +
+   scale_y_continuous(limits = c(0, 55), breaks = c(0, 20, 40, 60)) + theme(legend.position = "none") +
+   theme(axis.text=element_text(size=12),
+         axis.title=element_text(size=14,face="bold")) 
+ 
+panelB
+```
+
+
+##Testing for differences in final weight between the parental strains
+```{r statistical analysis F0}
+
+#subsetting the data by diet treatment
+F0_BC0805 <- subset(F0_growth, diet_strain == "P")
+F0_ObsII <- subset(F0_growth, diet_strain == "O")
+
+
+#BC0805 treatment first.
+fitF0_P <- aov(end_weight_mg ~ field, data = F0_BC0805)
+summary(fitF0_P)#shows statistically significant differences between parental pops
+
+shapiro.test(resid(fitF0_P))#BC0805 dataset meets assumptions of normality, but barely.
+boxcox(fitF0_P, plotit = TRUE)
+
+#fitting a glm
+fitF0_P1 <- glm(end_weight_mg ~ 1 + field, data = F0_BC0805, family = "gaussian")
+summary(fitF0_P1)
+
+fitF0_P2 <- glm(end_weight_mg ~ 1 + field, data = F0_BC0805, family = "Gamma")
+summary(fitF0_P2)#this is the better fit according to AIC
+
+#looking at distributions again
+plot(fitF0_P1)
+plot(fitF0_P2)#this does look better....
+
+#model comparison with and without field.
+fitF0_P2red <- glm(end_weight_mg ~ 1, data = F0_BC0805, family = "Gamma")
+
+lrtest(fitF0_P2red,fitF0_P2)#statistically sig diff again
+
+
+
+#ObsII treatment second
+fitF0_O <- aov(end_weight_mg ~ field, data = F0_ObsII)
+summary(fitF0_O) #statistically significant differences between strains.
+
+shapiro.test(resid(fitF0_O))#ObsII does not meet assumptions of normality.
+boxcox(fitF0_O, plotit = TRUE)
+
+#trying a log10 transformation first
+fitF0_OL <- aov(log10(end_weight_mg) ~ field, data = F0_ObsII)
+summary(fitF0_OL)
+shapiro.test(resid(fitF0_OL))#helps alot, but still does not quite meet assumptions of normality
+
+#fitting a glm
+fitF0_O1 <- glm(end_weight_mg ~ 1 + field, data = F0_ObsII, family = "gaussian")
+summary(fitF0_O1)
+
+fitF0_O2 <- glm(end_weight_mg ~ 1 + field, data = F0_ObsII, family = "Gamma")
+summary(fitF0_O2)#this is the better fit according to AIC
+
+#looking at distributions again
+plot(fitF0_O1)
+plot(fitF0_O2)#this does look better....
+
+#model comparison with and without field.
+fitF0_O2red <- glm(end_weight_mg ~ 1, data = F0_ObsII, family = "Gamma")
+
+lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff again
+```
+
 ##Two Mapping families - untreated vs. Cry1Ab leaf tissue incorporation assay
 One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue).  A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple).  While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
-```{r Family 1, include = FALSE}
-library(magrittr);library(dplyr);library(ggplot2);library(MASS); library(caTools)
-
+```{r mapping family 1, include = FALSE}
 genotypes1 <- read.csv("~/Downloads/Tabash_Reanalysis/genotypes_BV-BA52_BZM_P11_A1.csv", header = T)
 
 phenotypes1 <- read.csv("~/Downloads/Tabash_Reanalysis/BV_BA52_P11_BZM_A1_Scored.csv", header = T)
@@ -93,6 +227,8 @@ mendel_seg(geno9409_dist_Obs_DD)
 
 
 ```
+
+
 ## Anova and data transformation
 We check the assumptions with plots and a shapiro test and then run a boxcox test to determine the appropiate transformation. The lambda value of ~0.5 suggests a square root transformation for individuals on treated diet.  Nothing needed for controls.
 
@@ -157,7 +293,7 @@ fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_BA52_BZM_P11_A1
 
 summary(fit_glmF)
 
-anova(fit_glmR, fit_glmF)#adding the blocking factor doesn't help.
+anova(fit_glmR, fit_glmF)#adding the blocking factor doesn't change much.
 
 #forcing full model effects without the slope.
 fit_glmF2 <- lmer(sqrt(end_weight_mg) ~ 0 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
