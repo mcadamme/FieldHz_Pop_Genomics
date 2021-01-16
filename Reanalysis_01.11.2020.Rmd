@@ -203,27 +203,22 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
 #dev.off()
 ```
 
-## Counts of larvae with each genotype for Fred & test for mendelian seg
+## Counts of larvae with each genotype & test for mendelian seg
 ```{r}
-#function for test of mendelian segregation
-mendel_seg <- function(obs_genos) {
-   exp_props <- c(0.25, 0.5, 0.25)
-   chisq.test(x = obs_genos, p = exp_props)
-   }
+
+exp_props <- c(0.25, 0.5, 0.25)
 
 geno9409_dist_BCO805_DD <- as.matrix(table(BV_BA52_BZM_P11_A1_DD$genotype_9409b))#allele freqs diag dose BC0805
 print(geno9409_dist_BCO805_DD[-1,])#AA is the derived genotype in the field
-mendel_seg(geno9409_dist_BCO805_DD[-1,])
-
+chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T)
 
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
 print(geno9409_dist_BCO805_CL[-1,])#AA is the derived genotype in the field
-mendel_seg(geno9409_dist_BCO805_CL[-1,])
-
+chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T)
 
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
-print(as.matrix(geno9409_dist_Obs_DD))#AA is the derived genotype in the field
-mendel_seg(geno9409_dist_Obs_DD)
+print(geno9409_dist_Obs_DD)#AA is the derived genotype in the field
+chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
 
 
 ```
