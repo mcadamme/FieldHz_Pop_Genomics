@@ -374,7 +374,7 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
   geom_boxplot(fatten = 1, fill='#A4A4A4', color="black") + geom_jitter(position=position_jitter(0.2)) +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
   labs(y = "Weight (mg)", x = "", tag = "C") +
-  scale_y_continuous(limits = c(0,350), breaks = c(0, 50, 100, 150, 200, 250, 300, 350)) +
+  scale_y_continuous(limits = c(0,400), breaks = c(0, 50, 100, 150, 200, 250, 300, 350)) +
   scale_x_discrete(breaks  = c("GG", "AG", "AA"), labels = c("A", "A/V", "V")) +
   theme(axis.text=element_text(size=14), 
         axis.title=element_text(size=16,face="bold"))
@@ -433,7 +433,7 @@ chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_DD[-1, ]
-    ## X-squared = 1.5, df = NA, p-value = 0.4793
+    ## X-squared = 1.5, df = NA, p-value = 0.4918
 
 ``` r
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
@@ -452,7 +452,7 @@ chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_CL[-1, ]
-    ## X-squared = 1.6182, df = NA, p-value = 0.4593
+    ## X-squared = 1.6182, df = NA, p-value = 0.4503
 
 ``` r
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
@@ -473,7 +473,7 @@ chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_Obs_DD
-    ## X-squared = 0.73134, df = NA, p-value = 0.7296
+    ## X-squared = 0.73134, df = NA, p-value = 0.7281
 
 ## Anova and data transformation
 
