@@ -412,8 +412,7 @@ summary(fit_glmF2)
 ```
 
 ## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
-
-```{r, include = FALSE}
+```{r}
 BV_CV98_03_BZF_I9_DD_20 <- BV_CV98_03_BZF_I9_DD %>%
   filter (end_weight_mg > 20)
 

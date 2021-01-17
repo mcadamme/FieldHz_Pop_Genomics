@@ -433,7 +433,7 @@ chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_DD[-1, ]
-    ## X-squared = 1.5, df = NA, p-value = 0.4973
+    ## X-squared = 1.5, df = NA, p-value = 0.4793
 
 ``` r
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
@@ -452,7 +452,7 @@ chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_CL[-1, ]
-    ## X-squared = 1.6182, df = NA, p-value = 0.4423
+    ## X-squared = 1.6182, df = NA, p-value = 0.4593
 
 ``` r
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
@@ -473,7 +473,7 @@ chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_Obs_DD
-    ## X-squared = 0.73134, df = NA, p-value = 0.7091
+    ## X-squared = 0.73134, df = NA, p-value = 0.7296
 
 ## Anova and data transformation
 
@@ -906,3 +906,60 @@ summary(fit_glmF2)
     ## gnty_9409GG 0.093    0.137
 
 ## Excluding small individuals. Some progeny were still alive but with failure to thrive phenotypes.
+
+``` r
+BV_CV98_03_BZF_I9_DD_20 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 20)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_20))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   3.74   1.870   0.699  0.502
+    ## Residuals      51 136.36   2.674
+
+``` r
+BV_CV98_03_BZF_I9_DD_25 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 25)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_25))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   3.45   1.724   0.753  0.477
+    ## Residuals      47 107.64   2.290
+
+``` r
+BV_CV98_03_BZF_I9_DD_30 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 30)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_30))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)  
+    ## genotype_9409b  2  10.95   5.475   3.307 0.0464 *
+    ## Residuals      42  69.54   1.656                 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+BV_CV98_03_BZF_I9_DD_35 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 35)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_35))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   5.74   2.871   2.024  0.146
+    ## Residuals      38  53.90   1.419
+
+``` r
+BV_CV98_03_BZF_I9_DD_40 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 40)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_40))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   5.50   2.752   2.122  0.134
+    ## Residuals      36  46.67   1.296
