@@ -335,18 +335,18 @@ lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff again
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-## Two Mapping families - untreated vs. Cry1Ab leaf tissue incorporation assay
+## First mapping family - untreated vs. Cry1Ab leaf tissue incorporation assay
 
 One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue). A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple). While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
 ``` r
-#png("BV_BA52_BZM_P11_A1.png", units = "px", height = 600, width = 800)
+#good plot for presentation
 joined %>%
   filter (genotype_9409b != "") %>%
-ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
+ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam)) +
   geom_boxplot(fatten = 1, alpha = 0.8, notch = F) +
   geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
-  labs(y = "Weight (mg)", x = "", tag = "C") +
+  labs(y = "Weight (mg)", x = "") +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
   scale_y_continuous(breaks = c(0, 100, 200, 300)) +
   ylim(0,350) +
@@ -368,8 +368,49 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
 ![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
 ``` r
-#dev.off()
+#individual plots by family/treat
+BV_BA52_BZM_P11_A1_CL %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
+  geom_boxplot(fatten = 1, fill='#A4A4A4', color="black") + geom_jitter(position=position_jitter(0.2)) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  labs(y = "Weight (mg)", x = "", tag = "C") +
+  scale_y_continuous(limits = c(0,350), breaks = c(0, 50, 100, 150, 200, 250, 300, 350)) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"), labels = c("A", "A/V", "V")) +
+  theme(axis.text=element_text(size=14), 
+        axis.title=element_text(size=16,face="bold"))
 ```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-2-1.png)
+
+``` r
+BV_BA52_BZM_P11_A1_DD %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
+  geom_boxplot(fatten = 1, fill='#A4A4A4', color="black") + geom_jitter(position=position_jitter(0.2)) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  labs(y = "Weight (mg)", x = "", tag = "D") +
+  scale_y_continuous(limits = c(0,350), breaks = c(0, 50, 100, 150, 200, 250, 300, 350)) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"),
+                   labels = c("A", "A/V", "V")) +
+  theme(axis.text=element_text(size=14),
+         axis.title=element_text(size=16,face="bold"))
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-2-2.png)
+
+``` r
+BV_CV98_03_BZF_I9_DD %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
+  geom_boxplot(fatten = 1, fill='#A4A4A4', color="black") + geom_jitter(position=position_jitter(0.2)) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  labs(y = "Weight (mg)", x = "", tag = "E") +
+  scale_y_continuous(limits = c(0,350), breaks = c(0, 50, 100, 150, 200, 250, 300,350)) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"),
+                   labels = c("A", "A/V", "V")) +
+ theme(axis.text=element_text(size=14),
+         axis.title=element_text(size=16,face="bold"))
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-2-3.png)
 
 ## Counts of larvae with each genotype & test for mendelian seg
 
@@ -392,7 +433,7 @@ chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_DD[-1, ]
-    ## X-squared = 1.5, df = NA, p-value = 0.5007
+    ## X-squared = 1.5, df = NA, p-value = 0.4973
 
 ``` r
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
@@ -411,7 +452,7 @@ chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_CL[-1, ]
-    ## X-squared = 1.6182, df = NA, p-value = 0.4628
+    ## X-squared = 1.6182, df = NA, p-value = 0.4423
 
 ``` r
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
@@ -432,7 +473,7 @@ chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_Obs_DD
-    ## X-squared = 0.73134, df = NA, p-value = 0.7101
+    ## X-squared = 0.73134, df = NA, p-value = 0.7091
 
 ## Anova and data transformation
 
@@ -456,13 +497,13 @@ shapiro.test(resid(fitDD))
 plot(fitDD)
 ```
 
-![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-3-1.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-3-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-3-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-3-4.png)
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-1.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-4.png)
 
 ``` r
 boxcox(fitDD, plotit = TRUE)
 ```
 
-![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-3-5.png)
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-5.png)
 
 Progeny on untreated diet
 
@@ -482,13 +523,13 @@ shapiro.test(resid(fitCL))#no transformation needed.
 plot(fitCL)
 ```
 
-![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-1.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-4.png)
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-5-1.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-5-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-5-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-5-4.png)
 
 ``` r
 boxcox(fitCL, plotit = TRUE)
 ```
 
-![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-4-5.png)
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-5-5.png)
 
 For progeny on treated diet, trying a non-parametric test because the residuals are not normally distributed.
 
@@ -691,6 +732,177 @@ anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically 
 
 Removing small individuals BV\_BA52\_BZM\_P11\_A1\_DD does not change the outcome.
 
+``` r
+BV_BA52_BZM_P11_A1_DD_20 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 20)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_20))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)  
+    ## genotype_9409b  2  22.61   11.30   2.463 0.0936 .
+    ## Residuals      61 279.96    4.59                 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+BV_BA52_BZM_P11_A1_DD_25 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 25)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_25))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2  12.75   6.376   1.497  0.232
+    ## Residuals      59 251.28   4.259
+
+``` r
+BV_BA52_BZM_P11_A1_DD_30 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 30)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_30))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   5.69   2.844   0.715  0.493
+    ## Residuals      57 226.66   3.976
+
+``` r
+BV_BA52_BZM_P11_A1_DD_35 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 35)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_35))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   4.71   2.356   0.656  0.523
+    ## Residuals      55 197.64   3.593
+
+``` r
+BV_BA52_BZM_P11_A1_DD_40 <- BV_BA52_BZM_P11_A1_DD %>%
+  filter (end_weight_mg > 40)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_40))
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   2.77   1.386   0.395  0.676
+    ## Residuals      54 189.64   3.512
+
 ## Second Mapping family - Cry1A.105 + Cry2Ab2 leaf tissue incorporation assay
 
-All larvae were allowed to feed for 7 days and then weighed.
+Statistical analysis for the half of the second family on treated diet.
+
+## Anova and data transformation
+
+``` r
+fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+
+shapiro.test(resid(fitDD))
+```
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  resid(fitDD)
+    ## W = 0.96808, p-value = 0.08258
+
+``` r
+plot(fitDD)
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-1.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-4.png)
+
+``` r
+boxcox(fitDD, plotit = TRUE)
+```
+
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-5.png)
+
+# A glm
+
+Blocking on square because individuals within the same square got diet from the same syringe.
+
+``` r
+library(lme4)
+fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_CV98_03_BZF_I9_DD)
+fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_CV98_03_BZF_I9_DD)
+
+summary(fit_glmF)
+```
+
+    ## Linear mixed model fit by REML ['lmerMod']
+    ## Formula: sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1 | square)
+    ##    Data: BV_CV98_03_BZF_I9_DD
+    ## 
+    ## REML criterion at convergence: 291.5
+    ## 
+    ## Scaled residuals: 
+    ##     Min      1Q  Median      3Q     Max 
+    ## -1.9895 -0.7595  0.2044  0.6533  2.0182 
+    ## 
+    ## Random effects:
+    ##  Groups   Name        Variance Std.Dev.
+    ##  square   (Intercept) 0.129    0.3591  
+    ##  Residual             4.754    2.1803  
+    ## Number of obs: 67, groups:  square, 4
+    ## 
+    ## Fixed effects:
+    ##                  Estimate Std. Error t value
+    ## (Intercept)        5.8672     0.5918   9.914
+    ## genotype_9409bAG   1.0659     0.6688   1.594
+    ## genotype_9409bGG   0.1723     0.7976   0.216
+    ## 
+    ## Correlation of Fixed Effects:
+    ##             (Intr) g_9409A
+    ## gnty_9409AG -0.804        
+    ## gnty_9409GG -0.673  0.597
+
+``` r
+anova(fit_glmR, fit_glmF)
+```
+
+    ## refitting model(s) with ML (instead of REML)
+
+    ## Data: BV_CV98_03_BZF_I9_DD
+    ## Models:
+    ## fit_glmR: sqrt(end_weight_mg) ~ 1 + (1 | square)
+    ## fit_glmF: sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1 | square)
+    ##          Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)
+    ## fit_glmR  3 302.12 308.73 -148.06   296.12                         
+    ## fit_glmF  5 302.89 313.92 -146.45   292.89 3.2245      2     0.1994
+
+``` r
+#forcing full model effects without the slope.
+fit_glmF2 <- lmer(sqrt(end_weight_mg) ~ 0 + genotype_9409b + (1|square), data = BV_CV98_03_BZF_I9_DD)
+summary(fit_glmF2)
+```
+
+    ## Linear mixed model fit by REML ['lmerMod']
+    ## Formula: sqrt(end_weight_mg) ~ 0 + genotype_9409b + (1 | square)
+    ##    Data: BV_CV98_03_BZF_I9_DD
+    ## 
+    ## REML criterion at convergence: 291.5
+    ## 
+    ## Scaled residuals: 
+    ##     Min      1Q  Median      3Q     Max 
+    ## -1.9895 -0.7595  0.2044  0.6533  2.0182 
+    ## 
+    ## Random effects:
+    ##  Groups   Name        Variance Std.Dev.
+    ##  square   (Intercept) 0.129    0.3591  
+    ##  Residual             4.754    2.1803  
+    ## Number of obs: 67, groups:  square, 4
+    ## 
+    ## Fixed effects:
+    ##                  Estimate Std. Error t value
+    ## genotype_9409bAA   5.8672     0.5918   9.914
+    ## genotype_9409bAG   6.9330     0.4013  17.277
+    ## genotype_9409bGG   6.0394     0.5925  10.193
+    ## 
+    ## Correlation of Fixed Effects:
+    ##             g_9409AA g_9409AG
+    ## gnty_9409AG 0.135            
+    ## gnty_9409GG 0.093    0.137
+
+## Excluding small individuals. Some progeny were still alive but with failure to thrive phenotypes.

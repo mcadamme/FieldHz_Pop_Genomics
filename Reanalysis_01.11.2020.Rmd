@@ -141,7 +141,7 @@ fitF0_O2red <- glm(end_weight_mg ~ 1, data = F0_ObsII, family = "Gamma")
 lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff again
 ```
 
-##Two Mapping families - untreated vs. Cry1Ab leaf tissue incorporation assay
+##First mapping family - untreated vs. Cry1Ab leaf tissue incorporation assay
 One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue).  A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple).  While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
 ```{r mapping family 1, include = FALSE}
@@ -182,13 +182,13 @@ joined$TreatByFam <- paste(joined$Population, "", joined$Treatment)
 ```
 
 ```{r}
-#png("BV_BA52_BZM_P11_A1.png", units = "px", height = 600, width = 800)
+#good plot for presentation
 joined %>%
   filter (genotype_9409b != "") %>%
-ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam )) +
+ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam)) +
   geom_boxplot(fatten = 1, alpha = 0.8, notch = F) +
   geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
-  labs(y = "Weight (mg)", x = "", tag = "C") +
+  labs(y = "Weight (mg)", x = "") +
   theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
   scale_y_continuous(breaks = c(0, 100, 200, 300)) +
   ylim(0,350) +
@@ -203,7 +203,45 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
   theme(axis.text=element_text(size=12),
          axis.title=element_text(size=14,face="bold"))
 
-#dev.off()
+
+```
+
+```{r}
+#individual plots by family/treat
+BV_BA52_BZM_P11_A1_CL %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
+  geom_boxplot(fatten = 1, fill='#A4A4A4', color="black") + geom_jitter(position=position_jitter(0.2)) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  labs(y = "Weight (mg)", x = "", tag = "C") +
+  scale_y_continuous(limits = c(0,350), breaks = c(0, 50, 100, 150, 200, 250, 300, 350)) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"), labels = c("A", "A/V", "V")) +
+  theme(axis.text=element_text(size=14), 
+        axis.title=element_text(size=16,face="bold"))
+
+BV_BA52_BZM_P11_A1_DD %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
+  geom_boxplot(fatten = 1, fill='#A4A4A4', color="black") + geom_jitter(position=position_jitter(0.2)) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  labs(y = "Weight (mg)", x = "", tag = "D") +
+  scale_y_continuous(limits = c(0,350), breaks = c(0, 50, 100, 150, 200, 250, 300, 350)) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"),
+                   labels = c("A", "A/V", "V")) +
+  theme(axis.text=element_text(size=14),
+         axis.title=element_text(size=16,face="bold"))
+
+
+BV_CV98_03_BZF_I9_DD %>%
+ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
+  geom_boxplot(fatten = 1, fill='#A4A4A4', color="black") + geom_jitter(position=position_jitter(0.2)) +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  labs(y = "Weight (mg)", x = "", tag = "E") +
+  scale_y_continuous(limits = c(0,350), breaks = c(0, 50, 100, 150, 200, 250, 300,350)) +
+  scale_x_discrete(breaks  = c("GG", "AG", "AA"),
+                   labels = c("A", "A/V", "V")) +
+ theme(axis.text=element_text(size=14),
+         axis.title=element_text(size=16,face="bold"))
+
+
 ```
 
 ## Counts of larvae with each genotype & test for mendelian seg
@@ -311,7 +349,7 @@ anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically 
 ## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
 Removing small individuals BV_BA52_BZM_P11_A1_DD does not change the outcome.
 
-```{r, include = FALSE}
+```{r}
 BV_BA52_BZM_P11_A1_DD_20 <- BV_BA52_BZM_P11_A1_DD %>%
   filter (end_weight_mg > 20)
 
@@ -343,4 +381,64 @@ summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_4
 
 
 ##Second Mapping family - Cry1A.105 + Cry2Ab2 leaf tissue incorporation assay
-  All larvae were allowed to feed for 7 days and then weighed.
+Statistical analysis for the half of the second family on treated diet.
+
+## Anova and data transformation
+```{r}
+fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+
+shapiro.test(resid(fitDD))
+plot(fitDD)
+
+boxcox(fitDD, plotit = TRUE)
+```
+
+#A glm
+Blocking on square because individuals within the same square got diet from the same syringe.
+```{r}
+library(lme4)
+fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_CV98_03_BZF_I9_DD)
+fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_CV98_03_BZF_I9_DD)
+
+summary(fit_glmF)
+
+anova(fit_glmR, fit_glmF)
+
+#forcing full model effects without the slope.
+fit_glmF2 <- lmer(sqrt(end_weight_mg) ~ 0 + genotype_9409b + (1|square), data = BV_CV98_03_BZF_I9_DD)
+summary(fit_glmF2)
+
+
+```
+
+## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
+
+```{r, include = FALSE}
+BV_CV98_03_BZF_I9_DD_20 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 20)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_20))
+
+BV_CV98_03_BZF_I9_DD_25 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 25)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_25))
+
+BV_CV98_03_BZF_I9_DD_30 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 30)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_30))
+
+BV_CV98_03_BZF_I9_DD_35 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 35)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_35))
+
+BV_CV98_03_BZF_I9_DD_40 <- BV_CV98_03_BZF_I9_DD %>%
+  filter (end_weight_mg > 40)
+
+summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_40))
+
+
+
+```
