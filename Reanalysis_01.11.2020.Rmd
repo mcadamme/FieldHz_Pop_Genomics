@@ -346,6 +346,37 @@ anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically 
 
 ```
 
+
+#Do the distributions of the genotype frequencies differ for high and low weight gain individuals, per Tabashnik comments?
+```{r}
+#Cry1Ab DD
+quant_33 <- quantile(BV_BA52_BZM_P11_A1_DD$end_weight_mg, probs = c(0.33, 0.66))#also tried (0.25, 0.75) with no difference.
+BV_BA52_BZM_P11_A1_DD_LO <- subset(BV_BA52_BZM_P11_A1_DD, end_weight_mg < quant_33[1]) 
+geno9409_dist_BCO805_DDLO <- as.matrix(table(BV_BA52_BZM_P11_A1_DD_LO$genotype_9409b))
+geno9409_dist_BCO805_DDLO
+  
+BV_BA52_BZM_P11_A1_DD_HI <- subset(BV_BA52_BZM_P11_A1_DD, end_weight_mg > quant_33[2])
+geno9409_dist_BCO805_DDHI <- as.matrix(table(BV_BA52_BZM_P11_A1_DD_HI$genotype_9409b))
+geno9409_dist_BCO805_DDHI
+
+fisher.test(data.frame(cbind(geno9409_dist_BCO805_DDLO[-1],geno9409_dist_BCO805_DDHI[-1,])))
+
+#Control 
+quant_33 <- quantile(BV_BA52_BZM_P11_A1_CL$end_weight_mg, probs = c(0.33, 0.66))#also tried (0.25, 0.75), but it was not significant
+
+BV_BA52_BZM_P11_A1_CL_LO <- subset(BV_BA52_BZM_P11_A1_CL, end_weight_mg < quant_33[1])
+geno9409_dist_BCO805_CLLO <- as.matrix(table(BV_BA52_BZM_P11_A1_CL_LO$genotype_9409b))
+geno9409_dist_BCO805_CLLO
+  
+BV_BA52_BZM_P11_A1_CL_HI <- subset(BV_BA52_BZM_P11_A1_CL, end_weight_mg > quant_33[2])
+geno9409_dist_BCO805_CLHI <- as.matrix(table(BV_BA52_BZM_P11_A1_CL_HI$genotype_9409b))
+geno9409_dist_BCO805_CLHI
+
+fisher.test(data.frame(cbind(geno9409_dist_BCO805_CLLO[-1],geno9409_dist_BCO805_CLHI[-1,])))
+
+
+```
+
 ## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
 Removing small individuals BV_BA52_BZM_P11_A1_DD does not change the outcome.
 
@@ -411,6 +442,21 @@ summary(fit_glmF2)
 
 ```
 
+#Dist of the genotype frequencies for high and low weight gain individuals, per Tabashnik comments
+```{r}
+#Cry1A.105 + Cry2Ab2 DD
+quant_33 <- quantile(BV_CV98_03_BZF_I9_DD$end_weight_mg, c(0.33, 0.66))#result does not differ if I change to (0.25, 0.75)
+BV_CV98_03_BZF_I9_DD_LO <- subset(BV_CV98_03_BZF_I9_DD, end_weight_mg < quant_33[1])
+geno9409_dist_ObsII_DDLO <- as.matrix(table(BV_CV98_03_BZF_I9_DD_LO$genotype_9409b))
+geno9409_dist_ObsII_DDLO
+  
+BV_CV98_03_BZF_I9_DD_HI <- subset(BV_CV98_03_BZF_I9_DD, end_weight_mg > quant_33[2])
+geno9409_dist_ObsII_DDHI <- as.matrix(table(BV_CV98_03_BZF_I9_DD_HI$genotype_9409b))
+geno9409_dist_ObsII_DDHI
+
+fisher.test(data.frame(cbind(geno9409_dist_ObsII_DDLO ,geno9409_dist_ObsII_DDHI)))
+
+```
 ## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
 ```{r}
 BV_CV98_03_BZF_I9_DD_20 <- BV_CV98_03_BZF_I9_DD %>%

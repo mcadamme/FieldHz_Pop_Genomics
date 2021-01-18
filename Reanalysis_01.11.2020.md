@@ -433,7 +433,7 @@ chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_DD[-1, ]
-    ## X-squared = 1.5, df = NA, p-value = 0.4918
+    ## X-squared = 1.5, df = NA, p-value = 0.5002
 
 ``` r
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
@@ -452,7 +452,7 @@ chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_CL[-1, ]
-    ## X-squared = 1.6182, df = NA, p-value = 0.4503
+    ## X-squared = 1.6182, df = NA, p-value = 0.4423
 
 ``` r
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
@@ -473,7 +473,7 @@ chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_Obs_DD
-    ## X-squared = 0.73134, df = NA, p-value = 0.7281
+    ## X-squared = 0.73134, df = NA, p-value = 0.7236
 
 ## Anova and data transformation
 
@@ -728,6 +728,83 @@ anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
+# Do the distributions of the genotype frequencies differ for high and low weight gain individuals, per Tabashnik comments?
+
+``` r
+#Cry1Ab DD
+quant_33 <- quantile(BV_BA52_BZM_P11_A1_DD$end_weight_mg, probs = c(0.33, 0.66))#also tried (0.25, 0.75) with no difference.
+BV_BA52_BZM_P11_A1_DD_LO <- subset(BV_BA52_BZM_P11_A1_DD, end_weight_mg < quant_33[1]) 
+geno9409_dist_BCO805_DDLO <- as.matrix(table(BV_BA52_BZM_P11_A1_DD_LO$genotype_9409b))
+geno9409_dist_BCO805_DDLO
+```
+
+    ##    [,1]
+    ##       0
+    ## AA    6
+    ## AG    8
+    ## GG    7
+
+``` r
+BV_BA52_BZM_P11_A1_DD_HI <- subset(BV_BA52_BZM_P11_A1_DD, end_weight_mg > quant_33[2])
+geno9409_dist_BCO805_DDHI <- as.matrix(table(BV_BA52_BZM_P11_A1_DD_HI$genotype_9409b))
+geno9409_dist_BCO805_DDHI
+```
+
+    ##    [,1]
+    ##       0
+    ## AA    4
+    ## AG   15
+    ## GG    3
+
+``` r
+fisher.test(data.frame(cbind(geno9409_dist_BCO805_DDLO[-1],geno9409_dist_BCO805_DDHI[-1,])))
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  
+    ## p-value = 0.1632
+    ## alternative hypothesis: two.sided
+
+``` r
+#Control 
+quant_33 <- quantile(BV_BA52_BZM_P11_A1_CL$end_weight_mg, probs = c(0.33, 0.66))#also tried (0.25, 0.75), but it was not significant
+
+BV_BA52_BZM_P11_A1_CL_LO <- subset(BV_BA52_BZM_P11_A1_CL, end_weight_mg < quant_33[1])
+geno9409_dist_BCO805_CLLO <- as.matrix(table(BV_BA52_BZM_P11_A1_CL_LO$genotype_9409b))
+geno9409_dist_BCO805_CLLO
+```
+
+    ##    [,1]
+    ##       0
+    ## AA    1
+    ## AG   10
+    ## GG    7
+
+``` r
+BV_BA52_BZM_P11_A1_CL_HI <- subset(BV_BA52_BZM_P11_A1_CL, end_weight_mg > quant_33[2])
+geno9409_dist_BCO805_CLHI <- as.matrix(table(BV_BA52_BZM_P11_A1_CL_HI$genotype_9409b))
+geno9409_dist_BCO805_CLHI
+```
+
+    ##    [,1]
+    ##       0
+    ## AA    9
+    ## AG    6
+    ## GG    4
+
+``` r
+fisher.test(data.frame(cbind(geno9409_dist_BCO805_CLLO[-1],geno9409_dist_BCO805_CLHI[-1,])))
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  
+    ## p-value = 0.01532
+    ## alternative hypothesis: two.sided
+
 ## Excluding small individuals. Some progeny were still alive but with failure to thrive phenotypes.
 
 Removing small individuals BV\_BA52\_BZM\_P11\_A1\_DD does not change the outcome.
@@ -811,13 +888,13 @@ shapiro.test(resid(fitDD))
 plot(fitDD)
 ```
 
-![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-1.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-4.png)
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-12-1.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-12-2.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-12-3.png)![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-12-4.png)
 
 ``` r
 boxcox(fitDD, plotit = TRUE)
 ```
 
-![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-11-5.png)
+![](Reanalysis_01.11.2020_files/figure-markdown_github/unnamed-chunk-12-5.png)
 
 # A glm
 
@@ -904,6 +981,43 @@ summary(fit_glmF2)
     ##             g_9409AA g_9409AG
     ## gnty_9409AG 0.135            
     ## gnty_9409GG 0.093    0.137
+
+# Dist of the genotype frequencies for high and low weight gain individuals, per Tabashnik comments
+
+``` r
+#Cry1A.105 + Cry2Ab2 DD
+quant_33 <- quantile(BV_CV98_03_BZF_I9_DD$end_weight_mg, c(0.33, 0.66))
+BV_CV98_03_BZF_I9_DD_LO <- subset(BV_CV98_03_BZF_I9_DD, end_weight_mg < quant_33[1]) #bottom quartile
+geno9409_dist_ObsII_DDLO <- as.matrix(table(BV_CV98_03_BZF_I9_DD_LO$genotype_9409b))
+geno9409_dist_ObsII_DDLO
+```
+
+    ##    [,1]
+    ## AA    5
+    ## AG   12
+    ## GG    5
+
+``` r
+BV_CV98_03_BZF_I9_DD_HI <- subset(BV_CV98_03_BZF_I9_DD, end_weight_mg > quant_33[2])#top quartile
+geno9409_dist_ObsII_DDHI <- as.matrix(table(BV_CV98_03_BZF_I9_DD_HI$genotype_9409b))
+geno9409_dist_ObsII_DDHI
+```
+
+    ##    [,1]
+    ## AA    3
+    ## AG   15
+    ## GG    5
+
+``` r
+fisher.test(data.frame(cbind(geno9409_dist_ObsII_DDLO ,geno9409_dist_ObsII_DDHI)))
+```
+
+    ## 
+    ##  Fisher's Exact Test for Count Data
+    ## 
+    ## data:  data.frame(cbind(geno9409_dist_ObsII_DDLO, geno9409_dist_ObsII_DDHI))
+    ## p-value = 0.7116
+    ## alternative hypothesis: two.sided
 
 ## Excluding small individuals. Some progeny were still alive but with failure to thrive phenotypes.
 
