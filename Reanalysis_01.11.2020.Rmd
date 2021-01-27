@@ -468,6 +468,8 @@ fit_glmF <- lmer(end_weight_mg ~ 1 + genotype_9409b + (1|traySquare), data = BV_
 fit_glmR <- lmer(end_weight_mg ~ 1 + (1|traySquare), data = BV_CV98_03_BZF_I9_DD)
 
 summary(fit_glmF)
+summary(fit_glmR)#there is a singular fit issue, but could be triggered becuase this is a very simple model, where the random effect variance is estimated very near zero.   
+
 coef(fit_glmF)
 
 lrtest(fit_glmR, fit_glmF)
@@ -479,6 +481,11 @@ boxplot(BV_CV98_03_BZF_I9_DD$end_weight_mg ~ BV_CV98_03_BZF_I9_DD$traySquare)
 table(BV_CV98_03_BZF_I9_DD$genotype_9409b, BV_CV98_03_BZF_I9_DD$traySquare)
 
 
+#adding traySquare as a fixed effect to test how much the singular fit issue influences statistical significance
+fit_glmF2 <- lm(end_weight_mg ~ 1 + genotype_9409b + traySquare, data = BV_CV98_03_BZF_I9_DD)
+fit_glmR2 <- lm(end_weight_mg ~ 1 + traySquare, data = BV_CV98_03_BZF_I9_DD)
+
+lrtest(fit_glmR2,fit_glmF2)#still marginally significant
 ```
 
 #Dist of the genotype frequencies for high and low weight gain individuals, per Tabashnik comments

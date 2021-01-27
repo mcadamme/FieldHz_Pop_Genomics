@@ -442,7 +442,7 @@ chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_DD[-1, ]
-    ## X-squared = 1.9655, df = NA, p-value = 0.3983
+    ## X-squared = 1.9655, df = NA, p-value = 0.3903
 
 ``` r
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
@@ -461,7 +461,7 @@ chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_CL[-1, ]
-    ## X-squared = 2.64, df = NA, p-value = 0.2894
+    ## X-squared = 2.64, df = NA, p-value = 0.2864
 
 ``` r
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
@@ -482,7 +482,7 @@ chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_Obs_DD
-    ## X-squared = 0.73134, df = NA, p-value = 0.7061
+    ## X-squared = 0.73134, df = NA, p-value = 0.6987
 
 ## Anova and data transformation
 
@@ -886,6 +886,32 @@ summary(fit_glmF)
     ## gnty_9409GG -0.703  0.597
 
 ``` r
+summary(fit_glmR)#there is a singular fit issue, but could be triggered becuase this is a very simple model, where the random effect variance is estimated very near zero.   
+```
+
+    ## Linear mixed model fit by REML ['lmerMod']
+    ## Formula: end_weight_mg ~ 1 + (1 | traySquare)
+    ##    Data: BV_CV98_03_BZF_I9_DD
+    ## 
+    ## REML criterion at convergence: 634.4
+    ## 
+    ## Scaled residuals: 
+    ##     Min      1Q  Median      3Q     Max 
+    ## -1.5347 -0.7740  0.1297  0.5431  2.7047 
+    ## 
+    ## Random effects:
+    ##  Groups     Name        Variance Std.Dev.
+    ##  traySquare (Intercept)   0.0     0.00   
+    ##  Residual               821.4    28.66   
+    ## Number of obs: 67, groups:  traySquare, 8
+    ## 
+    ## Fixed effects:
+    ##             Estimate Std. Error t value
+    ## (Intercept)   47.184      3.501   13.48
+    ## convergence code: 0
+    ## boundary (singular) fit: see ?isSingular
+
+``` r
 coef(fit_glmF)
 ```
 
@@ -934,6 +960,24 @@ table(BV_CV98_03_BZF_I9_DD$genotype_9409b, BV_CV98_03_BZF_I9_DD$traySquare)
     ##   AA    2    1    1    2    2    2    2    3
     ##   AG    6    7    5    5    2    4    4    4
     ##   GG    3    3    1    4    1    2    1    0
+
+``` r
+#adding traySquare as a fixed effect to test how much the singular fit issue influences statistical significance
+fit_glmF2 <- lm(end_weight_mg ~ 1 + genotype_9409b + traySquare, data = BV_CV98_03_BZF_I9_DD)
+fit_glmR2 <- lm(end_weight_mg ~ 1 + traySquare, data = BV_CV98_03_BZF_I9_DD)
+
+lrtest(fit_glmR2,fit_glmF2)#still marginally significant
+```
+
+    ## Likelihood ratio test
+    ## 
+    ## Model 1: end_weight_mg ~ 1 + traySquare
+    ## Model 2: end_weight_mg ~ 1 + genotype_9409b + traySquare
+    ##   #Df  LogLik Df  Chisq Pr(>Chisq)  
+    ## 1   9 -315.91                       
+    ## 2  11 -313.40  2 5.0253    0.08105 .
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 # Dist of the genotype frequencies for high and low weight gain individuals, per Tabashnik comments
 
