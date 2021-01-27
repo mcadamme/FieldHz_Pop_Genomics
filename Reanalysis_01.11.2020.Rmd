@@ -6,7 +6,7 @@ output: github_document
 ---
 
 ##Parental strains used for linkage analysis
-Summary statistics and distributions of 7 day larval weights for the strains used as grandparents for linkage analysis crosses. The Benzon strain was used as the susceptible strain (dark grey) and a field-collected population from MD was used as the resistant strain.  Panel A shows the distributions of weights on a diagnostic dose of a diet with BC0805 (Cry1Ab) leaf tissue incorporation.  Panel B shows the distributions of weights on Obsession II (Cry1A.105+Cry2Ab2) leaf tissue.
+Summary statistics and distributions of 7 day larval weights for the strains used as grandparents for linkage analysis crosses. A population acquired from Benzon Laboratories was used as the susceptible strain (dark grey) and a field-collected population from MD was used as the resistant strain (light grey).  Panel A shows the distributions of weights on a diagnostic dose of a diet containing BC0805 (Cry1Ab) leaf tissue.  Panel B shows the distributions of weights on Obsession II (Cry1A.105+Cry2Ab2) leaf tissue.
 
 ```{r loading libraries, include = FALSE}
 
@@ -30,7 +30,8 @@ F0_growth <- F0_growth %>%
 str(F0_growth)
 ```
 
-```{r summary statistics F0}
+```{r F0 summary statistics and plots}
+
 F0_growth %>% 
    filter(end_weight_mg != "") %>% 
    group_by(diet_strain, field) %>%
@@ -40,6 +41,7 @@ F0_growth %>%
      median = median(end_weight_mg),
      sd = sd(end_weight_mg)
    )
+
 
 #parents on BC0805
 panelA <- F0_growth %>%
@@ -89,10 +91,9 @@ F0_ObsII <- subset(F0_growth, diet_strain == "O")
 
 #BC0805 treatment first.
 fitF0_P <- aov(end_weight_mg ~ field, data = F0_BC0805)
-summary(fitF0_P)#shows statistically significant differences between parental pops
+summary(fitF0_P)#shows statistically significant differences in 7 day weights for Benzon and MD pops on BC0805 diet.
 
 shapiro.test(resid(fitF0_P))#BC0805 dataset meets assumptions of normality, but barely.
-boxcox(fitF0_P, plotit = TRUE)
 
 #fitting a glm
 fitF0_P1 <- glm(end_weight_mg ~ 1 + field, data = F0_BC0805, family = "gaussian")
@@ -114,15 +115,14 @@ lrtest(fitF0_P2red,fitF0_P2)#statistically sig diff again
 
 #ObsII treatment second
 fitF0_O <- aov(end_weight_mg ~ field, data = F0_ObsII)
-summary(fitF0_O) #statistically significant differences between strains.
+summary(fitF0_O) #statistically significant differences between Benzon and MD parents on ObsII diet.
 
 shapiro.test(resid(fitF0_O))#ObsII does not meet assumptions of normality.
-boxcox(fitF0_O, plotit = TRUE)
 
 #trying a log10 transformation first
 fitF0_OL <- aov(log10(end_weight_mg) ~ field, data = F0_ObsII)
 summary(fitF0_OL)
-shapiro.test(resid(fitF0_OL))#helps alot, but still does not quite meet assumptions of normality
+shapiro.test(resid(fitF0_OL))#helps alot, but still does not meet assumptions of normality
 
 #fitting a glm
 fitF0_O1 <- glm(end_weight_mg ~ 1 + field, data = F0_ObsII, family = "gaussian")
@@ -131,14 +131,14 @@ summary(fitF0_O1)
 fitF0_O2 <- glm(end_weight_mg ~ 1 + field, data = F0_ObsII, family = "Gamma")
 summary(fitF0_O2)#this is the better fit according to AIC
 
-#looking at distributions again
+#qq comparison of distributions.
 plot(fitF0_O1)
-plot(fitF0_O2)#this does look better....
+plot(fitF0_O2)#again, looks better....
 
 #model comparison with and without field.
 fitF0_O2red <- glm(end_weight_mg ~ 1, data = F0_ObsII, family = "Gamma")
 
-lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff again
+lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff here too
 ```
 
 ##First mapping family - untreated vs. Cry1Ab leaf tissue incorporation assay
@@ -154,13 +154,16 @@ phenotypes1 <- phenotypes1 %>%
 
 BV_BA52_BZM_P11_A1 <- merge(phenotypes1, genotypes1, by = c("tray", "square", "row", "well"))
 
+#cleaning up the data to exclude individuals with low quality genotypes.
 BV_BA52_BZM_P11_A1_DD <- BV_BA52_BZM_P11_A1 %>%
   filter (Treatment == "DD") %>%
-  filter (genotype_3749 != "", genotype_9409b != "")
+  filter (genotype_3749 != "", genotype_9409b != "") %>%
+  filter (X9409b_low_quality != "*")
 
 BV_BA52_BZM_P11_A1_CL <- BV_BA52_BZM_P11_A1 %>%
   filter (Treatment == "CL") %>%
-  filter (genotype_9409b != "")
+  filter (genotype_9409b != "")%>%
+  filter (X9409b_low_quality == "")
 ```
 
 ```{r Family 2, include = FALSE}
@@ -172,17 +175,30 @@ phenotypes2 <- phenotypes2 %>%
   mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
 
 BV_CV98_03_BZF_I9_DD <- merge(phenotypes2, genotypes2, by = c("tray", "square", "row", "well")) %>%
-  filter (genotype_3749 != "", genotype_9409b != "")
+  filter (genotype_3749 != "")#no missing for genotype_9409b, only one low quality specified for 3749. 
+BV_CV98_03_BZF_I9_DD$traySquare <- paste(BV_CV98_03_BZF_I9_DD$tray,"", BV_CV98_03_BZF_I9_DD$square)
 ```
 
 ```{r joining two datasets just for plot, include = FALSE}
 
-joined <- data.frame(rbind(BV_BA52_BZM_P11_A1_DD[,c(6,7,12,16)], BV_BA52_BZM_P11_A1_CL[,c(6,7,12,16)], BV_CV98_03_BZF_I9_DD[,c(6,7,11,13)]))
+joined <- data.frame(rbind(BV_BA52_BZM_P11_A1_DD[,c(6,7,12,16,18)], BV_BA52_BZM_P11_A1_CL[,c(6,7,12,16,18)], BV_CV98_03_BZF_I9_DD[,c(6,7,11,13,17)]))
 joined$TreatByFam <- paste(joined$Population, "", joined$Treatment)
+
+
 ```
 
-```{r}
-#good plot for presentation
+We genotyped all progeny at two loci in the 3Mb region - are they correlated?
+```{r testing for correlations between genotypes}
+joined$num9409b <- as.numeric(gsub("GG", 0, gsub("AG", 1, gsub("AA", 2, joined$genotype_9409b))))
+joined$num3749 <- as.numeric(gsub("CC", 0, gsub("CT", 1, gsub("TT", 2, joined$genotype_3749))))
+
+cor.test(joined$num9409b, joined$num3749, method = "kendall")#significant correlation between these two loci
+
+```
+
+Due to the significant correlation between genotypes at the two loci, just looking at cpq1 going forward.
+```{r plot of 9409 genotypes ALL prog}
+#good plot for presentation - 9409_b; AA is derived
 joined %>%
   filter (genotype_9409b != "") %>%
 ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = TreatByFam)) +
@@ -202,11 +218,32 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg, fill = TreatByFam, color = Tre
                          values=c("#E69F00", "#56B4E9", "#9932CC")) +
   theme(axis.text=element_text(size=12),
          axis.title=element_text(size=14,face="bold"))
-
-
 ```
 
-```{r}
+```{r plot of 3749 if needed someday, include = FALSE}
+#add'l plot for presentation - 3749; TT is derived
+joined %>%
+  filter (genotype_3749 != "") %>%
+ggplot(aes(x = genotype_3749, y = end_weight_mg, fill = TreatByFam, color = TreatByFam)) +
+  geom_boxplot(fatten = 1, alpha = 0.8, notch = F) +
+  geom_point(position=position_jitterdodge(jitter.width = 0.3)) +
+  labs(y = "Weight (mg)", x = "") +
+  theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +
+  scale_y_continuous(breaks = c(0, 100, 200, 300)) +
+  ylim(0,350) +
+  scale_x_discrete(breaks  = c("CC", "CT", "TT"),
+                   labels = c("S", "S/N", "N")) +
+  scale_fill_manual(name="Treatment By Family",
+                         breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) +
+  scale_color_manual(name="Treatment By Family ",
+                         breaks=c("Fam 1 CL", "Fam 1 DD", "Fam 2 DD"),
+                         values=c("#E69F00", "#56B4E9", "#9932CC")) +
+  theme(axis.text=element_text(size=12),
+         axis.title=element_text(size=14,face="bold"))
+```
+
+```{r plots for pub}
 #individual plots by family/treat
 BV_BA52_BZM_P11_A1_CL %>%
 ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
@@ -245,7 +282,7 @@ ggplot(aes(x = genotype_9409b, y = end_weight_mg)) +
 ```
 
 ## Counts of larvae with each genotype & test for mendelian seg
-```{r}
+```{r test of mendelseg}
 
 exp_props <- c(0.25, 0.5, 0.25)
 
@@ -266,74 +303,65 @@ chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
 
 
 ## Anova and data transformation
-We check the assumptions with plots and a shapiro test and then run a boxcox test to determine the appropiate transformation. The lambda value of ~0.5 suggests a square root transformation for individuals on treated diet.  Nothing needed for controls.
+We check the assumptions with plots and a shapiro test. If not normally distributed, checking residuals and trying different transformations, as well as glms with different assumptions for distribution of residuals.
 
 Progeny on treated diet
 
-```{r}
+```{r linkage PDD Normality}
 fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
+summary(fitDD)
 
 shapiro.test(resid(fitDD))
-plot(fitDD)
-
-boxcox(fitDD, plotit = TRUE)
-```
-
-
-Progeny on untreated diet
-```{r}
-fitCL <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_CL)
-
-shapiro.test(resid(fitCL))#no transformation needed.
-plot(fitCL)
-
-boxcox(fitCL, plotit = TRUE)
-```
-
-For progeny on treated diet, trying a non-parametric test because the residuals are not normally distributed.
-```{r}
-
-kruskal.test(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
-
+plot(fitDD)#a heavy-tailed distribution
 
 ```
 
-Then tried a parametric test with sqrt transformed responses.
-```{r}
 
-fit_BV_BA52_BZM_P11_A1_DD <- aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
-summary(fit_BV_BA52_BZM_P11_A1_DD)
+Then tried a parametric tests with transformed responses.
+```{r linkage PDD transformed}
+
+fit_BV_BA52_BZM_P11_A1_DD1 <- aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
+summary(fit_BV_BA52_BZM_P11_A1_DD1)
+plot(fit_BV_BA52_BZM_P11_A1_DD1)
+
+fit_BV_BA52_BZM_P11_A1_DD2 <- aov(log(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
+summary(fit_BV_BA52_BZM_P11_A1_DD2)
+plot(fit_BV_BA52_BZM_P11_A1_DD2)
+
+fit_BV_BA52_BZM_P11_A1_DD3 <- aov((end_weight_mg^2) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD)
+summary(fit_BV_BA52_BZM_P11_A1_DD3)
+plot(fit_BV_BA52_BZM_P11_A1_DD3)
+
+#log transformation looks to be the best fit
 
 
-shapiro.test(resid(fit_BV_BA52_BZM_P11_A1_DD))#transformation worked
 ```
 
 
-Just ran parametric test for individuals raised up on untreated diet.
-```{r}
+Parametric test for individuals raised up on untreated diet.
+```{r linkage analysis PCL}
 fit_BV_BA52_BZM_P11_A1_CL <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_CL)
 summary(fit_BV_BA52_BZM_P11_A1_CL)
 
 shapiro.test(resid(fit_BV_BA52_BZM_P11_A1_CL))#shows no transformation needed.
+plot(fit_BV_BA52_BZM_P11_A1_CL)
 
 ```
 
+#Adding a random effect of square = 1 syringe mixture does one square.
+```{r glms to block on diet batch for P treatments}
 
-#What about a glm? 
-
-Blocking on square because individuals within the same square got diet from the same syringe.
-```{r}
-library(lme4)
-fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
-fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_BA52_BZM_P11_A1_DD)
+#not putting this section in the markdown file because it didn't change anything.
+fit_glmF <- lmer(log(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
+fit_glmR <- lmer(log(end_weight_mg) ~ 1 + (1|square),  data = BV_BA52_BZM_P11_A1_DD)
 
 summary(fit_glmF)
 
-anova(fit_glmR, fit_glmF)#adding the blocking factor doesn't change much.
+lrtest(fit_glmR, fit_glmF)#adding the blocking factor doesn't change much.
 
-#forcing full model effects without the slope.
-fit_glmF2 <- lmer(sqrt(end_weight_mg) ~ 0 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
-summary(fit_glmF2)
+#checking end weights by square
+boxplot(BV_BA52_BZM_P11_A1_DD$end_weight_mg ~ BV_BA52_BZM_P11_A1_DD$square)
+
 
 #now for the controls
 fit_glmF <- lmer(end_weight_mg ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_CL)
@@ -341,14 +369,16 @@ fit_glmR <- lmer(end_weight_mg ~ 1 + (1|square), data = BV_BA52_BZM_P11_A1_CL)
 
 summary(fit_glmF)
 
-anova(fit_glmR, fit_glmF)#but the controls look like there may be statistically significant differences in growth.
+lrtest(fit_glmR, fit_glmF)#but the controls look like there may be statistically significant differences in growth.
 
+#Checking end weights by square
+boxplot(BV_BA52_BZM_P11_A1_CL$end_weight_mg ~ BV_BA52_BZM_P11_A1_CL$square)
 
 ```
 
 
 #Do the distributions of the genotype frequencies differ for high and low weight gain individuals, per Tabashnik comments?
-```{r}
+```{r checking the tails for P diets}
 #Cry1Ab DD
 quant_33 <- quantile(BV_BA52_BZM_P11_A1_DD$end_weight_mg, probs = c(0.33, 0.66))#also tried (0.25, 0.75) with no difference.
 BV_BA52_BZM_P11_A1_DD_LO <- subset(BV_BA52_BZM_P11_A1_DD, end_weight_mg < quant_33[1]) 
@@ -362,7 +392,7 @@ geno9409_dist_BCO805_DDHI
 fisher.test(data.frame(cbind(geno9409_dist_BCO805_DDLO[-1],geno9409_dist_BCO805_DDHI[-1,])))
 
 #Control 
-quant_33 <- quantile(BV_BA52_BZM_P11_A1_CL$end_weight_mg, probs = c(0.33, 0.66))#also tried (0.25, 0.75), but it was not significant
+quant_33 <- quantile(BV_BA52_BZM_P11_A1_CL$end_weight_mg, probs = c(0.33, 0.66))#changing quantiles to (0.25, 0.75) makes it not significant
 
 BV_BA52_BZM_P11_A1_CL_LO <- subset(BV_BA52_BZM_P11_A1_CL, end_weight_mg < quant_33[1])
 geno9409_dist_BCO805_CLLO <- as.matrix(table(BV_BA52_BZM_P11_A1_CL_LO$genotype_9409b))
@@ -377,35 +407,34 @@ fisher.test(data.frame(cbind(geno9409_dist_BCO805_CLLO[-1],geno9409_dist_BCO805_
 
 ```
 
-## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
-Removing small individuals BV_BA52_BZM_P11_A1_DD does not change the outcome.
+```{r Excluding failure to thrive individuals, include = FALSE}
+#Some progeny were still alive but with failure to thrive phenotypes, so we tried excluding them
+#didn't change the outcome, so not including in the markdown file.
 
-```{r}
 BV_BA52_BZM_P11_A1_DD_20 <- BV_BA52_BZM_P11_A1_DD %>%
   filter (end_weight_mg > 20)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_20))
+summary(aov(log(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_20))
 
 BV_BA52_BZM_P11_A1_DD_25 <- BV_BA52_BZM_P11_A1_DD %>%
   filter (end_weight_mg > 25)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_25))
+summary(aov(log(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_25))
 
 BV_BA52_BZM_P11_A1_DD_30 <- BV_BA52_BZM_P11_A1_DD %>%
   filter (end_weight_mg > 30)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_30))
+summary(aov(log(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_30))
 
 BV_BA52_BZM_P11_A1_DD_35 <- BV_BA52_BZM_P11_A1_DD %>%
   filter (end_weight_mg > 35)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_35))
+summary(aov(log(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_35))
 
 BV_BA52_BZM_P11_A1_DD_40 <- BV_BA52_BZM_P11_A1_DD %>%
   filter (end_weight_mg > 40)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_40))
-
+summary(aov(log(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_40))
 
 
 ```
@@ -414,30 +443,40 @@ summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_DD_4
 ##Second Mapping family - Cry1A.105 + Cry2Ab2 leaf tissue incorporation assay
 Statistical analysis for the half of the second family on treated diet.
 
-## Anova and data transformation
+## Anova and data transformations
 ```{r}
 fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
-
-shapiro.test(resid(fitDD))
+shapiro.test(resid(fitDD)) #suggests a transformation may not be needed.
 plot(fitDD)
 
-boxcox(fitDD, plotit = TRUE)
+fitDD2 <- aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+shapiro.test(resid(fitDD2))
+plot(fitDD2)
+
+fitDD3 <- aov(log(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+shapiro.test(resid(fitDD3))
+plot(fitDD3)
+
+#untransformed data actually looks the best.
 ```
 
-#A glm
-Blocking on square because individuals within the same square got diet from the same syringe.
-```{r}
-library(lme4)
-fit_glmF <- lmer(sqrt(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_CV98_03_BZF_I9_DD)
-fit_glmR <- lmer(sqrt(end_weight_mg) ~ 1 + (1|square), data = BV_CV98_03_BZF_I9_DD)
+
+```{r tried glm for ObsII to add an effect of square}
+#tried a glm too so that I could test whether adding a random effect of square impacted the model output
+
+fit_glmF <- lmer(end_weight_mg ~ 1 + genotype_9409b + (1|traySquare), data = BV_CV98_03_BZF_I9_DD)
+fit_glmR <- lmer(end_weight_mg ~ 1 + (1|traySquare), data = BV_CV98_03_BZF_I9_DD)
 
 summary(fit_glmF)
+coef(fit_glmF)
 
-anova(fit_glmR, fit_glmF)
+lrtest(fit_glmR, fit_glmF)
 
-#forcing full model effects without the slope.
-fit_glmF2 <- lmer(sqrt(end_weight_mg) ~ 0 + genotype_9409b + (1|square), data = BV_CV98_03_BZF_I9_DD)
-summary(fit_glmF2)
+#the significance is surprising so looking at boxplot 
+boxplot(BV_CV98_03_BZF_I9_DD$end_weight_mg ~ BV_CV98_03_BZF_I9_DD$traySquare)
+
+#was there a weird distribution of genotypes across squares? No.
+table(BV_CV98_03_BZF_I9_DD$genotype_9409b, BV_CV98_03_BZF_I9_DD$traySquare)
 
 
 ```
@@ -456,33 +495,37 @@ geno9409_dist_ObsII_DDHI
 
 fisher.test(data.frame(cbind(geno9409_dist_ObsII_DDLO ,geno9409_dist_ObsII_DDHI)))
 
+#I guess this doesn't really tell us anything without the effect of square incorporated in.
+
 ```
-## Excluding small individuals.  Some progeny were still alive but with failure to thrive phenotypes.
-```{r}
+
+```{r again excluded small individuals, include = FALSE}
+
+#this did not really help, so did not include the output in the markdown file
 BV_CV98_03_BZF_I9_DD_20 <- BV_CV98_03_BZF_I9_DD %>%
   filter (end_weight_mg > 20)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_20))
+summary(aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_20))
 
 BV_CV98_03_BZF_I9_DD_25 <- BV_CV98_03_BZF_I9_DD %>%
   filter (end_weight_mg > 25)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_25))
+summary(aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_25))
 
 BV_CV98_03_BZF_I9_DD_30 <- BV_CV98_03_BZF_I9_DD %>%
   filter (end_weight_mg > 30)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_30))
+summary(aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_30))
 
 BV_CV98_03_BZF_I9_DD_35 <- BV_CV98_03_BZF_I9_DD %>%
   filter (end_weight_mg > 35)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_35))
+summary(aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_35))
 
 BV_CV98_03_BZF_I9_DD_40 <- BV_CV98_03_BZF_I9_DD %>%
   filter (end_weight_mg > 40)
 
-summary(aov(sqrt(end_weight_mg) ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_40))
+summary(aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD_40))
 
 
 
