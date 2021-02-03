@@ -325,7 +325,7 @@ lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff here too
 
 ## First mapping family - untreated vs. Cry1Ab leaf tissue incorporation assay
 
-One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue). A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple). While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
+One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue). A second F2 mapping family (see section below) was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple). While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
 We genotyped all progeny at two loci in the 3Mb region - are they correlated?
 
@@ -442,7 +442,7 @@ chisq.test(x = geno9409_dist_BCO805_DD[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_DD[-1, ]
-    ## X-squared = 1.9655, df = NA, p-value = 0.3903
+    ## X-squared = 1.9655, df = NA, p-value = 0.3753
 
 ``` r
 geno9409_dist_BCO805_CL <- as.matrix(table(BV_BA52_BZM_P11_A1_CL$genotype_9409b))#allele freqs control diet
@@ -461,7 +461,7 @@ chisq.test(x = geno9409_dist_BCO805_CL[-1,], p = exp_props, simulate.p.value = T
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_BCO805_CL[-1, ]
-    ## X-squared = 2.64, df = NA, p-value = 0.2864
+    ## X-squared = 2.64, df = NA, p-value = 0.2944
 
 ``` r
 geno9409_dist_Obs_DD <- as.matrix(table(BV_CV98_03_BZF_I9_DD $genotype_9409b))#allele freqs control diet
@@ -482,7 +482,7 @@ chisq.test(x = geno9409_dist_Obs_DD, p = exp_props, simulate.p.value = T)
     ##  on 2000 replicates)
     ## 
     ## data:  geno9409_dist_Obs_DD
-    ## X-squared = 0.73134, df = NA, p-value = 0.6987
+    ## X-squared = 0.73134, df = NA, p-value = 0.7181
 
 ## Anova and data transformation
 
@@ -572,7 +572,7 @@ Parametric test for individuals raised up on untreated diet.
 
 ``` r
 fit_BV_BA52_BZM_P11_A1_CL <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_CL)
-summary(fit_BV_BA52_BZM_P11_A1_CL)
+summary(fit_BV_BA52_BZM_P11_A1_CL)#without random effects term, is not significant.
 ```
 
     ##                Df Sum Sq Mean Sq F value Pr(>F)
@@ -598,7 +598,6 @@ plot(fit_BV_BA52_BZM_P11_A1_CL)
 # Adding a random effect of square = 1 syringe mixture does one square.
 
 ``` r
-#not putting this section in the markdown file because it didn't change anything.
 fit_glmF <- lmer(log(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
 fit_glmR <- lmer(log(end_weight_mg) ~ 1 + (1|square),  data = BV_BA52_BZM_P11_A1_DD)
 
@@ -792,6 +791,14 @@ Statistical analysis for the half of the second family on treated diet.
 
 ``` r
 fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+summary(fitDD)#summary fixed effects only model
+```
+
+    ##                Df Sum Sq Mean Sq F value Pr(>F)
+    ## genotype_9409b  2   2885    1442   1.799  0.174
+    ## Residuals      64  51328     802
+
+``` r
 shapiro.test(resid(fitDD)) #suggests a transformation may not be needed.
 ```
 
@@ -966,6 +973,38 @@ table(BV_CV98_03_BZF_I9_DD$genotype_9409b, BV_CV98_03_BZF_I9_DD$traySquare)
 fit_glmF2 <- lm(end_weight_mg ~ 1 + genotype_9409b + traySquare, data = BV_CV98_03_BZF_I9_DD)
 fit_glmR2 <- lm(end_weight_mg ~ 1 + traySquare, data = BV_CV98_03_BZF_I9_DD)
 
+summary(fit_glmF2)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = end_weight_mg ~ 1 + genotype_9409b + traySquare, 
+    ##     data = BV_CV98_03_BZF_I9_DD)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -51.525 -17.471  -2.858  18.581  70.497 
+    ## 
+    ## Coefficients:
+    ##                  Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)       41.7014    11.0225   3.783 0.000373 ***
+    ## genotype_9409bAG  16.2232     8.8632   1.830 0.072420 .  
+    ## genotype_9409bGG   3.0484    10.7460   0.284 0.777684    
+    ## traySquare1  B   -11.3112    12.0529  -0.938 0.351967    
+    ## traySquare1  C   -21.1106    13.6965  -1.541 0.128773    
+    ## traySquare1  D     7.2523    12.0528   0.602 0.549756    
+    ## traySquare3  A   -19.1404    15.3263  -1.249 0.216822    
+    ## traySquare3  B     0.2749    13.1180   0.021 0.983355    
+    ## traySquare3  C    -3.7216    13.6951  -0.272 0.786799    
+    ## traySquare3  D     4.7568    13.9200   0.342 0.733818    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 28.2 on 57 degrees of freedom
+    ## Multiple R-squared:  0.1637, Adjusted R-squared:  0.03162 
+    ## F-statistic: 1.239 on 9 and 57 DF,  p-value: 0.2901
+
+``` r
 lrtest(fit_glmR2,fit_glmF2)#still marginally significant
 ```
 
@@ -978,6 +1017,40 @@ lrtest(fit_glmR2,fit_glmF2)#still marginally significant
     ## 2  11 -313.40  2 5.0253    0.08105 .
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+fit_glmF3 <- lm(end_weight_mg ~ 0 + genotype_9409b + traySquare, data = BV_CV98_03_BZF_I9_DD)#forcing weight estimates for each genotype
+
+summary(fit_glmF3)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = end_weight_mg ~ 0 + genotype_9409b + traySquare, 
+    ##     data = BV_CV98_03_BZF_I9_DD)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -51.525 -17.471  -2.858  18.581  70.497 
+    ## 
+    ## Coefficients:
+    ##                  Estimate Std. Error t value Pr(>|t|)    
+    ## genotype_9409bAA  41.7014    11.0225   3.783 0.000373 ***
+    ## genotype_9409bAG  57.9246     9.0983   6.367 3.59e-08 ***
+    ## genotype_9409bGG  44.7498    10.5278   4.251 7.99e-05 ***
+    ## traySquare1  B   -11.3112    12.0529  -0.938 0.351967    
+    ## traySquare1  C   -21.1106    13.6965  -1.541 0.128773    
+    ## traySquare1  D     7.2523    12.0528   0.602 0.549756    
+    ## traySquare3  A   -19.1404    15.3263  -1.249 0.216822    
+    ## traySquare3  B     0.2749    13.1180   0.021 0.983355    
+    ## traySquare3  C    -3.7216    13.6951  -0.272 0.786799    
+    ## traySquare3  D     4.7568    13.9200   0.342 0.733818    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 28.2 on 57 degrees of freedom
+    ## Multiple R-squared:  0.7771, Adjusted R-squared:  0.738 
+    ## F-statistic: 19.87 on 10 and 57 DF,  p-value: 3.856e-15
 
 # Dist of the genotype frequencies for high and low weight gain individuals, per Tabashnik comments
 

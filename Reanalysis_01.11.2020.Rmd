@@ -142,7 +142,7 @@ lrtest(fitF0_O2red,fitF0_O2)#statistically sig diff here too
 ```
 
 ##First mapping family - untreated vs. Cry1Ab leaf tissue incorporation assay
-One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue).  A second F2 mapping family was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple).  While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
+One F2 mapping family was generated and split into two groups at 48h after hatching - half were placed on diet with untreated leaf tissue (orange), the other half were placed on diet containing Cry1Ab treated leaf tissue (blue).  A second F2 mapping family (see section below) was generated and also split into two groups at 48h after hatching - half were placed on diet containing Cry1A.105 + Cry2Ab2 treated leaf tissue (purple).  While we put the other half of the family on diet with untreated leaf tissue from a sweet corn isoline with the same genetic background as the two-toxin treated tissue, the data are not shown for simplicity. All larvae were allowed to feed for 7 days and then weighed.
 
 ```{r mapping family 1, include = FALSE}
 genotypes1 <- read.csv("~/Downloads/Tabash_Reanalysis/genotypes_BV-BA52_BZM_P11_A1.csv", header = T)
@@ -177,6 +177,8 @@ phenotypes2 <- phenotypes2 %>%
 BV_CV98_03_BZF_I9_DD <- merge(phenotypes2, genotypes2, by = c("tray", "square", "row", "well")) %>%
   filter (genotype_3749 != "")#no missing for genotype_9409b, only one low quality specified for 3749. 
 BV_CV98_03_BZF_I9_DD$traySquare <- paste(BV_CV98_03_BZF_I9_DD$tray,"", BV_CV98_03_BZF_I9_DD$square)
+
+
 ```
 
 ```{r joining two datasets just for plot, include = FALSE}
@@ -341,7 +343,7 @@ plot(fit_BV_BA52_BZM_P11_A1_DD3)
 Parametric test for individuals raised up on untreated diet.
 ```{r linkage analysis PCL}
 fit_BV_BA52_BZM_P11_A1_CL <- aov(end_weight_mg ~ genotype_9409b, data = BV_BA52_BZM_P11_A1_CL)
-summary(fit_BV_BA52_BZM_P11_A1_CL)
+summary(fit_BV_BA52_BZM_P11_A1_CL)#without random effects term, is not significant.
 
 shapiro.test(resid(fit_BV_BA52_BZM_P11_A1_CL))#shows no transformation needed.
 plot(fit_BV_BA52_BZM_P11_A1_CL)
@@ -351,7 +353,6 @@ plot(fit_BV_BA52_BZM_P11_A1_CL)
 #Adding a random effect of square = 1 syringe mixture does one square.
 ```{r glms to block on diet batch for P treatments}
 
-#not putting this section in the markdown file because it didn't change anything.
 fit_glmF <- lmer(log(end_weight_mg) ~ 1 + genotype_9409b + (1|square), data = BV_BA52_BZM_P11_A1_DD)
 fit_glmR <- lmer(log(end_weight_mg) ~ 1 + (1|square),  data = BV_BA52_BZM_P11_A1_DD)
 
@@ -446,6 +447,7 @@ Statistical analysis for the half of the second family on treated diet.
 ## Anova and data transformations
 ```{r}
 fitDD <- aov(end_weight_mg ~ genotype_9409b, data = BV_CV98_03_BZF_I9_DD)
+summary(fitDD)#summary fixed effects only model
 shapiro.test(resid(fitDD)) #suggests a transformation may not be needed.
 plot(fitDD)
 
@@ -485,7 +487,13 @@ table(BV_CV98_03_BZF_I9_DD$genotype_9409b, BV_CV98_03_BZF_I9_DD$traySquare)
 fit_glmF2 <- lm(end_weight_mg ~ 1 + genotype_9409b + traySquare, data = BV_CV98_03_BZF_I9_DD)
 fit_glmR2 <- lm(end_weight_mg ~ 1 + traySquare, data = BV_CV98_03_BZF_I9_DD)
 
+summary(fit_glmF2)
+
 lrtest(fit_glmR2,fit_glmF2)#still marginally significant
+
+fit_glmF3 <- lm(end_weight_mg ~ 0 + genotype_9409b + traySquare, data = BV_CV98_03_BZF_I9_DD)#forcing weight estimates for each genotype
+
+summary(fit_glmF3)
 ```
 
 #Dist of the genotype frequencies for high and low weight gain individuals, per Tabashnik comments
