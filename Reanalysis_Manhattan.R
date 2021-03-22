@@ -1,4 +1,4 @@
-#Here is the script I used to order and orient scaffolds and generate new Manhattan plots
+#Here is the script I used to order and orient scaffolds and generate new Manhattan plots with 10kb windows
 #03162021 MF
 
 #generating CMplots and getting scaffolds with outliers.
@@ -90,15 +90,13 @@ Full_Ord_Scafs <- Full_Ord_Scafs[,c(-4,-5,-7,-8,-9)]
 names(Full_Ord_Scafs) <- c("ArmScaf", "Start", "Stop", "Scaf", "Chr", "ArmScaf_Ord" )
 
 
-#first 2002-2017 comparison
-#40kb
-wcFST_2002_2017_unfilt <- read.table("2002and2017_40kb_wcFST_all.smoothed", header = F)
+##### 2002-2017 comparison - 10kb #######
+
+wcFST_2002_2017_unfilt <- read.table("2002and2017_10kb_wcFST_all.smoothed", header = F)
 names(wcFST_2002_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2017_unfilt$Scaf <- as.character(wcFST_2002_2017_unfilt$Scaf)
 
 wcFST_2002_2017 <- subset(wcFST_2002_2017_unfilt, "NumSnps" > 10)
-
-#merging the linkage map ordered scaffolds 
 
 #getting significance threshold based on ztransformation
 wcFST_2002_2017$ztrans <- scale(wcFST_2002_2017$wcFST, center = TRUE, scale = TRUE) #ztransformation 
@@ -125,23 +123,23 @@ with_artWin <- data.frame()
 for (i in seq(c(1:max(merged_2002_2017$Chr)))){
   print(i)
   sub_chrom <- subset(merged_2002_2017, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
+  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)#step is 10000 if 40kb, 1000 if 10kb
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
 
+with_artWin$wcFST <- as.numeric(as.character(with_artWin$wcFST))
 merged_2002_2017_forPlot <- with_artWin[,c(7,5,10,9)]
 names(merged_2002_2017_forPlot) <- c("SnpName", "Chr", "WinStart", "wcFST")
 
 #2002-2017 Manhattan plot function
 CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$wcFST)),
-       chr.den.col="pink", file="jpg", memo="2002and2017_40kb_wcFST", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
+       chr.den.col="pink", file="jpg", memo="2002and2017_10kb_wcFST", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
        highlight = hi_wcFST0$SnpName)
 
 
-#2002-2012 comparison
-#40kb
-wcFST_2002_2012_unfilt <- read.table("2002and2012_40kb_wcFST_all.smoothed", header = F)
+##### 2002-2012 comparison - 10kb #####
+wcFST_2002_2012_unfilt <- read.table("2002and2012_10kb_wcFST_all.smoothed", header = F)
 names(wcFST_2002_2012_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2012_unfilt$Scaf <- as.character(wcFST_2002_2012_unfilt$Scaf)
 
@@ -172,23 +170,24 @@ with_artWin <- data.frame()
 for (i in seq(c(1:max(merged_2002_2012$Chr)))){
   print(i)
   sub_chrom <- subset(merged_2002_2012, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
+  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
 
+with_artWin$wcFST <- as.numeric(as.character(with_artWin$wcFST))
 merged_2002_2012_forPlot <- with_artWin[,c(7,5,10,9)]
 names(merged_2002_2012_forPlot) <- c("SnpName", "Chr", "WinStart", "wcFST")
 
 #2002-2012 Manhattan plot function
 CMplot(merged_2002_2012_forPlot, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$wcFST)),
-       chr.den.col="pink", file="jpg", memo="2002and2012_40kb_wcFST", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
+       chr.den.col="pink", file="jpg", memo="2002and2012_10kb_wcFST", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
        highlight = hi_wcFST0$SnpName)
 
 
-#2012-2017 comparison
-#40kb
-wcFST_2012_2017_unfilt <- read.table("2012and2017_40kb_wcFST_all.smoothed", header = F)
+##### 2012-2017 comparison - 10kb #####
+
+wcFST_2012_2017_unfilt <- read.table("2012and2017_10kb_wcFST_all.smoothed", header = F)
 names(wcFST_2012_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2012_2017_unfilt$Scaf <- as.character(wcFST_2012_2017_unfilt$Scaf)
 
@@ -219,15 +218,34 @@ with_artWin <- data.frame()
 for (i in seq(c(1:max(merged_2012_2017$Chr)))){
   print(i)
   sub_chrom <- subset(merged_2012_2017, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
+  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
 
+with_artWin$wcFST <- as.numeric(as.character(with_artWin$wcFST))
 merged_2012_2017_forPlot <- with_artWin[,c(7,5,10,9)]
 names(merged_2012_2017_forPlot) <- c("SnpName", "Chr", "WinStart", "wcFST")
 
 #2012-2017 Manhattan plot function
 CMplot(merged_2012_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$wcFST)),
-       chr.den.col="pink", file="jpg", memo="2012and2017_40kb_wcFST", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
+       chr.den.col="pink", file="jpg", memo="2012and2017_10kb_wcFST", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
        highlight = hi_wcFST0$SnpName)
+
+
+#What are the scaffolds not represented in this final plot?
+
+scaf_names <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/Hzea_genome/scaffold_and_contig_names.txt",
+                         header = T)
+
+all_scafs <- unique(scaf_names$CHROM)
+plotted_scafs <- unique(Full_Ord_Scafs$Scaf)
+diff <- setdiff(all_scafs, plotted_scafs)
+diff_df <- data.frame(diff)
+
+#no candidate genes from Table 1 on these scaffolds - checked by hand.
+
+intersect(diff_df$diff, unique(hi_wcFST0$Scaf))#as of 3/22 this should be 0.
+#added "KZ116441.1" "KZ116446.1" "KZ117435.1" to ord_Chroms_final on 3/22/21, as chromsomes 43-45.  
+#These could not be mapped to chromosomes, even by hand.  No known genes on them. Very short.
+
