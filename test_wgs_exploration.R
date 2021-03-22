@@ -5,7 +5,6 @@ library(LEA);library(adegenet);library(vcfR);library(ape);library(CMplot)
 
 setwd("/media/megan/New Volume1/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1")
 
-
 #first 2002-2017 comparison
 #40kb
 wcFST_2002_2017_unfilt <- read.table("2002and2017_40kb_wcFST_all.smoothed", header = F)
