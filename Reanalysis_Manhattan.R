@@ -41,6 +41,7 @@ tail(ord_Chroms_ed_test)#note first and last line are the same.
 #final data after running loop and correcting
 ord_Chroms_final <- read.csv("ord_Chroms_final.csv", header = T)
 
+
 #Loop for checking for duplicate arm scaffolds
 data <- data.frame(ord_Chroms_final)#change dataset when not testing. 
 dups <- vector()
@@ -89,6 +90,17 @@ Full_Ord_Scafs <- Full_Scafs[order(Full_Scafs[,10], Full_Scafs[, 11], Full_Scafs
 Full_Ord_Scafs <- Full_Ord_Scafs[,c(-4,-5,-7,-8,-9)]
 names(Full_Ord_Scafs) <- c("ArmScaf", "Start", "Stop", "Scaf", "Chr", "ArmScaf_Ord" )
 
+#loading QTL SNPs
+cry1 <- read.csv("cry1_associated.csv", header = T)#added snp_bin with mround function directly to csv
+cry2 <- read.csv("cry2_associated.csv", header = T)
+
+HiCry1 <- subset(cry1, additive_effect > 0)#getting SNPs for fast growth
+HiCry2 <- subset(cry2, additive_effect > 0)
+
+#prepping for merge with FST dataset
+HiCry1$ScafPos <- paste0(HiCry1$scaffold,"_", HiCry1$snp_bin)
+HiCry2$ScafPos <- paste0(HiCry2$scaffold,"_", HiCry2$snp_bin)
+
 
 ##### 2002-2017 comparison - 10kb #######
 
@@ -99,23 +111,60 @@ wcFST_2002_2017_unfilt$Scaf <- as.character(wcFST_2002_2017_unfilt$Scaf)
 wcFST_2002_2017 <- subset(wcFST_2002_2017_unfilt, "NumSnps" > 10)
 
 #getting significance threshold based on ztransformation
-wcFST_2002_2017$ztrans <- scale(wcFST_2002_2017$wcFST, center = TRUE, scale = TRUE) #ztransformation 
-wcFST_2002_2017$SnpName <- seq(1:NROW(wcFST_2002_2017))
+wcFST_2002_2017$ztrans <- scale(wcFST_2002_2017$wcFST, center = TRUE, scale = TRUE) #ztransformation
 
 hist(wcFST_2002_2017$ztrans, breaks = 100)
 
-hi_wcFST0 <- subset(wcFST_2002_2017, ztrans > 6) #subsetting out any window with an FST greater than 6 SDs from mean.
+
+#merging ordered scafs with SNPs for plot
+forPlot_2002_2017 <- data.frame(cbind(wcFST_2002_2017$Scaf, wcFST_2002_2017$WinStart, wcFST_2002_2017$wcFST, wcFST_2002_2017$ztrans))
+names(forPlot_2002_2017) <- c("Scaf", "WinStart", "wcFST", "ztrans")
+forPlot_2002_2017$ztrans <- as.numeric(as.character(forPlot_2002_2017$ztrans)) 
+
+merged_2002_2017 <- merge(Full_Ord_Scafs, forPlot_2002_2017, by = "Scaf")
+merged_2002_2017$WinStart <- as.numeric(as.character(merged_2002_2017$WinStart))
+merged_2002_2017 <- merged_2002_2017[order(merged_2002_2017 [,5], merged_2002_2017 [,6], merged_2002_2017 [,3], 
+                                     merged_2002_2017 [,1], merged_2002_2017 [,7]),]
+
+
+merged_2002_2017$wcFST <- as.numeric(as.character(merged_2002_2017$wcFST))
+merged_2002_2017$SnpName <- seq(1:NROW(merged_2002_2017))
+merged_2002_2017$ScafPos <- paste0(merged_2002_2017$Scaf,"_",merged_2002_2017$WinStart)
+
+#getting highlighted SNPs
+hi_wcFST0 <- subset(merged_2002_2017, ztrans > 6) #subsetting out any window with an FST greater than 6 SDs from mean.
 print(min(hi_wcFST0$wcFST))
 print(mean(wcFST_2002_2017$wcFST))
 print(median(wcFST_2002_2017$wcFST))
 
-#merging ordered scafs with SNPs for plot
-forPlot_2002_2017 <- data.frame(cbind(wcFST_2002_2017$SnpName,wcFST_2002_2017$Scaf, wcFST_2002_2017$WinStart, wcFST_2002_2017$wcFST))
-names(forPlot_2002_2017) <- c("SnpName", "Scaf", "WinStart", "wcFST")
+hi_cry1 <- merge(HiCry1, merged_2002_2017, by = "ScafPos")
+hi_cry1$SnpName <- as.numeric(hi_cry1$SnpName)
 
-merged_2002_2017 <- merge(Full_Ord_Scafs, forPlot_2002_2017, by = "Scaf")
-merged_2002_2017 <- merged_2002_2017[order(merged_2002_2017 [,5], merged_2002_2017 [,6], merged_2002_2017 [,3], 
-                                     merged_2002_2017 [,1], merged_2002_2017 [,8]),]
+hi_cry2 <- merge(HiCry2, merged_2002_2017, by = "ScafPos")
+hi_cry2$SnpName <- as.numeric(hi_cry2$SnpName)
+
+#highlighting all SNPs within QTL region
+min_HiCry1ByScaf <- as.numeric(as.character(as.vector(tapply(hi_cry1$SnpName, hi_cry1$Chr, min))))
+max_HiCry1ByScaf <- as.numeric(as.character(as.vector(tapply(hi_cry1$SnpName, hi_cry1$Chr, max))))
+
+minMax_cry1 <- cbind(min_HiCry1ByScaf, max_HiCry1ByScaf)
+str(minMax_cry1)
+names(minMax_cry1) <- c("Min", "Max")
+
+#loop gets the windows
+cry1_SnpNames <- vector()
+for (row in 1:nrow(minMax_cry1)){
+  SNPseq <- (seq(from = minMax_cry1[row,1], to = minMax_cry1[row,2]))
+  cry1_SnpNames <- c(cry1_SnpNames, SNPseq)
+  
+}
+
+#then subset by significant fst value
+cry1_SnpNames_DF <- data.frame(cry1_SnpNames)
+Cry1FST <- merge(merged_2002_2017, cry1_SnpNames_DF, by.x = "SnpName", by.y = "cry1_SnpNames")
+hiCry1FST <- subset(Cry1FST, ztrans > 6)
+
+
 
 #adding artificial continuous window
 with_artWin <- data.frame()
@@ -129,13 +178,25 @@ for (i in seq(c(1:max(merged_2002_2017$Chr)))){
 }
 
 with_artWin$wcFST <- as.numeric(as.character(with_artWin$wcFST))
-merged_2002_2017_forPlot <- with_artWin[,c(7,5,10,9)]
+merged_2002_2017_forPlot <- with_artWin[,c(10,5,7,8)]
 names(merged_2002_2017_forPlot) <- c("SnpName", "Chr", "WinStart", "wcFST")
 
 #2002-2017 Manhattan plot function
+
+#sig FST
 CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$wcFST)),
        chr.den.col="pink", file="jpg", memo="2002and2017_10kb_wcFST", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
        highlight = hi_wcFST0$SnpName)
+
+#sig Cry1
+CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$wcFST)),
+       chr.den.col="pink", file="jpg", memo="2002and2017_10kb_cry1", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
+       highlight = hiCry1FST$SnpName)
+
+#sig Cry2
+CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$wcFST)),
+       chr.den.col="pink", file="jpg", memo="2002and2017_10kb_cry2", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
+       highlight = hi_cry2$SnpName)
 
 
 ##### 2002-2012 comparison - 10kb #####
