@@ -42,7 +42,7 @@ vcfann <- as.data.frame(getFIX(vcf_allpops))
 outliers_allyears_df <- data.frame(OF_out$results, header = T)
 outliers_allyears_df_withpos <- cbind(vcfann[,c(1:2)],outliers_allyears_df)
 outliers_allyears <- subset(outliers_allyears_df_withpos, OutlierFlag == "TRUE")
-outliers_allyears$ChromPos <- paste(outliers_allyears$CHROM, "_", outliers_allyears$POS)
+outliers_allyears$ChromPos <- paste0(outliers_allyears$CHROM,"_",outliers_allyears$POS)
 
 outliers_allyears_uniqScafs <- unique(outliers_allyears$CHROM)
 outliers_allyears_uniqScafs
@@ -61,9 +61,26 @@ points(OF_out$results$He[OF_out$results$qvalues<0.05], OF_out$results$FST[OF_out
 
 dev.off()
 
+
+##### Checking scaffolds with outliers against LGs in the super-scaffolded assembly #####
+
+ord_Chroms_final <- read.csv("~/Desktop/Hz_fieldColl_pop_gen/Reanalysis_PNAS/ord_Chroms_final.csv", header = T)
+
+outliers_allyears_withLG <- merge(outliers_allyears, ord_Chroms_final, by.x = "CHROM", by.y = "V6")
+nrow(outliers_allyears_withLG) #42 of 53 outliers could be mapped to Linkage Groups or chromosomes in the super-scaffolded assembly
+
+#gives unique LGs with outliers
+outliers_uniqLGs <- unique(outliers_allyears_withLG$chr)
+outliers_uniqLGs
+
 #what percentage of these outliers were also in the top 5% of variance contributing SNPs from the DAPC?
 DAPC_top5 <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/mpileupANDvcftools_output/DAPC2_top5per.txt", header = F)
 colnames(DAPC_top5) <- c("CHROM", "POS")
 DAPC_top5$ChromPos <- paste(DAPC_top5$CHROM, "_", DAPC_top5$POS)
 
-merged_chromPos <- merge(outliers_allyears, DAPC_top5, by = "ChromPos")
+merged_chromPos <- merge(outliers_allyears, DAPC_top5, by = "ChromPos") #17 of 22 mapped to chromosomes
+
+#checking these 17 outliers and their positions.
+mergedOLs <- merge(merged_chromPos, ord_Chroms_final, by.x = "CHROM.x", by.y = "V6")
+mergedoutliers_uniqLGs <- unique(mergedOLs$chr)
+mergedoutliers_uniqLGs
