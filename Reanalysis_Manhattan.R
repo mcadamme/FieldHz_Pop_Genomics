@@ -143,7 +143,7 @@ hi_cry1$SnpName <- as.numeric(hi_cry1$SnpName)
 hi_cry2 <- merge(HiCry2, merged_2002_2017, by = "ScafPos")
 hi_cry2$SnpName <- as.numeric(hi_cry2$SnpName)
 
-#highlighting all SNPs within QTL region
+#highlighting all SNPs within QTL region - cry1
 min_HiCry1ByScaf <- as.numeric(as.character(as.vector(tapply(hi_cry1$SnpName, hi_cry1$Chr, min))))
 max_HiCry1ByScaf <- as.numeric(as.character(as.vector(tapply(hi_cry1$SnpName, hi_cry1$Chr, max))))
 
@@ -164,6 +164,27 @@ cry1_SnpNames_DF <- data.frame(cry1_SnpNames)
 Cry1FST <- merge(merged_2002_2017, cry1_SnpNames_DF, by.x = "SnpName", by.y = "cry1_SnpNames")
 hiCry1FST <- subset(Cry1FST, ztrans > 6)
 
+
+#highlighting all SNPs within QTL region - cry2
+min_HiCry2ByScaf <- as.numeric(as.character(as.vector(tapply(hi_cry2$SnpName, hi_cry2$Chr, min))))
+max_HiCry2ByScaf <- as.numeric(as.character(as.vector(tapply(hi_cry2$SnpName, hi_cry2$Chr, max))))
+
+minMax_cry2 <- cbind(min_HiCry2ByScaf, max_HiCry2ByScaf)
+str(minMax_cry2)
+names(minMax_cry2) <- c("Min", "Max")
+
+#loop gets the windows
+cry2_SnpNames <- vector()
+for (row in 1:nrow(minMax_cry2)){
+  SNPseq <- (seq(from = minMax_cry2[row,1], to = minMax_cry2[row,2]))
+  cry2_SnpNames <- c(cry2_SnpNames, SNPseq)
+  
+}
+
+#then subset by significant fst value
+cry2_SnpNames_DF <- data.frame(cry2_SnpNames)
+Cry2FST <- merge(merged_2002_2017, cry2_SnpNames_DF, by.x = "SnpName", by.y = "cry2_SnpNames")
+hiCry2FST <- subset(Cry2FST, ztrans > 6)
 
 
 #adding artificial continuous window
@@ -196,7 +217,7 @@ CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex
 #sig Cry2
 CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex = 0.8, ylim = c(0,max(hi_wcFST0$wcFST)),
        chr.den.col="pink", file="jpg", memo="2002and2017_10kb_cry2", dpi=300, threshold = min(hi_wcFST0$wcFST), LOG10 = F, ylab = "FST", xlab = "",
-       highlight = hi_cry2$SnpName)
+       highlight = hiCry2FST$SnpName)
 
 
 ##### 2002-2012 comparison - 10kb #####
