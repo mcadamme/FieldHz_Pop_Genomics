@@ -89,7 +89,7 @@ with_artPos <- data.frame()
   for (i in seq(c(1:max(merged_Map$Chr)))){
     print(i)
     sub_chrom <- subset(merged_Map, Chr == i)
-    artPos <- seq(0, (nrow(sub_chrom)-1), by = 1)
+    artPos <- seq(from = 1, to = (nrow(sub_chrom)))
     comb <- data.frame(cbind(sub_chrom, artPos))
     with_artPos <- rbind(with_artPos, comb)
   }
