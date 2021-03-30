@@ -9,7 +9,7 @@ setwd("~/Desktop/Hz_fieldColl_pop_gen/Reanalysis_PNAS")
 #loading zea superscaffolds
 Full_Ord_Scafs <- read.table(file = "Hzea_superScaf_genome.txt", header = T)
 
-##### Subsetting and outputting on Sig QTL at diff thresholds #####
+##### Function to subset Sig QTL at diff thresholds #####
 
 sig_levels <- list(0.01, 0.005, 0.001, 0.0005, 0.0001, 0.00005, 0.00001, 0.000005, 0.000001)
 df <- data.frame()
@@ -27,7 +27,7 @@ getSig_QTL <- function(X, outfile){
 write.csv(df, file = outfile)
 }
 
-##### loading QTL SNPs & removing low freq alleles#####
+##### loading QTL SNPs & removing low freq allele s#####
 
 BAP11A1_DD <- read.csv("BAP11A1_DD_all_snps.csv", header = T)#BC0805
 str(BAP11A1_DD)
@@ -44,6 +44,7 @@ sub_DEO9A1_DD <- subset(DEO9A1_DD, allele_frequency > 0.099)
 DEO9A1_CL <- read.csv("DEO9A1_CL_all_snps.csv", header = T)#Obs
 str(DEO9A1_CL)
 sub_DEO9A1_CL <- subset(DEO9A1_CL, allele_frequency > 0.099)
+
 
 ###### Applying getSig_QTL function ######
 
@@ -77,7 +78,7 @@ intersect(unique(sig_BAP11A1_CL$scaffold), unique(sig_BAP11A1_DD$scaffold))
 intersect(unique(sig_DEO9A1_CL$scaffold), unique(sig_DEO9A1_DD$scaffold))
 
 
-##### plotting function #####
+##### QTL plotting function #####
 plot_QTL <- function(X, name, sigLev){
   
 merged_Map <- merge(Full_Ord_Scafs, X, by.x = "Scaf", by.y = "scaffold")
@@ -98,19 +99,15 @@ For_plot <- data.frame(cbind(with_artPos$snp_id, with_artPos$Chr, with_artPos$ra
 names(For_plot) <- c("SnpName", "Chr", "Pos", "Pval")
 str(For_plot)#sanity check
 
-#getting sig SNPs
-
 SNPs <- subset(For_plot, Pval < sigLev)
-
 CMplot(For_plot, type="p",plot.type="m", LOG10=TRUE, threshold=NULL,file="jpg",memo=name,dpi=300,
        col=c("grey50","grey70"), pch = 21, cex = 0.8, ylim = c(0,12), highlight=SNPs$SnpName,
        highlight.col="dark blue", highlight.cex=0.8, highlight.pch=19, file.output=TRUE,verbose=TRUE,width=14,height=6)
 }
 
+##### Drawing plots #####
 
-##### Getting plots #####
-
-#plotTL runs once per dataset - last argument is sig level
+#plot_QTL runs once per dataset - last argument is sig level
 plot_QTL(sub_BAP11A1_DD, "BAP11A1_DD", 1e-3)
 plot_QTL(sub_BAP11A1_CL, "BAP11A1_CL", 1e-3)
 plot_QTL(sub_DEO9A1_DD, "DEO9A1_DD", 1e-3)
