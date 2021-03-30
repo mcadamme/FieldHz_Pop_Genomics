@@ -2,7 +2,7 @@
 #03052020
 
 
-setwd("~/ms_sims/FieldPops/N0_105thou/")
+setwd("~/ms_sims/FieldPops/N0_105thou_10kb/")
 
 #Loading packages
 x <- c("adegenet", "hierfstat")
