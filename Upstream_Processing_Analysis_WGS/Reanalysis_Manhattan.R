@@ -1,4 +1,4 @@
-#Here is the script I used to order and orient scaffolds and generate new Manhattan plots with 10kb windows
+#Here is the script I used to generate new Manhattan plots with 10kb window sizes and add QTL
 #03162021 MF
 
 #generating CMplots and getting scaffolds with outliers.
@@ -42,7 +42,7 @@ wcFST_2002_2017_unfilt <- read.table("2002and2017_10kb_wcFST_all.smoothed", head
 names(wcFST_2002_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2017_unfilt$Scaf <- as.character(wcFST_2002_2017_unfilt$Scaf)
 
-wcFST_2002_2017 <- subset(wcFST_2002_2017_unfilt, "NumSnps" > 10)
+wcFST_2002_2017 <- subset(wcFST_2002_2017_unfilt, NumSnps > 10)
 
 #getting significance threshold based on ztransformation
 wcFST_2002_2017$ztrans <- scale(wcFST_2002_2017$wcFST, center = TRUE, scale = TRUE) #ztransformation
@@ -125,20 +125,26 @@ hiCry2FST <- subset(Cry2FST, ztrans > 6)
 
 write.table(hiCry2FST, "hiCry2FST2002to2017.txt", row.names = F)
 
+#no Obs on Chr44 after filter, so needed a work-around for the loop
+merged_2002_2017$Chr_fac <- as.factor(merged_2002_2017$Chr)
+levels(merged_2002_2017$Chr_fac)[levels(merged_2002_2017$Chr_fac)=="45"] <- "44"
+levels(merged_2002_2017$Chr_fac)[levels(merged_2002_2017$Chr_fac)=="46"] <- "45"
+
 #adding artificial continuous window
 with_artWin <- data.frame()
 
-for (i in seq(c(1:max(merged_2002_2017$Chr)))){
+for (i in seq_along(levels(merged_2002_2017$Chr_fac))){
   print(i)
-  sub_chrom <- subset(merged_2002_2017, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)#step is 10000 if 40kb, 1000 if 10kb
+  sub_chrom <- subset(merged_2002_2017, Chr_fac == i)
+  print(nrow(sub_chrom))
+  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
 
 with_artWin$wcFST <- as.numeric(as.character(with_artWin$wcFST))
-merged_2002_2017_forPlot <- with_artWin[,c(10,5,7,8)]
-names(merged_2002_2017_forPlot) <- c("SnpName", "Chr", "WinStart", "wcFST")
+merged_2002_2017_forPlot <- with_artWin[,c(10,5,13,8)]
+names(merged_2002_2017_forPlot) <- c("SnpName", "Chr", "artWin", "wcFST")
 
 #2002-2017 Manhattan plot function
 
@@ -163,7 +169,7 @@ wcFST_2002_2012_unfilt <- read.table("2002and2012_10kb_wcFST_all.smoothed", head
 names(wcFST_2002_2012_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2012_unfilt$Scaf <- as.character(wcFST_2002_2012_unfilt$Scaf)
 
-wcFST_2002_2012 <- subset(wcFST_2002_2012_unfilt, "NumSnps" > 10)
+wcFST_2002_2012 <- subset(wcFST_2002_2012_unfilt, NumSnps > 10)
 
 #getting significance threshold based on ztransformation
 wcFST_2002_2012$ztrans <- scale(wcFST_2002_2012$wcFST, center = TRUE, scale = TRUE) #ztransformation
@@ -245,20 +251,26 @@ hiCry2FST <- subset(Cry2FST, ztrans > 6)
 
 write.table(hiCry2FST, "hiCry2FST2002to2012.txt", row.names = F)
 
+#no Obs on Chr44 after filter, so needed a work-around for the loop
+merged_2002_2012$Chr_fac <- as.factor(merged_2002_2012$Chr)
+levels(merged_2002_2012$Chr_fac)[levels(merged_2002_2012$Chr_fac)=="45"] <- "44"
+levels(merged_2002_2012$Chr_fac)[levels(merged_2002_2012$Chr_fac)=="46"] <- "45"
+
 #adding artificial continuous window
 with_artWin <- data.frame()
 
-for (i in seq(c(1:max(merged_2002_2012$Chr)))){
+for (i in seq_along(levels(merged_2002_2012$Chr_fac))){
   print(i)
-  sub_chrom <- subset(merged_2002_2012, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)#step is 10000 if 40kb, 1000 if 10kb
+  sub_chrom <- subset(merged_2002_2012, Chr_fac == i)
+  print(nrow(sub_chrom))
+  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
 
 with_artWin$wcFST <- as.numeric(as.character(with_artWin$wcFST))
-merged_2002_2012_forPlot <- with_artWin[,c(10,5,7,8)]
-names(merged_2002_2012_forPlot) <- c("SnpName", "Chr", "WinStart", "wcFST")
+merged_2002_2012_forPlot <- with_artWin[,c(10,5,13,8)]
+names(merged_2002_2012_forPlot) <- c("SnpName", "Chr", "artWin", "wcFST")
 
 #2002-2012 Manhattan plot function
 
@@ -283,7 +295,7 @@ wcFST_2012_2017_unfilt <- read.table("2012and2017_10kb_wcFST_all.smoothed", head
 names(wcFST_2012_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2012_2017_unfilt$Scaf <- as.character(wcFST_2012_2017_unfilt$Scaf)
 
-wcFST_2012_2017 <- subset(wcFST_2012_2017_unfilt, "NumSnps" > 10)
+wcFST_2012_2017 <- subset(wcFST_2012_2017_unfilt, NumSnps > 10)
 
 #getting significance threshold based on ztransformation
 wcFST_2012_2017$ztrans <- scale(wcFST_2012_2017$wcFST, center = TRUE, scale = TRUE) #ztransformation
@@ -364,20 +376,27 @@ hiCry2FST <- subset(Cry2FST, ztrans > 6)
 
 write.table(hiCry2FST, "hiCry2FST2012to2017.txt", row.names = F)
 
+#no Obs on Chr44 after filter, so needed a work-around for the loop
+merged_2012_2017$Chr_fac <- as.factor(merged_2012_2017$Chr)
+levels(merged_2012_2017$Chr_fac)[levels(merged_2012_2017$Chr_fac)=="45"] <- "44"
+levels(merged_2012_2017$Chr_fac)[levels(merged_2012_2017$Chr_fac)=="46"] <- "45"
+
 #adding artificial continuous window
 with_artWin <- data.frame()
 
-for (i in seq(c(1:max(merged_2012_2017$Chr)))){
+for (i in seq_along(levels(merged_2012_2017$Chr_fac))){
   print(i)
-  sub_chrom <- subset(merged_2012_2017, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)#step is 10000 if 40kb, 1000 if 10kb
+  sub_chrom <- subset(merged_2012_2017, Chr_fac == i)
+  print(nrow(sub_chrom))
+  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
 
 with_artWin$wcFST <- as.numeric(as.character(with_artWin$wcFST))
-merged_2012_2017_forPlot <- with_artWin[,c(10,5,7,8)]
-names(merged_2012_2017_forPlot) <- c("SnpName", "Chr", "WinStart", "wcFST")
+
+merged_2012_2017_forPlot <- with_artWin[,c(10,5,13,8)]
+names(merged_2012_2017_forPlot) <- c("SnpName", "Chr", "artWin", "wcFST")
 
 #2012-2017 Manhattan plot function
 
