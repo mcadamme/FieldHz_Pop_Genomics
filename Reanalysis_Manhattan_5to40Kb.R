@@ -2,31 +2,14 @@
 #03222021 MF
 
 #library(LEA);library(adegenet);library(vcfR);library(ape);
-library(CMplot); library(plyr)
+library(CMplot)
 
-ord_Chroms_final <- read.csv("~/Desktop/Hz_fieldColl_pop_gen/Reanalysis_PNAS/ord_Chroms_final.csv", header = T)
+setwd("~/Desktop/Hz_fieldColl_pop_gen/Reanalysis_PNAS/")
 
-scafs_by_ChrMark <- ord_Chroms_final[,c(2,11)]
-names(scafs_by_ChrMark) <- c("Scaffold", "Chr")
+#loading zea superscaffolds
+Full_Ord_Scafs <- read.table(file = "Hzea_superScaf_genome.txt", header = T)
 
-#loop to add order
-data_with_ordChr <- data.frame()
-
-for (i in seq(c(1:max(scafs_by_ChrMark$Chr)))){
-  print(i)
-  sub_chrom <- subset(scafs_by_ChrMark, Chr == i)
-  uniq_scafs <- unique(sub_chrom[c("Scaffold", "Chr")])
-  uniq_scafs $scaf_ord <- cbind(seq(c(1:nrow(uniq_scafs ))))
-  data_with_ordChr <- rbind(data_with_ordChr, uniq_scafs)
-}
-
-Full_Scafs <- merge(ZeaScafs_clean, data_with_ordChr, by.x = "V1", by.y = "Scaffold")
-Full_Ord_Scafs <- Full_Scafs[order(Full_Scafs[,10], Full_Scafs[, 11], Full_Scafs[, 2]),]
-Full_Ord_Scafs <- Full_Ord_Scafs[,c(-4,-5,-7,-8,-9)]
-names(Full_Ord_Scafs) <- c("ArmScaf", "Start", "Stop", "Scaf", "Chr", "ArmScaf_Ord" )
-
-
-##### 2002-2017 comparison - 40kb #####
+##### 2002-2017 comparison - 40kb with 10kb step #####
 wcFST_2002_2017_unfilt <- read.table("2002and2017_40kb_wcFST_all.smoothed", header = F)
 names(wcFST_2002_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2017_unfilt$Scaf <- as.character(wcFST_2002_2017_unfilt$Scaf)
@@ -73,7 +56,7 @@ CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex
 
 
 
-##### 2002-2017 comparison - 20kb #####
+##### 2002-2017 comparison - 20kb with 5kb step #####
 wcFST_2002_2017_unfilt <- read.table("2002and2017_20kb_wcFST_all.smoothed", header = F)
 names(wcFST_2002_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2017_unfilt$Scaf <- as.character(wcFST_2002_2017_unfilt$Scaf)
@@ -105,7 +88,7 @@ with_artWin <- data.frame()
 for (i in seq(c(1:max(merged_2002_2017$Chr)))){
   print(i)
   sub_chrom <- subset(merged_2002_2017, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
+  artWin <- seq(0, (nrow(sub_chrom)-1)*5000, by = 5000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
@@ -119,7 +102,7 @@ CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex
        highlight = hi_wcFST0$SnpName)
 
 
-##### 2002-2017 comparison - 10kb #####
+##### 2002-2017 comparison - 10kb with 1kb step #####
 wcFST_2002_2017_unfilt <- read.table("2002and2017_10kb_wcFST_all.smoothed", header = F)
 names(wcFST_2002_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2017_unfilt$Scaf <- as.character(wcFST_2002_2017_unfilt$Scaf)
@@ -151,7 +134,7 @@ with_artWin <- data.frame()
 for (i in seq(c(1:max(merged_2002_2017$Chr)))){
   print(i)
   sub_chrom <- subset(merged_2002_2017, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
+  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
@@ -165,7 +148,7 @@ CMplot(merged_2002_2017_forPlot, plot.type="m", col = c("grey30", "grey60"), cex
        highlight = hi_wcFST0$SnpName)
 
 
-##### 2002-2017 comparison - 5kb #####
+##### 2002-2017 comparison - 5kb with 1kb step #####
 wcFST_2002_2017_unfilt <- read.table("2002and2017_5kb_wcFST_all.smoothed", header = F)
 names(wcFST_2002_2017_unfilt) <- c("Scaf", "WinStart", "WinStop", "NumSnps", "wcFST")
 wcFST_2002_2017_unfilt$Scaf <- as.character(wcFST_2002_2017_unfilt$Scaf)
@@ -197,7 +180,7 @@ with_artWin <- data.frame()
 for (i in seq(c(1:max(merged_2002_2017$Chr)))){
   print(i)
   sub_chrom <- subset(merged_2002_2017, Chr == i)
-  artWin <- seq(0, (nrow(sub_chrom)-1)*10000, by = 10000)
+  artWin <- seq(0, (nrow(sub_chrom)-1)*1000, by = 1000)
   comb <- data.frame(cbind(sub_chrom, artWin))
   with_artWin <- rbind(with_artWin, comb)
 }
