@@ -64,23 +64,23 @@ dev.off()
 
 ##### Checking scaffolds with outliers against LGs in the super-scaffolded assembly #####
 
-ord_Chroms_final <- read.csv("~/Desktop/Hz_fieldColl_pop_gen/Reanalysis_PNAS/ord_Chroms_final.csv", header = T)
+ord_Chroms_final <- read.table(file = "~/Desktop/Hz_fieldColl_pop_gen/Reanalysis_PNAS/Hzea_superScaf_genome.txt", header = T)
 
-outliers_allyears_withLG <- merge(outliers_allyears, ord_Chroms_final, by.x = "CHROM", by.y = "V6")
-nrow(outliers_allyears_withLG) #42 of 53 outliers could be mapped to Linkage Groups or chromosomes in the super-scaffolded assembly
+outliers_allyears_withLG <- merge(outliers_allyears, ord_Chroms_final, by.x = "CHROM", by.y = "Scaf")
+nrow(outliers_allyears_withLG) #52 of 53 outliers could be mapped to Linkage Groups or chromosomes in the super-scaffolded assembly
 
 #gives unique LGs with outliers
-outliers_uniqLGs <- unique(outliers_allyears_withLG$chr)
+outliers_uniqLGs <- unique(outliers_allyears_withLG$Chr)
 outliers_uniqLGs
 
 #what percentage of these outliers were also in the top 5% of variance contributing SNPs from the DAPC?
 DAPC_top5 <- read.table("/media/megan/New Volume1/Hz_PopGen_ddRAD_demult/Bowtie_genome_alignments/mpileupANDvcftools_output/DAPC2_top5per.txt", header = F)
 colnames(DAPC_top5) <- c("CHROM", "POS")
-DAPC_top5$ChromPos <- paste(DAPC_top5$CHROM, "_", DAPC_top5$POS)
+DAPC_top5$ChromPos <- paste0(DAPC_top5$CHROM,"_",DAPC_top5$POS)
 
-merged_chromPos <- merge(outliers_allyears, DAPC_top5, by = "ChromPos") #17 of 22 mapped to chromosomes
+merged_chromPos <- merge(outliers_allyears, DAPC_top5, by = "ChromPos") #21 of 22 mapped to chromosomes
 
-#checking these 17 outliers and their positions.
-mergedOLs <- merge(merged_chromPos, ord_Chroms_final, by.x = "CHROM.x", by.y = "V6")
-mergedoutliers_uniqLGs <- unique(mergedOLs$chr)
+#checking these outliers and their positions.
+mergedOLs <- merge(merged_chromPos, ord_Chroms_final, by.x = "CHROM.x", by.y = "Scaf")
+mergedoutliers_uniqLGs <- unique(mergedOLs$Chr)
 mergedoutliers_uniqLGs
