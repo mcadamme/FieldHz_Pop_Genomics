@@ -15,10 +15,26 @@ bcftools call -vmO v -o ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variant
 
 vcftools --vcf ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly.vcf --recode --out ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --remove-indels
 
-#Getting Allele frequencies for each pop
+#Getting genome-wide Allele frequencies for each pop
 vcftools --vcf ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/Bt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/thinned_FieldHzea_variantsonly_BtOnly.freq --freq
 
 vcftools --vcf ./WGRS_mpileupANDvcftools_output/thinned_BtandNonBt_Hzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/NonBt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/thinned_FieldHzea_variantsonly_NonBtOnly.freq --freq
+
+#Getting allele freqs just for the outlier chromosomes
+
+mkdir ./WGRS_mpileupANDvcftools_output/KZ118395.1_only
+
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/BtandNonBt_Hzea_variantsonly.vcf --recode --out ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/KZ118395.1_thinned_FieldHzea_variantsonly.vcf --chr KZ118395.1 --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --remove-indels
+
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/KZ118395.1_thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/Bt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/thinned_FieldHzea_variantsonly_BtOnly.freq --freq
+
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/KZ118395.1_thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/NonBt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/thinned_FieldHzea_variantsonly_NonBtOnly.freq --freq
+
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/KZ118395.1_thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/Bt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/thinned_FieldHzea_variantsonly_BtOnly --het
+
+vcftools --vcf ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/KZ118395.1_thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/NonBt_WGRS_Hzea.txt  --out  ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/thinned_FieldHzea_variantsonly_NonBtOnly --het
+
+/home/megan/src/vcflib/bin/wcFst --target 0,1,2,3,4,5,6,7  --background 8,9,10,11,12,13,14,15 --file ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/KZ118395.1_thinned_FieldHzea_variantsonly.vcf.recode.vcf --type PL > ./WGRS_mpileupANDvcftools_output/KZ118395.1_only/KZ118395.1_wcFst_BtandNonBt
 
 #sliding window pfst analysis
 
