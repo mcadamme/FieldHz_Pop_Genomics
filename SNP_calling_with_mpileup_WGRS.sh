@@ -3,14 +3,14 @@
 #bcftools v. 1.9
 
 
-cd /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142020
+cd /media/megan/"New Volume1"/Hzea_WGRS_Bowtie2_output/Alignment_by_years_01142020
 
 mkdir WGRS_mpileupANDvcftools_output_v1
 
-bcftools mpileup -f /media/megan/"New Volume"/Hzea_genome/GCA_002150865.1_Hzea_1.0_genomic.fna -b ./WGRS_Hzea_BamFiles.txt -I -d 70 --threads 6 -O u -o /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/FieldHzea.bcf
+bcftools mpileup -f /media/megan/"New Volume1"/Hzea_genome/GCA_002150865.1_Hzea_1.0_genomic.fna -b ./WGRS_Hzea_BamFiles.txt -I -d 70 --threads 6 -O u -o /media/megan/"New Volume1"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1/FieldHzea.bcf
 
 
-cd /media/megan/"New Volume"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1
+cd /media/megan/"New Volume1"/Hzea_WGRS_Bowtie2_output/WGRS_mpileupANDvcftools_output_v1
 
 bcftools call -vmO v -o ./FieldHzea_variantsonly.vcf ./FieldHzea.bcf #SNP calling and conversion to vcf format
 
@@ -201,6 +201,12 @@ vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2012.txt --out ./KZ118395.1_only/FieldHzea2012 --chr KZ118395.1 --freq
 
 vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2017.txt --out ./KZ118395.1_only/FieldHzea2017 --chr KZ118395.1 --freq
+
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2002.txt --out ./KZ118395.1_only/FieldHzea2002 --chr KZ118395.1 --het                                                                                                         
+                                                                                                                                                      
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2012.txt --out ./KZ118395.1_only/FieldHzea2012 --chr KZ118395.1 --het
+
+vcftools --vcf thinned_FieldHzea_variantsonly.vcf.recode.vcf --keep /home/megan/scripts/Field_HZ_Pop_Genomics/pop_files/WGS_2017.txt --out ./KZ118395.1_only/FieldHzea2017 --chr KZ118395.1 --het
 
 vcftools --vcf ./FieldHzea_variantsonly.vcf --recode --out ./KZ118395.1_only/KZ118395.1_thinned_FieldHzea_variantsonly.vcf --chr KZ118395.1 --minDP 3  --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.75 --remove-indels
 
