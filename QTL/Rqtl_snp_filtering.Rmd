@@ -1,0 +1,108 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+```{r, message = FALSE, warning = FALSE}
+library(qtl)
+library(tidyverse)
+```
+
+## Read in the data files
+
+```{r}
+DEO9A1 <- read.cross("csvs", "~/Desktop/UMD/Crosses_Analysis/rqtl",
+           genfile = "BV_DE107_O9_BZM_A1.gen.csv", 
+           phefile = "BV_DE107_O9_BZM_A1.phen.csv",
+           na.strings = "-",
+           genotypes=c("a","h","b"),
+           alleles=c("a","b"))
+```
+
+
+## Calculate cross summary statistics
+
+```{r}
+nind(DEO9A1)
+nphe(DEO9A1)
+nchr(DEO9A1)
+totmar(DEO9A1)
+```
+
+## Remove markers that deviated from expected 1:2:1 genotype ratio 
+ 
+```{r, message = FALSE, warning = FALSE}
+gt <- geno.table(DEO9A1)
+
+head(gt[gt$P.value < 0.01/totmar(DEO9A1),])
+```
+
+```{r}
+todrop <- rownames(gt[gt$P.value < 0.01/totmar(DEO9A1),])
+DEO9A1 <- drop.markers(DEO9A1, todrop)
+```
+
+### Remove duplicate markers
+
+```{r}
+dupmar <- findDupMarkers(DEO9A1) 
+DEO9A1 <- drop.markers(DEO9A1, unlist(dupmar))
+```
+
+
+## Plot missingness data for loci and individuals
+
+Some individuals and markers have very high amounts of missing data which could indicate problems with DNA quality for those individuals or loci construction for that marker. Those with the highest amounts of missing data will be pruned.
+
+```{r}
+plot(ntyped(DEO9A1), ylab="# typed markers", main="# genotypes by individual", pch = 1, cex = 1)
+plot(ntyped(DEO9A1, "mar"), ylab="# typed individuals", main="# genotypes by marker", pch = 1, cex = 0.2, col=alpha(rgb(0,0,0), 0.1))
+```
+
+
+### Remove markers genotyped in less than 25 individuals 
+
+```{r}
+nt.bymar <- ntyped(DEO9A1, "mar")
+todrop <- names(nt.bymar[nt.bymar < 25])
+DEO9A1 <- drop.markers(DEO9A1, todrop)
+```
+
+### Remove individuals genotype at less than 500 sites 
+
+```{r}
+DEO9A1 <- subset(DEO9A1, ind = (ntyped(DEO9A1) > 500))
+```
+
+
+```{r}
+nind(DEO9A1)
+nphe(DEO9A1)
+nchr(DEO9A1)
+totmar(DEO9A1)
+```
+
+# Plot genotype frequencies by individual
+
+Nothing looks concerning here
+
+```{r}
+g <- pull.geno(DEO9A1)
+gfreq <- apply(g, 1, function(a) table(factor(a, levels=1:3)))
+gfreq <- t(t(gfreq) / colSums(gfreq))
+par(mfrow=c(1,3), las=1)
+for(i in 1:3)
+plot(gfreq[i,], ylab="Genotype frequency", main=c("AA", "AB", "BB")[i],
+ylim=c(0,1))
+```
+
+
+```{r}
+plot(ntyped(DEO9A1), ylab="# typed markers", main="# genotypes by individual", pch = 1, cex = 1, ylim =c(0,5000))
+plot(ntyped(DEO9A1, "mar"), ylab="# typed individuals", main="# genotypes by marker", pch = 20, cex = 0.7, col=alpha(rgb(0,0,0), 0.1), ylim = c(0,150))
+
+```
+
+
+
+

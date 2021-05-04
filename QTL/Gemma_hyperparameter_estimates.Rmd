@@ -1,0 +1,85 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+setwd("~/Desktop/UMD/Crosses_Analysis/gemma/hyper_est")
+files <- list.files(pattern = "refilter*")
+file_names <- gsub("[.hyp.txt]", "", files)
+file_names <- gsub("[refilter_]", "", file_names)
+
+for (i in 1:length(files)) {
+assign(paste(file_names[i]), read.table(paste( "~/Desktop/UMD/Crosses_Analysis/gemma/hyper_est/",files[i], sep = ""), header = TRUE)) 
+}
+```
+
+```{r}
+DEO9A1_DD <- do.call("rbind",mget(ls(pattern = "^DEO9A1DD*")))
+DEO9A1_CL <- do.call("rbind",mget(ls(pattern = "^DEO9A1CL*")))
+BAP11A1_DD <- do.call("rbind",mget(ls(pattern = "^BAP11A1DD*")))
+BAP11A1_CL <- do.call("rbind",mget(ls(pattern = "^BAP11A1CL*")))
+```
+
+## Calculate mean and 95% CI for each hyperparameter
+```{r}
+colMeans(DEO9A1_DD)
+sapply(DEO9A1_DD, quantile, probs=c(0.025, 0.975))
+```
+
+```{r}
+colMeans(DEO9A1_CL)
+sapply(DEO9A1_CL, quantile, probs=c(0.025, 0.975))
+```
+
+```{r}
+colMeans(BAP11A1_DD)
+sapply(BAP11A1_DD, quantile, probs=c(0.025, 0.975))
+```
+
+```{r}
+colMeans(BAP11A1_CL)
+sapply(BAP11A1_CL, quantile, probs=c(0.025, 0.975))
+```
+
+## Plot posterior for PVE and PGE
+
+```{r}
+#png(filename="~/Desktop/pve.png")
+plot(density(DEO9A1DD1$pve), type="l", ylab="pve", main="pve", col = "red")
+lines(density(BAP11A1DD1$pve))
+lines(density(BAP11A1DD2$pve))
+lines(density(BAP11A1DD3$pve))
+lines(density(BAP11A1DD4$pve))
+lines(density(BAP11A1DD5$pve))
+lines(density(DEO9A1DD2$pve), col = "red")
+lines(density(DEO9A1DD3$pve), col = "red")
+lines(density(DEO9A1DD4$pve), col = "red")
+lines(density(DEO9A1DD5$pve), col = "red")
+#dev.off()
+```
+
+
+```{r}
+#png(filename="~/Desktop/pge.png")
+plot(density(DEO9A1DD1$pge), type="l", ylab="pge", main="pge", col = "red")
+lines(density(BAP11A1DD1$pge))
+lines(density(BAP11A1DD2$pge))
+lines(density(BAP11A1DD3$pge))
+lines(density(BAP11A1DD4$pge))
+lines(density(BAP11A1DD5$pge))
+lines(density(DEO9A1DD2$pge), col = "red")
+lines(density(DEO9A1DD3$pge), col = "red")
+lines(density(DEO9A1DD4$pge), col = "red")
+lines(density(DEO9A1DD5$pge), col = "red")
+#dev.off()
+```
+
+
+

@@ -1,0 +1,111 @@
+```{r, include = FALSE}
+library(tidyverse)
+library(CMplot)
+```
+
+
+```{r}
+Map <- read.table(file = "Hzea_superScaf_genome.txt", header = T)
+```
+
+```{r}
+BAP11A1_DD <- read.csv("BAP11A1_DD_all_snps_4.5.21.csv", header = T) %>% filter(allele_frequency > .05) 
+
+BAP11A1_CL <- read.csv("BAP11A1_CL_all_snps_4.5.21.csv", header = T) %>% filter(allele_frequency > .05) 
+
+DEO9A1_DD <- read.csv("DEO9A1_DD_all_snps_4.5.21.csv", header = T) %>% filter(allele_frequency > .05) 
+
+DEO9A1_CL <- read.csv("DEO9A1_CL_all_snps_4.5.21.csv", header = T) %>% filter(allele_frequency > .05) 
+
+```
+
+
+## Plot all chromosomes
+
+```{r}
+plot_QTL <- function(X, name){
+
+merged_Map <- merge(Map, X, by.x = "Scaf", by.y = "scaffold")
+merged_Map <- merged_Map[order(merged_Map[,5], merged_Map[,6], merged_Map[,3], 
+                               merged_Map[,1], merged_Map[,9]),]
+with_artPos <- data.frame()
+
+  for (i in seq(c(1:max(merged_Map$Chr)))){
+    sub_chrom <- subset(merged_Map, Chr == i)
+    artPos <- seq(from = 1, to = (nrow(sub_chrom)))
+    comb <- data.frame(cbind(sub_chrom, artPos))
+    with_artPos <- rbind(with_artPos, comb)
+  }
+
+with_artPos$SnpName <- seq(from = 1, to = nrow(with_artPos), by = 1)
+
+For_plot <- data.frame(cbind(with_artPos$SnpName, with_artPos$Chr, with_artPos$radtag_position, with_artPos$p_lrt, with_artPos$gamma, with_artPos$additive_effect))
+names(For_plot) <- c("SnpName", "Chr", "Pos", "Pval", "Gamma", "Eff")
+str(For_plot)#sanity check
+For_plot$SnpName <- as.factor(For_plot$SnpName)
+
+SNPs <- For_plot %>% filter(Pval < .01 & Gamma > 0.01)  %>% pull(SnpName) 
+
+For_plot_1 <- For_plot %>% select(SnpName, Chr, Pos, Eff)
+For_plot_2 <- For_plot %>% select(SnpName, Chr, Pos, Pval)
+
+For_plot_1$Eff <- abs(For_plot$Eff)
+
+
+CMplot(For_plot_1, type="p", plot.type="m", LOG10=FALSE, threshold=NULL,file="jpg", memo=name, dpi=300, col=c("grey50","grey70"), pch = 21, cex = 0.8,  highlight=SNPs, ylab="Additive effect",highlight.col="dark blue", highlight.cex=0.8, highlight.pch=19, file.output=TRUE, verbose=TRUE, width=14, height=6, xticks.pos = 1)
+
+CMplot(For_plot_2, type="p", plot.type="m", LOG10=TRUE, threshold=NULL,file="jpg", memo=name, dpi=300, col=c("grey50","grey70"), pch = 21, cex = 0.8,  highlight=SNPs, highlight.col="dark blue", highlight.cex=0.8, highlight.pch=19, file.output=TRUE, verbose=TRUE, width=14, height=6, xticks.pos = 1)
+}
+```
+
+```{r}
+plot_QTL(BAP11A1_DD, "BAP11A1_DD")
+plot_QTL(BAP11A1_CL, "BAP11A1_CL")
+plot_QTL(DEO9A1_DD, "DEO9A1_DD")
+plot_QTL(DEO9A1_CL, "DEO9A1_CL")
+```
+
+## Plot single chromosome
+
+```{r}
+plot_QTL_chrom <- function(X, name, chrom){
+
+merged_Map <- merge(Map, X, by.x = "Scaf", by.y = "scaffold")
+merged_Map <- merged_Map[order(merged_Map[,5], merged_Map[,6], merged_Map[,3], 
+                               merged_Map[,1], merged_Map[,9]),]
+with_artPos <- data.frame()
+
+  for (i in seq(c(1:max(merged_Map$Chr)))){
+    sub_chrom <- subset(merged_Map, Chr == i)
+    artPos <- seq(from = 1, to = (nrow(sub_chrom)))
+    comb <- data.frame(cbind(sub_chrom, artPos))
+    with_artPos <- rbind(with_artPos, comb)
+  }
+
+with_artPos$SnpName <- seq(from = 1, to = nrow(with_artPos), by = 1)
+
+For_plot <- data.frame(cbind(with_artPos$SnpName, with_artPos$Chr, with_artPos$radtag_position, with_artPos$p_lrt, with_artPos$gamma, with_artPos$additive_effect))
+names(For_plot) <- c("SnpName", "Chr", "Pos", "Pval", "Gamma", "Eff")
+str(For_plot)#sanity check
+For_plot$SnpName <- as.factor(For_plot$SnpName)
+
+SNPs <- For_plot %>% filter(Pval < .01, Gamma > 0.01)  %>% pull(SnpName) 
+#str(SNPs)
+
+For_plot <- For_plot %>% select(SnpName, Chr, Pos, Eff) %>% filter(Chr == chrom)
+
+For_plot$Eff <- abs(For_plot$Eff)
+
+
+CMplot(For_plot, type="p", plot.type="m", LOG10=FALSE, threshold=NULL,file="jpg", memo=name, dpi=300, col=c("grey50","grey70"), pch = 21, cex = 0.8, highlight=SNPs,
+       highlight.col="dark blue", highlight.cex=0.8, highlight.pch=19, file.output=TRUE, verbose=TRUE, width=14, height=6)
+}
+```
+
+
+```{r}
+plot_QTL_chrom(BAP11A1_DD, "BAP11A1_DD_7", 7)
+plot_QTL_chrom(BAP11A1_CL, "BAP11A1_CL_7", 7)
+plot_QTL_chrom(DEO9A1_DD, "DEO9A1_DD_7", 7)
+plot_QTL_chrom(DEO9A1_CL, "DEO9A1_CL_7", 7)
+```

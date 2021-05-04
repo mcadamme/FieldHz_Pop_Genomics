@@ -1,0 +1,82 @@
+```{r}
+library(qtl)
+```
+
+## Estimate pairwise Recombionation fraction and LOD
+```{r}
+DEO9A1 <- est.rf(DEO9A1)
+```
+
+## Organize markers into linkage groups
+
+```{r}
+DEO9A1_org <- formLinkageGroups(DEO9A1, max.rf=0.2, min.lod=16, reorgMarkers=TRUE)
+```
+
+## Arrange marker order 
+
+```{r}
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 1, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 2, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 3, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 4, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 5, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 6, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 7, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 8, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 9, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 10, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 11, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 12, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 13, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 14, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 15, error.prob=0.005,  use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 16, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 17, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 18, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 19, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 20, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 21, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 22, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 23, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 24, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 25, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 26, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 27, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 28, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 29, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+DEO9A1_org <- orderMarkers(DEO9A1_org, chr = 30, error.prob=0.005, use.ripple=TRUE, window = 6, map.function = "kosambi")
+
+```
+
+
+

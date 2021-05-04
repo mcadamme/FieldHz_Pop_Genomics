@@ -1,0 +1,120 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+ 
+```{r}
+library(tidyverse)
+theme_set(theme_bw(base_size=12))
+theme_update(panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), 
+  plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+
+BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/gemma/BAP11A1_DD_all_snps_4.5.21.csv", header = T)#BC0805
+BAP11A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/gemma/BAP11A1_CL_all_snps_4.5.21.csv", header = T)#providence
+DEO9A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/gemma/DEO9A1_DD_all_snps_4.5.21.csv", header = T)#ObsII
+DEO9A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/gemma/DEO9A1_CL_all_snps_4.5.21.csv", header = T)#Obs
+
+
+chrom_info <- read.csv("~/Desktop/UMD/Crosses_Analysis/B.mori/B_mori_assembly_info.csv", header = TRUE)
+
+chrom_info$B_mori_length <- as.numeric(gsub(",", "", chrom_info$B_mori_length, fixed=TRUE))
+
+scaf_info <- read.table("~/Desktop/UMD/Crosses_Analysis/B.mori/Hzea_1.0_genomic.fasta.scaf.length.txt", header = TRUE)
+
+map <- read.table("~/Desktop/UMD/Crosses_Analysis/B.mori/Hzea_superScaf_genome.txt", header = TRUE)
+```
+
+## Calculate total length of each linkage group 
+
+```{r}
+map2 <- merge(map, scaf_info, by.x = "Scaf", by.y = "Scaffold") %>%
+  group_by(Chr) %>%
+  summarize(length = sum(length))
+
+```
+
+## Compare H. zea linkage group length and B. mori chromsome length
+
+```{r}
+chrom_info <- merge(map2, chrom_info, by.x = "Chr", by.y = "H_zea_chr", all.x = TRUE)
+
+ggplot(chrom_info, aes(y = length, x= B_mori_length)) +
+  geom_point() +
+  labs(y = "H. zea linkage group length", x = "B. mori chromosome length")
+```
+
+## Add linkage group information to SNPs for each treatment
+
+```{r}
+BAP11A1_DD <- merge(BAP11A1_DD, map, by.x = "scaffold", by.y = "Scaf", all.x = TRUE)
+BAP11A1_CL <- merge(BAP11A1_CL, map, by.x = "scaffold", by.y = "Scaf", all.x = TRUE)
+
+DEO9A1_DD <- merge(DEO9A1_DD, map, by.x = "scaffold", by.y = "Scaf", all.x = TRUE)
+DEO9A1_CL <- merge(DEO9A1_CL, map, by.x = "scaffold", by.y = "Scaf", all.x = TRUE)
+```
+
+
+## Calculate mean and total effect size for SNPs on each linkage group.
+
+```{r}
+BAP11A1_DD_eff_by_chr <- BAP11A1_DD %>%
+  group_by(Chr) %>%
+  summarize(tot_eff = sum(abs(additive_effect)), mean_eff = mean(abs(additive_effect))) 
+
+
+BAP11A1_DD_eff_by_chr <- merge(BAP11A1_DD_eff_by_chr, chrom_info, by = "Chr") %>% 
+  filter(Chr < 32)
+
+DEO9A1_DD_eff_by_chr <- DEO9A1_DD %>%
+  group_by(Chr) %>%
+  summarize(tot_eff = sum(abs(additive_effect)), mean_eff = mean(abs(additive_effect))) 
+
+DEO9A1_DD_eff_by_chr <- merge(DEO9A1_DD_eff_by_chr, chrom_info, by.x = "Chr") %>% 
+  filter(Chr < 32) 
+
+```
+
+```{r}
+
+#png('~/Desktop/DEO9A1_DD_eff_by_chr.png', width = 5, height = 5, units = 'in', res = 500)
+ggplot(DEO9A1_DD_eff_by_chr, aes(y = mean_eff, x = length)) +
+  geom_point(alpha = 0.6, size = 3) +
+  labs(x = "Linkage group length", y = "Mean effect size", tag = "B")+
+  geom_text(
+    label = DEO9A1_DD_eff_by_chr$Chr, nudge_y = 1, 
+    check_overlap = T, size = 2) +
+  geom_smooth(method = lm, se = FALSE, linetype = "dashed", color="black", size = 1)
+#dev.off()
+
+#png('~/Desktop/BAP11A1_DD_eff_by_chr.png', width = 5, height = 5, units = 'in', res = 500)
+ggplot(BAP11A1_DD_eff_by_chr, aes(y = mean_eff, x = length)) +
+  geom_point(alpha = 0.6, size = 3) +
+  labs(x = "Linkage group length", y = "Mean effect size", tag = "A")+
+  geom_text(
+    label = BAP11A1_DD_eff_by_chr$Chr, nudge_y = 0.5, 
+    check_overlap = T, size = 2) +
+  geom_smooth(method = lm, se = FALSE, linetype = "dashed", color="black", size = 1)
+#dev.off()
+
+
+```
+
+
+
+```{r}
+cor.test(BAP11A1_DD_eff_by_chr$mean_eff, BAP11A1_DD_eff_by_chr$length)
+
+cor.test(DEO9A1_DD_eff_by_chr$mean_eff, DEO9A1_DD_eff_by_chr$length)
+```
+
+
+
+
+
+
+

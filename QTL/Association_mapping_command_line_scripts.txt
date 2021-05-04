@@ -1,0 +1,121 @@
+##### Stacks demultiplex
+
+~/programs/stacks-2.55/process_radtags -1 ~/xspace/raw_data/ddRAD/pool_1_S387_L003_R1_001.fastq.gz -2  ~/xspace/raw_data/ddRAD/pool_1_S387_L003_R2_001.fastq.gz --paired -b ~/xspace/barcodes/barcodes_lib1.txt -o ~/xspace/demultiplexed/lib_1 -w 0.1 -s 20 --renz-1 'ecoRI' --renz-2 'mspI' --adapter_1 AATGATACGGCGACCACCGAGATCT --adapter_2 CAAGCAGAAGACGGCATACGAGAT --adapter_mm 2
+
+##### Bowtie align
+
+for file in `ls ~/xspace/demultiplexed/lib_1/*rem.1.fq.gz`
+do
+base=$(basename $file "rem.1.fq.gz")
+~/miniconda3/bin/bowtie2 -x ~/xspace/reference_genome/Hzea -1 ~/xspace/demultiplexed/lib_1/${base}1.fq.gz -2 ~/xspace/demultiplexed/lib_1/${base}2.fq.gz -U ~/xspace/demultiplexed/lib_1/${base}rem.1.fq.gz, ~/xspace/demultiplexed/lib_1/${base}rem.2.fq.gz -S ~/xspace/aligned/BV_BA52_P11BZM_A1_DD/${base}sam --very-sensitive --threads 1
+done
+
+
+##### Sam to sorted bam convert 
+
+for file in *.sam; 
+do
+    samtools view -S -b $file > "`basename $file .sam`.bam"
+done
+
+for file in *.bam; 
+do
+    samtools sort $file > "`basename $file .bam`.sort.bam"
+done
+
+for file in *.sort.bam; 
+do
+    samtools index $file 
+done
+
+
+##### Gstacks
+
+~/programs/stacks-2.55/gstacks -I ~/xspace/aligned/sorted_bam/ -M ~/xspace/aligned/sorted_bam/pop_map.txt -O ~/xspace/stacks -t 4
+
+#### Populations
+
+~/programs/stacks-2.55/populations -P ~/xspace/stacks \
+-M ~/xspace/stacks/pop_map/pop_map_DEO9A1.txt \
+-O ~/xspace/stacks/populations_DEO9A1 \
+--map-type F2 --map-format rqtl --vcf --plink \
+-t 4 --write-single-snp --min-mac 3 -r .1 --hwe
+
+~/programs/stacks-2.55/populations -P ~/xspace/stacks /
+-M ~/xspace/stacks/pop_map/pop_map_BAP11A1.txt \
+-O ~/xspace/stacks/populations_BAP11A1 \
+--map-type F2 --map-format rqtl --vcf --plink \
+-t 4 --write-single-snp --min-mac 3 -r .1 --hwe
+
+##### Plink file filtering and format conversion 
+
+~/programs/plink --vcf DEO9A1.snps.vcf --make-bed --out DEO9A1_vcf --const-fid 0 --allow-extra-chr 
+~/programs/plink --bfile DEO9A1_vcf --make-bed --out DEO9A1_filter --const-fid 0 --allow-extra-chr --mind 0.8 --geno 0.2 --hwe2 0.01 --mac 3
+~/programs/plink --bfile DEO9A1_filter --make-bed --out DEO9A1_nophen --allow-extra-chr --allow-no-sex 
+~/programs/plink --bfile DEO9A1_nophen --pheno DEO9A1.plink.phen.txt --make-bed --allow-extra-chr --allow-no-sex --out DEO9A1_phen
+~/programs/plink --bfile DEO9A1_phen --recode --out DEO9A1 --allow-extra-chr --allow-no-sex
+
+
+~/programs/plink --vcf BAP11A1.snps.vcf --make-bed --out BAP11A1_vcf --const-fid 0 --allow-extra-chr 
+~/programs/plink --bfile BAP11A1_vcf --make-bed --out BAP11A1_filter --const-fid 0 --allow-extra-chr --mind 0.8 --geno 0.2 --hwe2 0.01 --mac 3
+~/programs/plink --bfile BAP11A1_filter --make-bed --out BAP11A1_nophen --allow-extra-chr --allow-no-sex 
+~/programs/plink --bfile BAP11A1_nophen --pheno BAP11A1.plink.phen.txt --make-bed --allow-extra-chr --allow-no-sex --out BAP11A1_phen
+~/programs/plink --bfile BAP11A1_phen --recode --out BAP11A1 --allow-extra-chr --allow-no-sex
+
+##### Link impute 
+
+java -jar ~/programs/LinkImpute.jar -q DEO9A1.ped DEO9A1.impute.ped
+java -jar ~/programs/LinkImpute.jar -q BAP11A1.ped BAP11A1.impute.ped
+
+
+##### Plink file convert
+~/programs/plink --script plink_script_BAP11A1_CL.txt
+~/programs/plink --script plink_script_DEO9A1_DD.txt
+~/programs/plink --script plink_script_DEO9A1_CL.txt
+~/programs/plink --script plink_script_BAP11A1_DD.txt
+
+plink_script_BAP11A1_DD.txt:
+
+--ped BAP11A1.impute.ped 
+--map BAP11A1_phen.map 
+--allow-no-sex
+--allow-extra-chr
+--make-bed 
+--out ../BAP11A1_DD
+--keep keep_list_BAP11A1_DD.txt 
+
+##### Gemma LMM
+
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -lm 4 -o refilter_DEO9A1_DD
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -lm 4 -o refilter_DEO9A1_CL
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -lm 4 -o refilter_BAP11A1_DD
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -lm 4 -o refilter_BAP11A1_CL
+
+##### Gemma BSLMM
+
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_1
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_1
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_1
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_1
+
+
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_2
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_2
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_2
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_2
+
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_3
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_3
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_3
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_3
+
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_4
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_4
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_4
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_4
+
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_5
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_5
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_5
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_5
+
