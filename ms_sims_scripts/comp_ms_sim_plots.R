@@ -51,10 +51,15 @@ a <- ggplot(df3, aes(x = df3$V1, fill = df3$sim_name)) +
 dev.off()
 
 #getting p-vals - relative to 6 s.d. threshold @10kb window for 2002-2017 
-nrow(subset(data_1, V1 > 0.08))/nrow(na.omit(data_1))
-nrow(subset(data_2, V1 > 0.08))/nrow(na.omit(data_2))
-nrow(subset(data_3, V1 > 0.08))/nrow(na.omit(data_3))
-nrow(subset(data_4, V1 > 0.08))/nrow(na.omit(data_4))
+nrow(subset(data_1, V1 > 0.078))/nrow(na.omit(data_1))
+nrow(subset(data_2, V1 > 0.078))/nrow(na.omit(data_2))
+nrow(subset(data_3, V1 > 0.078))/nrow(na.omit(data_3))
+nrow(subset(data_4, V1 > 0.078))/nrow(na.omit(data_4))
+
+nrow(subset(data_1, V1 > 0.292))/nrow(na.omit(data_1))#@scaffold 1612
+nrow(subset(data_2, V1 > 0.292))/nrow(na.omit(data_2))
+nrow(subset(data_3, V1 > 0.292))/nrow(na.omit(data_3))
+nrow(subset(data_4, V1 > 0.292))/nrow(na.omit(data_4))
 
 #relative to 6 s.d. threshold @40kb window for 2002-2017 
 nrow(subset(data_1, V1 > 0.047))/nrow(na.omit(data_1))
