@@ -75,12 +75,12 @@ str(merged_W_spl)
 merged_W_spl$Pos <- as.numeric(as.character(merged_W_spl$Pos))
 
 
-#subsetting by Cry1 scaffolds & windows
-Cry1_KZ118241.1 <- subset(merged_W_spl, Scaf == "KZ118241.1" & Pos > 140000 & Pos < (147000+1000))#adding 1000 to get full window
+#subsetting by Cry1 scaffolds & windows - commented out scaffolds that were not significant after we changed how we defined the QTL windows.
+#Cry1_KZ118241.1 <- subset(merged_W_spl, Scaf == "KZ118241.1" & Pos > 140000 & Pos < (147000+1000))#adding 1000 to get full window
 Cry1_KZ118067.1 <- subset(merged_W_spl, Scaf == "KZ118067.1" & Pos > 144000 & Pos < (146000+1000))
 Cry1_KZ116099.1 <- subset(merged_W_spl, Scaf == "KZ116099.1" & Pos > 2000 & Pos < (7000+1000))
 Cry1_KZ117975.1 <- subset(merged_W_spl, Scaf == "KZ117975.1" & Pos > 43000 & Pos < (46000+1000))
-Cry1_KZ118133.1 <- subset(merged_W_spl, Scaf == "KZ118133.1" & Pos > 34000 & Pos < (35000+1000))
+#Cry1_KZ118133.1 <- subset(merged_W_spl, Scaf == "KZ118133.1" & Pos > 34000 & Pos < (35000+1000))
 
 #writing position tables
 #write.csv(Cry1_KZ118241.1[,c(1,2)], file = "Cry1_KZ118241.1_pos.csv")
@@ -90,7 +90,8 @@ Cry1_KZ118133.1 <- subset(merged_W_spl, Scaf == "KZ118133.1" & Pos > 34000 & Pos
 #write.csv(Cry1_KZ118133.1[,c(1,2)], file = "Cry1_KZ118133.1_pos.csv")
 
 #All Cry1
-All_Cry1 <- rbind(Cry1_KZ118241.1, Cry1_KZ118067.1, Cry1_KZ116099.1, Cry1_KZ117975.1, Cry1_KZ118133.1)
+#All_Cry1 <- rbind(Cry1_KZ118241.1, Cry1_KZ118067.1, Cry1_KZ116099.1, Cry1_KZ117975.1, Cry1_KZ118133.1)
+All_Cry1 <- rbind(Cry1_KZ118067.1, Cry1_KZ116099.1, Cry1_KZ117975.1)
 All_Cry1 <- na.omit(All_Cry1)
 str(All_Cry1)
 
