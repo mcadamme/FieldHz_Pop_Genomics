@@ -1,0 +1,84 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Read in all replicate runs
+
+```{r}
+setwd("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_bslmm_output/")
+files <- list.files(pattern = "*.hyp.txt")
+file_names <- gsub("[.hyp.txt]", "", files)
+
+for (i in 1:length(files)) {
+assign(paste(file_names[i]), read.table(paste( "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_bslmm_output/",files[i], sep = ""), header = TRUE)) 
+}
+```
+
+# Merge replicate runs
+
+```{r}
+DEO9A1_DD <- do.call("rbind",mget(ls(pattern = "^DEO9A1_DD*")))
+DEO9A1_CL <- do.call("rbind",mget(ls(pattern = "^DEO9A1_CL*")))
+BAP11A1_DD <- do.call("rbind",mget(ls(pattern = "^BAP11A1_DD*")))
+BAP11A1_CL <- do.call("rbind",mget(ls(pattern = "^BAP11A1_CL*")))
+```
+
+## Calculate mean and 95% CI for each treatment and hyperparameter
+
+```{r}
+colMeans(DEO9A1_DD)
+sapply(DEO9A1_DD, quantile, probs=c(0.025, 0.975))
+```
+
+```{r}
+colMeans(DEO9A1_CL)
+sapply(DEO9A1_CL, quantile, probs=c(0.025, 0.975))
+```
+
+```{r}
+colMeans(BAP11A1_DD)
+sapply(BAP11A1_DD, quantile, probs=c(0.025, 0.975))
+```
+
+```{r}
+colMeans(BAP11A1_CL)
+sapply(BAP11A1_CL, quantile, probs=c(0.025, 0.975))
+```
+
+## Plot posterior for PVE and PGE
+
+```{r}
+plot(density(DEO9A1_DD_BSLMM_1$pve), type="l", ylab="pve", main="pve", col = "red")
+lines(density(BAP11A1_DD_BSLMM_1$pve))
+lines(density(BAP11A1_DD_BSLMM_2$pve))
+lines(density(BAP11A1_DD_BSLMM_3$pve))
+lines(density(BAP11A1_DD_BSLMM_4$pve))
+lines(density(BAP11A1_DD_BSLMM_5$pve))
+lines(density(DEO9A1_DD_BSLMM_2$pve), col = "red")
+lines(density(DEO9A1_DD_BSLMM_3$pve), col = "red")
+lines(density(DEO9A1_DD_BSLMM_4$pve), col = "red")
+lines(density(DEO9A1_DD_BSLMM_5$pve), col = "red")
+```
+
+
+```{r}
+plot(density(DEO9A1_DD_BSLMM_1$pge), type="l", ylab="pve", main="pve", col = "red")
+lines(density(BAP11A1_DD_BSLMM_1$pge))
+lines(density(BAP11A1_DD_BSLMM_2$pge))
+lines(density(BAP11A1_DD_BSLMM_3$pge))
+lines(density(BAP11A1_DD_BSLMM_4$pge))
+lines(density(BAP11A1_DD_BSLMM_5$pge))
+lines(density(DEO9A1_DD_BSLMM_2$pge), col = "red")
+lines(density(DEO9A1_DD_BSLMM_3$pge), col = "red")
+lines(density(DEO9A1_DD_BSLMM_4$pge), col = "red")
+lines(density(DEO9A1_DD_BSLMM_5$pge), col = "red")
+```
+
+
+

@@ -1,0 +1,206 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(grid)
+theme_set(theme_bw(base_size=10))
+theme_update(panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), 
+  plot.title = element_text(hjust = 0.5),
+  legend.position = "none")
+```
+
+```{r}
+F0_growth_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/F0_growth_phenotypes_DD.csv")
+
+F0_growth_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/F0_growth_phenotypes_CL.csv")
+
+BAP11A1 <-  read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/tabs/BV_BA52_P11_BZM_A1_Scored.csv") %>%
+  filter(Population != "BENZON", Population != "Benzon")
+
+DEO9A1 <- read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/tabs/BV_DE107_O9_BZM_A1_Scored.csv") %>%
+  filter(Population != "Benzon", Population != "Benzon")
+
+```
+
+```{r}
+F0_growth_DD <- F0_growth_DD %>% 
+  mutate(end_weight_mg = end_weight * 1000)
+
+F0_growth_CL <- F0_growth_CL %>% 
+  mutate(end_weight_mg = end_weight * 1000)
+
+BAP11A1 <- BAP11A1 %>% 
+  mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
+
+DEO9A1 <- DEO9A1 %>% 
+  mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
+  
+F0_growth_DD <- F0_growth_DD %>% 
+  mutate(field = case_when(family == "Benzon" ~ "Benzon", TRUE ~ "Field"))
+
+F0_growth_CL <- F0_growth_CL %>% 
+  mutate(field = case_when(family == "Benzon" ~ "Benzon", TRUE ~ "Field"))
+
+F0_growth <- rbind(F0_growth_CL, F0_growth_DD)
+```
+
+
+## New plots 8/21/21
+
+```{r}
+P_DD_A <- F0_growth_DD %>%
+  filter(diet_strain == "P", end_weight_mg != "", field == "Field") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "Resistant") +
+  annotate(geom = "segment", x = 147, y = 19, xend = 147, yend = 14, size = 5, color = "red", arrow = arrow(length = unit(5, "mm"))) +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+P_DD_B <- F0_growth_DD %>%
+  filter(diet_strain == "P", end_weight_mg != "", field == "Benzon") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "Susceptible") +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+P_DD_C <- BAP11A1 %>%
+  filter(end_weight_mg != "", Treatment == "DD") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "F2") +
+  coord_cartesian(xlim=c(0, 400)) +
+    scale_y_continuous(breaks=c(0,2,4,6,8,10), limits = c(0,10)) +
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+P_DD_plot <- grid.arrange(left = textGrob("A", gp = gpar(fontsize = 70), vjust = -13.5, hjust = 0.2), P_DD_A, P_DD_B, P_DD_C, ncol = 1)
+```
+
+```{r}
+ 
+O_DD_A <- F0_growth_DD %>%
+  filter(diet_strain == "O", end_weight_mg != "", field == "Field") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "") +
+  annotate(geom = "segment", x = 130, y = 19, xend = 130, yend = 13, size = 5, color = "red", 
+  arrow = arrow(length = unit(5, "mm")))  +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+O_DD_B <- F0_growth_DD %>%
+  filter(diet_strain == "O", end_weight_mg != "", field == "Benzon") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "") +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+O_DD_C <- DEO9A1 %>%
+  filter(end_weight_mg != "", Treatment == "DD") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "") +
+  coord_cartesian(xlim=c(0, 400))+
+  scale_y_continuous(breaks=c(0,2,4,6,8,10), limits = c(0,10)) +
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+O_DD_plot <- grid.arrange(left = textGrob("B", gp = gpar(fontsize = 70), vjust = -13.5, hjust = -0.2), O_DD_A, O_DD_B, O_DD_C, ncol = 1)
+```
+
+```{r}
+P_CL_A <- F0_growth_CL %>%
+  filter(diet_strain == "P", end_weight_mg != "", field == "Field") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "Resistant") +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+P_CL_B <- F0_growth_CL %>%
+  filter(diet_strain == "P", end_weight_mg != "", field == "Benzon") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "Susceptible") +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+P_CL_C <- BAP11A1 %>%
+  filter(end_weight_mg != "", Treatment == "CL") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "Weight (mg)", y = "F2") +
+  scale_y_continuous(breaks=c(0,2,4,6,8,10), limits =c(0,10)) +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54))
+
+P_CL_plot <- grid.arrange(left = textGrob("C", gp = gpar(fontsize = 70), vjust = -13.5, hjust = -0.2), P_CL_A, P_CL_B, P_CL_C, ncol = 1)
+```
+
+```{r}
+ 
+O_CL_A <- F0_growth_CL %>%
+  filter(diet_strain == "O", end_weight_mg != "", field == "Field") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "") +
+  coord_cartesian(xlim=c(0, 400))+
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+O_CL_B <- F0_growth_CL %>%
+  filter(diet_strain == "O", end_weight_mg != "", field == "Benzon") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "", y = "") +
+  coord_cartesian(xlim=c(0, 400))+
+  scale_y_continuous(breaks=c(0,2,4,6,8,10,12)) +
+  theme(text=element_text(size=54),
+        axis.text.x=element_blank())
+
+O_CL_C <- DEO9A1 %>%
+  filter(end_weight_mg != "", Treatment == "CL") %>%
+  ggplot(aes(x = end_weight_mg)) +
+  geom_histogram(fill = "grey60", binwidth = 10) +
+  labs(x = "Weight (mg)", y = "") +
+  scale_y_continuous(breaks=c(0,2,4,6,8,10), limits = c(0,10)) +
+  coord_cartesian(xlim=c(0, 400)) +
+  theme(text=element_text(size=54))
+
+O_CL_plot <- grid.arrange(left = textGrob("D", gp = gpar(fontsize = 70), vjust = -13.5, hjust = -0.2), O_CL_A, O_CL_B, O_CL_C, ncol = 1)
+```
+
+
+
+```{r}
+P_DD_plot <- grid.arrange(P_DD_plot, ncol = 1, left = textGrob("Number of individuals", rot = 90, gp = gpar(fontsize = 54)))
+
+O_DD_plot <- grid.arrange(O_DD_plot, ncol = 1, left = textGrob(" ", rot = 90, gp = gpar(fontsize = 54)))
+
+P_CL_plot <- grid.arrange(P_CL_plot, ncol = 1, left = textGrob("Number of individuals", rot = 90, gp = gpar(fontsize = 54)))
+
+O_CL_plot <- grid.arrange(O_CL_plot, ncol = 1, left = textGrob(" ", rot = 90, gp = gpar(fontsize = 54)))
+
+jpeg("~/Desktop/UMD/Crosses_Analysis/analysis/phenotypes_summary_2.jpg", width = 4000, height = 3000)
+grid.arrange(P_DD_plot, O_DD_plot, P_CL_plot, O_CL_plot, nrow = 2)
+dev.off()
+
+```
+
+
+
+

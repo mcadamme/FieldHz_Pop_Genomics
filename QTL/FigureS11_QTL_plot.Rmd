@@ -1,0 +1,143 @@
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(grid)
+theme_set(theme_bw(base_size=10))
+theme_update(panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), 
+  plot.title = element_text(),
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank(),
+  panel.margin = unit(0, "lines"),
+  strip.background = element_blank(),
+  panel.border = element_blank(),
+  legend.position = "none", 
+  strip.text.x = element_text(margin = margin(0,0,0,0, "cm")))
+```
+
+
+```{r}
+windows_DEO9A1_DD <-read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_DD.csv", header = TRUE)
+
+windows_BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_BAP11A1_DD.csv", header = TRUE)
+
+windows_DEO9A1_CL <-read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_CL.csv", header = TRUE)
+
+windows_BAP11A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_BAP11A1_CL.csv", header = TRUE)
+```
+
+
+```{r}
+BAP11A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/BAP11A1_CL_window_snps.csv") %>%  
+  filter(Chr != "",  allele_frequency > .1) %>%
+  mutate(color = case_when(gamma_sig_window == 0 & Chr %% 2 != 0 ~ 1, 
+                           gamma_sig_window == 0 & Chr %% 2 == 0 ~ 2, 
+                           gamma_sig_window == 1 & Chr %% 2 != 0 ~ 3, 
+                           gamma_sig_window == 1 & Chr %% 2 == 0 ~ 4))
+
+BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/BAP11A1_DD_window_snps.csv") %>%  
+  filter(Chr != "",  allele_frequency > .1) %>%
+  mutate(color = case_when(gamma_sig_window == 0 & Chr %% 2 != 0 ~ 1, 
+                           gamma_sig_window == 0 & Chr %% 2 == 0 ~ 2, 
+                           gamma_sig_window == 1 & Chr %% 2 != 0 ~ 3, 
+                           gamma_sig_window == 1 & Chr %% 2 == 0 ~ 4))
+
+DEO9A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/DEO9A1_CL_window_snps.csv") %>%  
+  filter(Chr != "",  allele_frequency > .1) %>%
+  mutate(color = case_when(gamma_sig_window == 0 & Chr %% 2 != 0 ~ 1, 
+                           gamma_sig_window == 0 & Chr %% 2 == 0 ~ 2, 
+                           gamma_sig_window == 1 & Chr %% 2 != 0 ~ 3, 
+                           gamma_sig_window == 1 & Chr %% 2 == 0 ~ 4))
+
+DEO9A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/DEO9A1_DD_window_snps.csv") %>%  
+  filter(Chr != "",  allele_frequency > .1) %>%
+  mutate(color = case_when(gamma_sig_window == 0 & Chr %% 2 != 0 ~ 1, 
+                           gamma_sig_window == 0 & Chr %% 2 == 0 ~ 2, 
+                           gamma_sig_window == 1 & Chr %% 2 != 0 ~ 3, 
+                           gamma_sig_window == 1 & Chr %% 2 == 0 ~ 4))
+```
+
+
+## Generate combined QTL plot
+
+```{r}
+DEO9A1_DD$Chr <- as.factor(DEO9A1_DD$Chr)
+levels(DEO9A1_DD$Chr) <- 1:43
+DEO9A1_DD_plot <- DEO9A1_DD %>%
+  ggplot(aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position), color = as.factor(color))) +
+  geom_point(data = DEO9A1_DD %>% filter(gamma_sig_window == 0), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  geom_point(data = DEO9A1_DD %>% filter(gamma_sig_window == 1), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  scale_color_manual(values = rep(c("grey15", "grey65", "red","red"), times = 24)) +
+  labs(x = "", y = "Additive effect", tag = "C") +
+  ylim(-50,50)+
+  geom_hline(yintercept = 0, color = "black", cex = 2) +
+  facet_wrap(~Chr, nrow = 1, strip.position="bottom", scales = "free_x", drop = FALSE) +
+  theme(text=element_text(size=42))
+
+DEO9A1_DD_plot 
+```
+
+```{r}
+DEO9A1_CL$Chr <- as.factor(DEO9A1_CL$Chr)
+levels(DEO9A1_CL$Chr) <- 1:43
+DEO9A1_CL_plot <- DEO9A1_CL %>%
+  ggplot(aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position), color = as.factor(color))) +
+  geom_point(data = DEO9A1_CL %>% filter(gamma_sig_window == 0), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  geom_point(data = DEO9A1_CL %>% filter(gamma_sig_window == 1), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  scale_color_manual(values = rep(c("grey15", "grey65", "red","red"), times = 24)) +
+  labs(x = "Linkage group", y = "Additive effect", tag = "D") +
+  ylim(-50,50)+
+  geom_hline(yintercept = 0, color = "black", cex = 2) +
+  facet_wrap(~Chr, nrow = 1, strip.position="bottom", scales = "free_x", drop = FALSE) +
+  theme(text=element_text(size=42))
+
+DEO9A1_CL_plot 
+```
+
+
+```{r}
+BAP11A1_DD$Chr <- as.factor(BAP11A1_DD$Chr)
+levels(BAP11A1_DD$Chr) <- 1:43
+BAP11A1_DD_plot <- BAP11A1_DD %>%
+  ggplot(aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position), color = as.factor(color))) +
+  geom_point(data = BAP11A1_DD %>% filter(gamma_sig_window == 0), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  geom_point(data = BAP11A1_DD %>% filter(gamma_sig_window == 1), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  scale_color_manual(values = rep(c("grey15", "grey65", "red","red"), times = 24)) +
+  labs(x = "", y = "Additive effect", tag = "A") +
+  ylim(-50,50)+
+  geom_hline(yintercept = 0, color = "black", cex = 2) +
+  facet_wrap(~Chr, nrow = 1, strip.position="bottom", scales = "free_x", drop = FALSE) +
+  theme(text=element_text(size=42))
+
+BAP11A1_DD_plot 
+```
+
+```{r}
+BAP11A1_CL$Chr <- as.factor(BAP11A1_CL$Chr)
+levels(BAP11A1_CL$Chr) <- 1:43
+
+BAP11A1_CL_plot <- BAP11A1_CL %>%
+  filter(allele_frequency > 0.25) %>%
+  ggplot(aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position), color = as.factor(color))) +
+  geom_point(data = BAP11A1_CL %>% filter(gamma_sig_window == 0), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  geom_point(data = BAP11A1_CL %>% filter(gamma_sig_window == 1), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 6) +
+  scale_color_manual(values = rep(c("grey15", "grey65", "red","red"), times = 24)) +
+  labs(x = "", y = "Additive effect", tag = "B") +
+  ylim(-50,50)+
+  geom_hline(yintercept = 0, color = "black", cex = 2) +
+  facet_wrap(~Chr, nrow = 1, strip.position="bottom", scales = "free_x", drop = FALSE) +
+  theme(text=element_text(size=42))
+
+BAP11A1_CL_plot 
+```
+
+
+```{r}
+jpeg("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/plots/QTL_plot_all_treatments_8.18.21", width = 2400, height = 2000)
+grid.arrange(BAP11A1_DD_plot, BAP11A1_CL_plot, DEO9A1_DD_plot, DEO9A1_CL_plot,  nrow = 4)
+dev.off()
+```
+
+
+
+

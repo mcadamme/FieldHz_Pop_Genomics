@@ -1,0 +1,104 @@
+
+```{r}
+library(tidyverse)
+```
+
+## Read in parent WGS genotypes
+
+```{r}
+parent_vcf_recode <- read.table("~/Desktop/UMD/Crosses_Analysis/Ref_allele/all_parent_calls.vcf", header = FALSE)
+```
+
+```{r}
+colnames(parent_vcf_recode) <- c("CHROM","POS", "ID", "REF", "ALT",	"QUAL",	"FILTER",	"INFO","FORMAT", "Field_1", "Benzon_1", "Benzon_2", "Field_2")
+```
+
+
+## Load all SNP files
+
+```{r}
+DEO9A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/DEO9A1_DD_all_snps_8.4.21.csv") 
+DEO9A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/DEO9A1_CL_all_snps_8.4.21.csv")
+BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/BAP11A1_DD_all_snps_8.4.21.csv") 
+BAP11A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/BAP11A1_CL_all_snps_8.4.21.csv") 
+```
+
+
+## Merge all SNP files with parent genotype info
+
+```{r}
+DEO9A1_DD_merged <- merge(DEO9A1_DD, parent_vcf_recode, by.x = c("scaffold", "position"), by.y = c("CHROM", "POS")) 
+
+DEO9A1_CL_merged <- merge(DEO9A1_CL, parent_vcf_recode, by.x = c("scaffold", "position"), by.y = c("CHROM", "POS"))
+
+BAP11A1_DD_merged <- merge(BAP11A1_DD, parent_vcf_recode, by.x = c("scaffold", "position"), by.y = c("CHROM", "POS")) 
+
+BAP11A1_CL_merged <- merge(BAP11A1_CL, parent_vcf_recode, by.x = c("scaffold", "position"), by.y = c("CHROM", "POS")) 
+```
+
+## Correct effect direction 
+
+Fix effect direction so that it is reported relative to the resistant field parent allele rather than allele0/allele1. 
+
+```{r}
+DEO9A1_DD_merged <- DEO9A1_DD_merged %>% 
+  separate(Benzon_1, sep = ":", into = c("Benzon_1", "Benzon_1_PL")) %>% 
+  separate(Benzon_2, sep = ":", into = c("Benzon_2", "Benzon_2_PL")) %>% 
+  separate(Field_1, sep = ":", into = c("Field_1", "Field_1_PL")) %>% 
+  separate(Field_2, sep = ":", into = c("Field_2", "Field_2_PL"))
+
+
+head(DEO9A1_DD_merged)
+```
+
+
+```{r}
+
+BAP11A1_DD_merged <- BAP11A1_DD_merged %>%
+  separate(Benzon_1, sep = ":", into = c("Benzon_1", "Benzon_1_PL")) %>% 
+  separate(Field_1, sep = ":", into = c("Field_1", "Field_1_PL")) %>% 
+  filter(Benzon_1 == "0/0" & Field_1 == "1/1" |Benzon_1 == "1/1" & Field_1 == "0/0") %>%
+  mutate(BENZ = case_when(Benzon_1 == "1/1" ~ ALT, Benzon_1 == "0/0" ~ REF)) %>%
+  mutate(FIELD = case_when(Field_1 == "1/1" ~ ALT, Field_1 == "0/0" ~ REF)) %>%
+  mutate(additive_effect_fixed = case_when(allele1 == BENZ & additive_effect < 0 ~ abs(additive_effect), allele1 == BENZ & additive_effect > 0 ~ additive_effect*(-1), allele1 == FIELD ~ additive_effect))
+
+
+BAP11A1_CL_merged <- BAP11A1_CL_merged %>%
+  separate(Benzon_1, sep = ":", into = c("Benzon_1", "Benzon_1_PL")) %>% 
+  separate(Field_1, sep = ":", into = c("Field_1", "Field_1_PL")) %>% 
+  filter(Benzon_1 == "0/0" & Field_1 == "1/1" |Benzon_1 == "1/1" & Field_1 == "0/0") %>%
+  mutate(BENZ = case_when(Benzon_1 == "1/1" ~ ALT, Benzon_1 == "0/0" ~ REF)) %>%
+  mutate(FIELD = case_when(Field_1 == "1/1" ~ ALT, Field_1 == "0/0" ~ REF)) %>%
+  mutate(additive_effect_fixed = case_when(allele1 == BENZ & additive_effect < 0 ~ abs(additive_effect), allele1 == BENZ & additive_effect > 0 ~ additive_effect*(-1), allele1 == FIELD ~ additive_effect))
+
+DEO9A1_DD_merged <- DEO9A1_DD_merged %>%
+  separate(Benzon_2, sep = ":", into = c("Benzon_2", "Benzon_2_PL")) %>% 
+  separate(Field_2, sep = ":", into = c("Field_2", "Field_2_PL")) %>% 
+  filter(Benzon_2 == "0/0" & Field_2 == "1/1" |Benzon_2 == "1/1" & Field_2 == "0/0") %>%
+  mutate(BENZ = case_when(Benzon_2 == "1/1" ~ ALT, Benzon_2 == "0/0" ~ REF)) %>%
+  mutate(FIELD = case_when(Field_2 == "1/1" ~ ALT, Field_2 == "0/0" ~ REF)) %>%
+  mutate(additive_effect_fixed = case_when(allele1 == BENZ & additive_effect < 0 ~ abs(additive_effect), allele1 == BENZ & additive_effect > 0 ~ additive_effect*(-1), allele1 == FIELD ~ additive_effect))
+
+
+DEO9A1_CL_merged <- DEO9A1_CL_merged %>%
+  separate(Benzon_2, sep = ":", into = c("Benzon_2", "Benzon_2_PL")) %>% 
+  separate(Field_2, sep = ":", into = c("Field_2", "Field_2_PL")) %>% 
+  filter(Benzon_2 == "0/0" & Field_2 == "1/1" |Benzon_2 == "1/1" & Field_2 == "0/0") %>%
+  mutate(BENZ = case_when(Benzon_2 == "1/1" ~ ALT, Benzon_2 == "0/0" ~ REF)) %>%
+  mutate(FIELD = case_when(Field_2 == "1/1" ~ ALT, Field_2 == "0/0" ~ REF)) %>%
+  mutate(additive_effect_fixed = case_when(allele1 == BENZ & additive_effect < 0 ~ abs(additive_effect), allele1 == BENZ & additive_effect > 0 ~ additive_effect*(-1), allele1 == FIELD ~ additive_effect))
+
+```
+
+## Write output SNP files with corrected effect direction
+
+```{r}
+write.csv(BAP11A1_DD_merged, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/BAP11A1_DD_snp_eff_8.4.21.csv")
+
+write.csv(BAP11A1_CL_merged, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/BAP11A1_CL_snp_eff_8.4.21.csv")
+
+write.csv(DEO9A1_DD_merged, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/DEO9A1_DD_snp_eff_8.4.21.csv")
+
+write.csv(DEO9A1_CL_merged, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/DEO9A1_CL_snp_eff_8.4.21.csv")
+
+```

@@ -1,0 +1,87 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+candidates <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/candidate_genes.csv", header = TRUE)
+
+candidates$start <- as.numeric(gsub(",","",candidates$start))
+candidates$stop <- as.numeric(gsub(",","",candidates$stop))
+
+map <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/Hzea_superScaf_genome_8.4.21.txt", header = TRUE)
+
+candidates <- candidates %>% merge(map, by.x = "scaf", by.y = "Scaf") %>%
+  mutate(start_pos = as.numeric(scaffold_lg_start) + as.numeric(start),
+         stop_pos = as.numeric(scaffold_lg_start) + as.numeric(stop))
+
+
+candidates$start_pos <- as.numeric(candidates$start_pos)
+candidates$end_pos <- as.numeric(candidates$start_pos)
+```
+
+```{r}
+windows_BAP11A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_BAP11A1_CL.csv")
+windows_BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_BAP11A1_DD.csv")
+windows_DEO9A1_CL  <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_CL.csv") 
+windows_DEO9A1_DD  <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_DD.csv") 
+
+windows_BAP11A1_CL$window_start_pos <- as.numeric(windows_BAP11A1_CL$window_start_pos)
+windows_BAP11A1_CL$window_end_pos <- as.numeric(windows_BAP11A1_CL$window_end_pos)
+```
+
+
+```{r}
+for (i in 1:nrow(windows_DEO9A1_DD)){
+  Sig <- candidates %>% filter(windows_DEO9A1_DD$window_lg_start[i] == Chr & as.numeric(windows_DEO9A1_DD$window_start_pos[i]) - 100000 < as.numeric(start_pos) & as.numeric(windows_DEO9A1_DD$window_end_pos[i]) + 100000 > as.numeric(start_pos))
+  Sig2 <- candidates %>% filter(windows_DEO9A1_DD$window_lg_start[i] == Chr & as.numeric(windows_DEO9A1_DD$window_start_pos[i]) - 100000 < as.numeric(end_pos) & as.numeric(windows_DEO9A1_DD$window_end_pos[i]) + 100000 > as.numeric(end_pos)) 
+     if (nrow(Sig) > 0 ) {
+       print(Sig)} 
+    if (nrow(Sig2) > 0 ) {
+       print(Sig2)}
+  }
+```
+
+```{r}
+for (i in 1:nrow(windows_BAP11A1_DD)){
+  Sig <- candidates %>% filter(windows_BAP11A1_DD$window_lg_start[i] == Chr & as.numeric(windows_BAP11A1_DD$window_start_pos[i]) - 100000 < as.numeric(start_pos) & as.numeric(windows_BAP11A1_DD$window_end_pos[i]) + 100000 > as.numeric(start_pos))
+  Sig2 <- candidates %>% filter(windows_BAP11A1_DD$window_lg_start[i] == Chr & as.numeric(windows_BAP11A1_DD$window_start_pos[i]) - 100000 < as.numeric(end_pos)  & as.numeric(windows_BAP11A1_DD$window_end_pos[i]) + 100000 > as.numeric(end_pos))
+     if (nrow(Sig) > 0 ) {
+       print(Sig)} 
+    if (nrow(Sig2) > 0 ) {
+       print(Sig2)}
+  }
+```
+
+
+```{r}
+for (i in 1:nrow(windows_DEO9A1_CL)){
+  Sig <- candidates %>% filter(windows_DEO9A1_CL$window_lg_start[i] == Chr & as.numeric(windows_DEO9A1_CL$window_start_pos[i])- 100000 < as.numeric(start_pos) & as.numeric(windows_DEO9A1_CL$window_end_pos[i]) + 100000 > as.numeric(start_pos))
+  Sig2 <- candidates %>% filter(windows_DEO9A1_DD$window_lg_start[i] == Chr & as.numeric(windows_DEO9A1_CL$window_start_pos[i]) - 100000 < as.numeric(end_pos) & as.numeric(windows_DEO9A1_CL$window_end_pos[i]) + 100000 > as.numeric(end_pos))
+     if (nrow(Sig) > 0 ) {
+       print(Sig)} 
+    if (nrow(Sig2) > 0 ) {
+       print(Sig2)}
+  }
+```
+
+
+
+
+
+```{r}
+for (i in 1:nrow(windows_BAP11A1_CL)){
+  Sig <- candidates %>% filter(windows_BAP11A1_CL$window_lg_start[i] == Chr & as.numeric(windows_BAP11A1_CL$window_start_pos[i])- 100000  < as.numeric(start_pos) & as.numeric(windows_BAP11A1_CL$window_end_pos[i]) + 100000> as.numeric(start_pos))
+  Sig2 <- candidates %>% filter(windows_BAP11A1_CL$window_lg_start[i] == Chr & as.numeric(windows_BAP11A1_CL$window_start_pos[i]) - 100000 < as.numeric(end_pos) & as.numeric(windows_BAP11A1_CL$window_end_pos[i]) + 100000 > as.numeric(end_pos))
+     if (nrow(Sig) > 0 ) {
+       print(Sig)} 
+    if (nrow(Sig2) > 0 ) {
+       print(Sig2)}
+  }
+```
+

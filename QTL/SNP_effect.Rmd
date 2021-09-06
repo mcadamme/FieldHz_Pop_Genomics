@@ -1,0 +1,116 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(data.table)
+```
+ 
+##Read in BSLMM results
+```{r}
+setwd("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_bslmm_output/")
+
+files <- list.files(pattern = "*.param.txt")
+file_names <- gsub("[.param.txt]", "", files)
+
+for (i in 1:length(files)) {
+assign(paste(file_names[i]), read.table(paste( "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_bslmm_output/",files[i], sep = ""), header = TRUE)) 
+}
+```
+
+
+### Combine BSLMM outputs from multiple runs
+
+```{r}
+DEO9A1_DD_BSLMM <- bind_rows(DEO9A1_DD_BSLMM_1, DEO9A1_DD_BSLMM_2, DEO9A1_DD_BSLMM_3, DEO9A1_DD_BSLMM_4, DEO9A1_DD_BSLMM_5)
+
+DEO9A1_DD_BSLMM <- DEO9A1_DD_BSLMM %>% 
+  group_by(rs) %>% 
+  summarise(ps = mean(ps), alpha = median(alpha), 
+            beta = mean(beta), gamma = median(gamma),)
+
+DEO9A1_CL_BSLMM <- bind_rows(DEO9A1_CL_BSLMM_1, DEO9A1_CL_BSLMM_2, DEO9A1_CL_BSLMM_3, DEO9A1_CL_BSLMM_4, DEO9A1_CL_BSLMM_5)
+
+DEO9A1_CL_BSLMM <- DEO9A1_CL_BSLMM %>% 
+  group_by(rs) %>% 
+  summarise(ps = mean(ps), alpha = median(alpha), 
+            beta = mean(beta), gamma = median(gamma),)
+
+BAP11A1_DD_BSLMM <- bind_rows(BAP11A1_DD_BSLMM_1, BAP11A1_DD_BSLMM_2, BAP11A1_DD_BSLMM_3, BAP11A1_DD_BSLMM_4, BAP11A1_DD_BSLMM_5)
+
+BAP11A1_DD_BSLMM <- BAP11A1_DD_BSLMM %>% 
+  group_by(rs) %>% 
+  summarise(ps = mean(ps), alpha = median(alpha), 
+            beta = mean(beta), gamma = median(gamma),)
+
+BAP11A1_CL_BSLMM <- bind_rows(BAP11A1_CL_BSLMM_1, BAP11A1_CL_BSLMM_2, BAP11A1_CL_BSLMM_3, BAP11A1_CL_BSLMM_4, BAP11A1_CL_BSLMM_5)
+
+BAP11A1_CL_BSLMM <- BAP11A1_CL_BSLMM %>% 
+  group_by(rs) %>% 
+  summarise(ps = mean(ps), alpha = median(alpha), 
+            beta = mean(beta), gamma = median(gamma),)
+```
+ 
+## Read in gemma LM output
+
+```{r}
+DEO9A1_DD <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_lmm_output/DEO9A1_DD.assoc.txt", header=TRUE)
+
+BAP11A1_DD <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_lmm_output/BAP11A1_DD.assoc.txt", header=TRUE)
+
+DEO9A1_CL <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_lmm_output/DEO9A1_CL.assoc.txt", header=TRUE)
+
+BAP11A1_CL <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/gemma_lmm_output/BAP11A1_CL.assoc.txt", header=TRUE)
+```
+
+## Merge BSLMM and LMM results
+
+```{r}
+DEO9A1_DD <- merge(DEO9A1_DD, DEO9A1_DD_BSLMM, by = c( "rs", "ps"))
+
+DEO9A1_CL <- merge(DEO9A1_CL, DEO9A1_CL_BSLMM, by = c( "rs", "ps"))
+
+BAP11A1_DD <- merge(BAP11A1_DD, BAP11A1_DD_BSLMM, by = c( "rs", "ps"))
+
+BAP11A1_CL <- merge(BAP11A1_CL, BAP11A1_CL_BSLMM, by = c( "rs", "ps"))
+```
+
+## Add map information and select and rename columns
+
+```{r}
+map <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/Hzea_superScaf_genome_8.4.21.txt", header = TRUE)
+
+DEO9A1_DD <- DEO9A1_DD %>%
+  merge(map, by.x = "chr", by.y = "Scaf") %>%
+  select("Chr", "ArmScaf", "chr","rs", "ps", "allele1", "allele0", "af", "beta.x", "se", "p_lrt", "alpha", "beta.y", "gamma", "scaffold_lg_start", "scaffold_lg_end") %>%
+  rename("scaffold" = "chr", "snp_id" = "rs", "position" = "ps", "allele_frequency" = "af", "additive_effect" = "beta.x", "sterr_additive_effect" = "se", "beta"= "beta.y")
+
+DEO9A1_CL <- DEO9A1_CL %>%
+  merge(map, by.x = "chr", by.y = "Scaf") %>%
+  select("Chr", "ArmScaf", "chr","rs", "ps", "allele1", "allele0", "af", "beta.x", "se", "p_lrt", "alpha", "beta.y", "gamma", "scaffold_lg_start", "scaffold_lg_end") %>%
+  rename("scaffold" = "chr", "snp_id" = "rs", "position" = "ps", "allele_frequency" = "af", "additive_effect" = "beta.x", "sterr_additive_effect" = "se", "beta"= "beta.y")
+
+BAP11A1_DD <- BAP11A1_DD %>%
+  merge(map, by.x = "chr", by.y = "Scaf") %>%
+  select("Chr", "ArmScaf", "chr","rs", "ps", "allele1", "allele0", "af", "beta.x", "se", "p_lrt", "alpha", "beta.y", "gamma", "scaffold_lg_start", "scaffold_lg_end") %>%
+  rename("scaffold" = "chr", "snp_id" = "rs", "position" = "ps", "allele_frequency" = "af", "additive_effect" = "beta.x", "sterr_additive_effect" = "se", "beta"= "beta.y")
+
+BAP11A1_CL <- BAP11A1_CL %>%
+  merge(map, by.x = "chr", by.y = "Scaf") %>%
+  select("Chr", "ArmScaf", "chr","rs", "ps", "allele1", "allele0", "af", "beta.x", "se", "p_lrt", "alpha", "beta.y", "gamma", "scaffold_lg_start", "scaffold_lg_end") %>%
+  rename("scaffold" = "chr", "snp_id" = "rs", "position" = "ps", "allele_frequency" = "af", "additive_effect" = "beta.x", "sterr_additive_effect" = "se", "beta"= "beta.y")
+```
+
+## Write all_snp output files
+
+```{r}
+write.csv(BAP11A1_CL, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/BAP11A1_CL_all_snps_8.4.21.csv")
+write.csv(BAP11A1_DD, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/BAP11A1_DD_all_snps_8.4.21.csv")
+write.csv(DEO9A1_CL, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/DEO9A1_CL_all_snps_8.4.21.csv")
+write.csv(DEO9A1_DD, "~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/gemma/DEO9A1_DD_all_snps_8.4.21.csv")
+```
+
+

@@ -1,0 +1,193 @@
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(grid)
+theme_set(theme_bw(base_size=10))
+theme_update(panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), 
+  plot.title = element_text(),
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank(),
+  panel.margin = unit(0, "lines"),
+  strip.background = element_blank(),
+  panel.border = element_blank(),
+  legend.position = "none", 
+  strip.text.x = element_text(margin = margin(0,0,0,0, "cm")))
+```
+
+```{r}
+map <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/Hzea_superScaf_genome_8.4.21.txt", header = TRUE)
+```
+
+```{r}
+FST_2002_2017 <- read.table("~/Desktop/UMD/Crosses_Analysis/Define_Windows/2002and2017_10kb_wcFST_all.smoothed.txt") %>% merge(map, by.x = "V1", by.y = "Scaf", all.x = TRUE) %>% arrange(Chr, scaffold_lg_start, V2) %>% mutate(window_lg_position = rowSums(select(.,scaffold_lg_start, V2))) %>% mutate(window_lg_position_end = rowSums(select(.,scaffold_lg_start, V3))) %>% mutate(sig = case_when(V5 > 0.078 & V4 > 10 ~ 1,TRUE ~ 0)) 
+
+FST_2002_2012 <- read.table("~/Desktop/UMD/Crosses_Analysis/Define_Windows/2002and2012_10kb_wcFST_all.smoothed.txt") %>% merge(map, by.x = "V1", by.y = "Scaf", all.x = TRUE) %>% arrange(Chr, scaffold_lg_start, V2) %>% mutate(window_lg_position = rowSums(select(.,scaffold_lg_start, V2))) %>% mutate(window_lg_position_end = rowSums(select(.,scaffold_lg_start, V3))) %>% mutate(sig = case_when(V5 > 0.078 & V4 > 10 ~ 1,TRUE ~ 0)) 
+
+FST_2012_2017 <- read.table("~/Desktop/UMD/Crosses_Analysis/Define_Windows/2012and2017_10kb_wcFST_all.smoothed.txt") %>% merge(map, by.x = "V1", by.y = "Scaf", all.x = TRUE) %>% arrange(Chr, scaffold_lg_start, V2) %>% mutate(window_lg_position = rowSums(select(.,scaffold_lg_start, V2))) %>% mutate(window_lg_position_end = rowSums(select(.,scaffold_lg_start, V3))) %>% mutate(sig = case_when(V5 > 0.078 & V4 > 10 ~ 1,TRUE ~ 0)) 
+
+```
+
+```{r}
+windows_DEO9A1_DD <-read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_DD.csv", header = TRUE)
+
+windows_BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_BAP11A1_DD.csv", header = TRUE)
+```
+
+```{r}
+BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/BAP11A1_DD_window_snps.csv") %>%  
+  filter(Chr != "",  allele_frequency > .1, Chr < 32) %>%
+  mutate(color = case_when(gamma_sig_window == 0 & Chr %% 2 != 0 ~ 1, 
+                           gamma_sig_window == 0 & Chr %% 2 == 0 ~ 2, 
+                           gamma_sig_window == 1 & Chr %% 2 != 0 ~ 3, 
+                           gamma_sig_window == 1 & Chr %% 2 == 0 ~ 4))
+
+DEO9A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/DEO9A1_DD_window_snps.csv") %>%  
+  filter(Chr != "",  allele_frequency > .1, Chr < 32) %>%
+  mutate(color = case_when(gamma_sig_window == 0 & Chr %% 2 != 0 ~ 1, 
+                           gamma_sig_window == 0 & Chr %% 2 == 0 ~ 2, 
+                           gamma_sig_window == 1 & Chr %% 2 != 0 ~ 3, 
+                           gamma_sig_window == 1 & Chr %% 2 == 0 ~ 4))
+```
+
+
+## Add QTL significant window information to FST data set 
+
+```{r}
+FST_2002_2017$BAP11A1_DD_sig_window <- 0
+
+for (i in 1:nrow(windows_BAP11A1_DD)) {
+FST_2002_2017 <- FST_2002_2017 %>%
+  mutate(BAP11A1_DD_sig_window = case_when(
+  windows_BAP11A1_DD$window_start_pos[i] <= window_lg_position &
+    windows_BAP11A1_DD$window_end_pos[i] >= window_lg_position &
+    Chr == windows_BAP11A1_DD$window_lg_start[i] | 
+    windows_BAP11A1_DD$window_start_pos[i] <= window_lg_position_end &
+    windows_BAP11A1_DD$window_end_pos[i] >= window_lg_position_end &
+    Chr == windows_BAP11A1_DD$window_lg_start[i]~ 1 ,
+    TRUE ~ BAP11A1_DD_sig_window))
+}
+
+FST_2002_2017$DEO9A1_DD_sig_window <- 0
+
+for (i in 1:nrow(windows_DEO9A1_DD)) {
+FST_2002_2017 <- FST_2002_2017 %>%
+  mutate(DEO9A1_DD_sig_window = case_when(
+  windows_DEO9A1_DD$window_start_pos[i] <= window_lg_position &
+    windows_DEO9A1_DD$window_end_pos[i] >= window_lg_position &
+    Chr == windows_DEO9A1_DD$window_lg_start[i] | 
+    windows_DEO9A1_DD$window_start_pos[i] <= window_lg_position_end &
+    windows_DEO9A1_DD$window_end_pos[i] >= window_lg_position_end &
+    Chr == windows_DEO9A1_DD$window_lg_start[i]~ 1 ,
+    TRUE ~ DEO9A1_DD_sig_window))
+}
+
+FST_2002_2017 <- FST_2002_2017 %>%
+  mutate(highlight = case_when(
+    BAP11A1_DD_sig_window == 1 & DEO9A1_DD_sig_window  == 0 & sig == 1 ~ 1, DEO9A1_DD_sig_window  == 1 & BAP11A1_DD_sig_window == 0 & sig == 1 ~ 2,
+    DEO9A1_DD_sig_window  == 1 & BAP11A1_DD_sig_window == 1& sig == 1 ~ 3,
+    TRUE ~ 4))
+```
+
+
+## List FST QTL overlap window information
+
+```{r}
+FST_2002_2017 %>%
+  filter(sig == 1) %>%
+  filter(DEO9A1_DD_sig_window == 1 | BAP11A1_DD_sig_window == 1) %>%
+  select(Chr, ArmScaf, V2, V3, V4, V5, DEO9A1_DD_sig_window, BAP11A1_DD_sig_window) 
+```
+
+
+
+### Generate combined QTL FST plot
+
+```{r}
+
+DEO9A1_DD_plot <- DEO9A1_DD %>%
+  ggplot(aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position), color = as.factor(color))) +
+  geom_hline(yintercept = 0, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = -10, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = -20, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = -30, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = 10, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = 20, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = 30, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_point(data = DEO9A1_DD %>% filter(gamma_sig_window == 0), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 0.2) +
+  geom_point(data = DEO9A1_DD %>% filter(gamma_sig_window == 1), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 0.2) +
+  scale_color_manual(values = rep(c("grey15", "grey65", "blue","blue"), times = 24)) +
+  labs(x = "", y = "Additive effect", tag = "B") +
+  facet_wrap(~Chr, nrow = 1, strip.position="bottom", scales = "free_x") +
+  theme(text=element_text(size=9)) +
+  theme(strip.text = element_text(size = 0)) +
+  scale_y_continuous(breaks =c(-30, -20, -10, 0, 10, 20, 30), limits= c(-30,40))
+  
+DEO9A1_DD_plot 
+```
+
+
+```{r}
+
+BAP11A1_DD_plot <- BAP11A1_DD %>%
+  ggplot(aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position), color = as.factor(color))) +
+  geom_hline(yintercept = 0, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = -10, color = "grey", cex = 0.1, alpha = 0.3) +
+  geom_hline(yintercept = -20, color = "grey", cex =0.1, alpha = 0.3) +
+  geom_hline(yintercept = -30, color = "grey", cex =0.1, alpha = 0.3) +
+  geom_hline(yintercept = 10, color = "grey", cex =  0.1, alpha = 0.3) +
+  geom_hline(yintercept = 20, color = "grey", cex = 0.1, alpha = 0.3) +
+  geom_hline(yintercept = 30, color = "grey", cex = 0.1, alpha = 0.3) +
+  geom_point(data = BAP11A1_DD %>% filter(gamma_sig_window == 0), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 0.2) +
+  geom_point(data = BAP11A1_DD %>% filter(gamma_sig_window == 1), aes(y = additive_effect_fixed, x = as.numeric(snp_lg_position)), cex = 0.2) +
+  scale_color_manual(values = rep(c("grey15", "grey65", "red","red"), times = 24)) +
+  labs(x = "", y = "Additive effect", tag = "A") +
+  facet_wrap(~Chr, nrow = 1, strip.position="bottom", scales = "free_x") +
+  theme(text=element_text(size=9)) +
+  theme(strip.text = element_text(size = 0))+
+  scale_y_continuous(breaks =c(-30, -20, -10, 0, 10, 20, 30), limits= c(-30,40))
+
+
+BAP11A1_DD_plot
+```
+
+```{r}
+chrms <-  data.frame(1:45)
+colnames(chrms) <- "Chrom"
+
+FST_2002_2017_plot2 <- FST_2002_2017 %>%
+  filter(Chr != "", V4 > 10, Chr < 32) %>%
+  ggplot(aes(y = V5, x = as.numeric(window_lg_position))) +
+  geom_hline(yintercept = 0.1, color = "grey", cex = 0.1, alpha = 0.3) +
+  geom_hline(yintercept = 0.2, color = "grey", cex =0.1, alpha = 0.3) +
+  geom_hline(yintercept = 0.3, color = "grey", cex =0.1, alpha = 0.3) +
+  geom_point(alpha = 0.5, cex = 0.2, aes(color = as.factor(Chr))) +
+  scale_color_manual(values = rep(c("grey15", "grey65"), times = 24)) +
+  labs(x = "Linkage group", y = "FST", tag = "C") +
+  facet_wrap(~Chr, strip.position="bottom", nrow = 1, scales = "free_x") +
+  coord_cartesian(ylim = c(0, 0.3)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  geom_hline(yintercept = 0.078, color = "red",linetype = "dashed", cex = 0.5) +
+  geom_point(data= FST_2002_2017 %>% filter(highlight == 1), 
+               color="red", cex = 0.2) +
+  geom_point(data= FST_2002_2017 %>% filter(highlight == 2), 
+               color="blue", cex = 0.2)+
+  geom_point(data= FST_2002_2017 %>% filter(highlight == 3), 
+               color= "purple", cex = 0.2) +
+ theme(text=element_text(size=9)) 
+
+FST_2002_2017_plot2
+```
+
+
+```{r}
+jpeg("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/plots/Combined_FST_QTL_8.18.21.jpg", width = 11, height = 11, units = "cm", res = 900 )
+lay <- rbind(c(1),
+             c(2),
+             c(3))
+
+grid.arrange(BAP11A1_DD_plot, DEO9A1_DD_plot, FST_2002_2017_plot2, 
+             layout_matrix = lay)
+dev.off()
+```
+

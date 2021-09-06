@@ -1,0 +1,145 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+library(tidyverse)
+library(gridExtra)
+library(grid)
+theme_set(theme_bw(base_size=10))
+theme_update(panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), 
+  plot.title = element_text(hjust = 0.5),
+  legend.position = "none")
+```
+
+```{r}
+F0_growth_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/F0_growth_phenotypes_DD.csv")
+
+F0_growth_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/F0_growth_phenotypes_CL.csv")
+
+BAP11A1 <-  read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/tabs/BV_BA52_P11_BZM_A1_Scored.csv") %>%
+  filter(Population != "BENZON", Population != "Benzon")
+
+DEO9A1 <- read.csv("~/Desktop/UMD/Crosses_Analysis/Raw_Data_Tabs_Crosses/tabs/BV_DE107_O9_BZM_A1_Scored.csv")%>%
+  filter(Population != "Benzon", Population != "Benzon")
+
+```
+
+```{r}
+F0_growth_DD <- F0_growth_DD %>% 
+  mutate(end_weight_mg = end_weight * 1000)
+
+F0_growth_CL <- F0_growth_CL %>% 
+  mutate(end_weight_mg = end_weight * 1000)
+
+BAP11A1 <- BAP11A1 %>% 
+  mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
+
+DEO9A1 <- DEO9A1 %>% 
+  mutate(end_weight_mg = Individual.Larvae.Weight * 1000)
+  
+F0_growth_DD <- F0_growth_DD %>% 
+  mutate(field = case_when(family == "Benzon" ~ "Benzon", TRUE ~ "Field"))
+
+F0_growth_CL <- F0_growth_CL %>% 
+  mutate(field = case_when(family == "Benzon" ~ "Benzon", TRUE ~ "Field"))
+
+F0_growth <- rbind(F0_growth_CL, F0_growth_DD)
+```
+
+
+
+```{r}
+ F0_growth_DD %>% filter(end_weight_mg != "") %>%
+  group_by(diet_strain, field) %>%
+  summarize(
+    count = n(),
+    mean = mean(end_weight_mg),
+    max = max(end_weight_mg),
+    min = min(end_weight_mg))
+```
+
+```{r}
+F0_growth %>%
+  filter(end_weight_mg != "") %>%
+  group_by(treatment, diet_strain, field) %>%
+  summarize(
+    count = n(),
+    mean = mean(end_weight_mg),
+    max = max(end_weight_mg),
+    min = min(end_weight_mg))
+```
+
+## F2 phenotypes
+```{r}
+BAP11A1 %>%
+filter(end_weight_mg != "") %>%
+  group_by(Treatment) %>%
+  summarize(
+    count = n(),
+    mean = mean(end_weight_mg),
+    sd = sd(end_weight_mg),
+    se = sd/sqrt(n()))
+```
+
+```{r}
+with(BAP11A1, shapiro.test(end_weight_mg[Treatment == "DD"]))
+
+with(BAP11A1, shapiro.test(end_weight_mg[Treatment == "CL"]))
+```
+
+```{r}
+wilcox.test(BAP11A1$end_weight_mg~BAP11A1$Treatment,paired=FALSE)
+```
+
+```{r}
+DEO9A1 %>%
+filter(end_weight_mg != "") %>%
+  group_by(Treatment) %>%
+  summarize(
+    count = n(),
+    mean = mean(end_weight_mg),
+    sd = sd(end_weight_mg),
+    se = sd/sqrt(n()))
+
+```
+
+```{r}
+wilcox.test(DEO9A1$end_weight_mg~DEO9A1$Treatment,paired=FALSE)
+```
+
+Mean difference between field and susceptible populations
+```{r}
+114.27687/21.20792
+87.02952/6.31200
+```
+
+Founding parents
+```{r}
+145.6/21.20792
+129.5/6.31200
+```
+
+```{r}
+F0_growth_PDD <-F0_growth_DD %>% filter(diet_strain == "P") %>%
+  mutate(log_end_weight = log(end_weight_mg))
+F0_growth_ODD <-F0_growth_DD %>% filter(diet_strain == "O") %>%
+  mutate(log_end_weight = log(end_weight_mg))
+```
+
+
+```{r}
+with(F0_growth_ODD, shapiro.test(end_weight_mg[field == "Benzon"]))
+
+with(F0_growth_ODD, shapiro.test(end_weight_mg[field == "Field"]))
+```
+
+```{r}
+wilcox.test(F0_growth_ODD$end_weight_mg~F0_growth_ODD$field,paired=FALSE)
+wilcox.test(F0_growth_PDD$end_weight_mg~F0_growth_PDD$field,paired=FALSE)
+```
+
+
+

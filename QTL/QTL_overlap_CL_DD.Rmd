@@ -1,0 +1,73 @@
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+BAP11A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_BAP11A1_CL.csv")
+BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_BAP11A1_DD.csv")
+DEO9A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_CL.csv") 
+DEO9A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_DD.csv") 
+```
+
+# Identify overlap between DD and CL windows for each family
+
+```{r}
+BAP11A1_DD$overlap_CL <- 0
+
+for (i in 1:nrow(BAP11A1_CL)) {
+BAP11A1_DD <- BAP11A1_DD %>%
+  mutate(overlap_CL = case_when(
+    BAP11A1_CL$window_start_pos[i] >= window_start_pos &
+    BAP11A1_CL$window_start_pos[i] <= window_end_pos &
+    window_lg_start == BAP11A1_CL$window_lg_start[i] | 
+    BAP11A1_CL$window_end_pos[i] >= window_start_pos &
+    BAP11A1_CL$window_end_pos[i] <= window_end_pos & 
+    window_lg_start == BAP11A1_CL$window_lg_start[i] |
+    window_start_pos >= BAP11A1_CL$window_start_pos[i] &
+    window_start_pos <= BAP11A1_CL$window_end_pos[i] &
+    window_lg_start == BAP11A1_CL$window_lg_start[i] |
+    window_end_pos >= BAP11A1_CL$window_start_pos[i] &
+    window_end_pos <= BAP11A1_CL$window_end_pos[i] &
+    window_lg_start == BAP11A1_CL$window_lg_start[i]  ~ 1 ,
+    TRUE ~ overlap_CL))
+}
+
+```
+
+
+```{r}
+DEO9A1_DD$overlap_CL <- 0
+
+for (i in 1:nrow(DEO9A1_CL)) {
+DEO9A1_DD <- DEO9A1_DD %>%
+  mutate(overlap_CL = case_when(
+    DEO9A1_CL$window_start_pos[i] >= window_start_pos &
+    DEO9A1_CL$window_start_pos[i] <= window_end_pos &
+    window_lg_start == DEO9A1_CL$window_lg_start[i] | 
+    DEO9A1_CL$window_end_pos[i] >= window_start_pos &
+    DEO9A1_CL$window_end_pos[i] <= window_end_pos &
+    window_lg_start == DEO9A1_CL$window_lg_start[i] |
+    window_start_pos >= DEO9A1_CL$window_start_pos[i] &
+    window_start_pos <= DEO9A1_CL$window_end_pos[i] &
+    window_lg_start == DEO9A1_CL$window_lg_start[i] |
+    window_end_pos >= DEO9A1_CL$window_start_pos[i] &
+    window_end_pos <= DEO9A1_CL$window_end_pos[i] &
+    window_lg_start == DEO9A1_CL$window_lg_start[i] ~ 1 ,
+    TRUE ~ overlap_CL))
+}
+
+```
+
+## Print overlapping windows
+
+```{r}
+BAP11A1_DD %>%
+  filter(overlap_CL == 1)
+```
+
+```{r}
+DEO9A1_DD %>%
+  filter(overlap_CL == 1)
+```

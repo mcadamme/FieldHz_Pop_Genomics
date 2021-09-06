@@ -1,0 +1,113 @@
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+
+candidates <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/candidate_genes.csv", header = TRUE)
+
+candidates$start <- as.numeric(gsub(",","",candidates$start))
+candidates$stop <- as.numeric(gsub(",","",candidates$stop))
+
+map <- read.table("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/Hzea_superScaf_genome_8.4.21.txt", header = TRUE)
+
+candidates <- candidates %>% merge(map, by.x = "scaf", by.y = "Scaf") %>%
+  mutate(start_lg_position = as.numeric(scaffold_lg_start) + as.numeric(start),
+         stop_lg_position = as.numeric(scaffold_lg_start) + as.numeric(stop))
+
+
+
+BAP11A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/BAP11A1_CL_window_snps.csv") 
+
+BAP11A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/BAP11A1_DD_window_snps.csv") 
+
+DEO9A1_CL <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/DEO9A1_CL_window_snps.csv") 
+
+DEO9A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/DEO9A1_DD_window_snps.csv") 
+
+```
+
+
+```{r}
+candidates$BAP11A1_DD_eff <- "X"
+candidates$DEO9A1_DD_eff <- "X"
+candidates$BAP11A1_CL_eff <- "X"
+candidates$DEO9A1_CL_eff <- "X"
+candidates$BAP11A1_DD_n <- "0"
+candidates$DEO9A1_DD_n <- "0"
+candidates$BAP11A1_CL_n <- "0"
+candidates$DEO9A1_CL_n <- "0"
+
+for (i in 1:nrow(candidates)) {
+eff <- BAP11A1_DD %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == BAP11A1_DD$Chr) %>% summarize(eff = mean(additive_effect_fixed, na.rm = TRUE))
+
+n <- BAP11A1_DD %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == BAP11A1_DD$Chr) %>% summarize(n = n())
+
+
+candidates$BAP11A1_DD_eff[i] <- round(eff, 1)
+candidates$BAP11A1_DD_n[i] <- n
+}
+
+candidates$BAP11A1_DD_eff <- unlist(candidates$BAP11A1_DD_eff)
+candidates$BAP11A1_DD_n <- unlist(candidates$BAP11A1_DD_n)
+
+```
+
+
+```{r}
+for (i in 1:nrow(candidates)) {
+eff <- BAP11A1_CL %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == BAP11A1_CL$Chr) %>% summarize(eff = mean(additive_effect_fixed, na.rm = TRUE))
+
+n <- BAP11A1_CL %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == BAP11A1_CL$Chr) %>% summarize(n = n())
+
+
+candidates$BAP11A1_CL_eff[i] <- round(eff,1)
+candidates$BAP11A1_CL_n[i] <- n
+}
+candidates$BAP11A1_CL_eff <- unlist(candidates$BAP11A1_CL_eff)
+candidates$BAP11A1_CL_n <- unlist(candidates$BAP11A1_CL_n)
+
+```
+
+
+```{r}
+for (i in 1:nrow(candidates)) {
+eff <- DEO9A1_DD %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == DEO9A1_DD$Chr) %>% summarize(eff = mean(additive_effect_fixed, na.rm = TRUE))
+
+n <- DEO9A1_DD %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == DEO9A1_DD$Chr) %>% summarize(n = n())
+
+
+candidates$DEO9A1_DD_eff[i] <- round(eff,1)
+candidates$DEO9A1_DD_n[i] <- n
+}
+
+candidates$DEO9A1_DD_eff <- unlist(candidates$DEO9A1_DD_eff)
+candidates$DEO9A1_DD_n <- unlist(candidates$DEO9A1_DD_n)
+
+```
+
+```{r}
+for (i in 1:nrow(candidates)) {
+eff <- DEO9A1_CL %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == DEO9A1_CL$Chr) %>% summarize(eff = mean(additive_effect_fixed, na.rm = TRUE))
+
+n <- DEO9A1_CL %>% filter(snp_lg_position > max((candidates$start_lg_position[i] - 250000), 0) & snp_lg_position < candidates$stop_lg_position[i] + 250000 & candidates$Chr[i] == DEO9A1_CL$Chr) %>% summarize(n = n())
+
+
+candidates$DEO9A1_CL_eff[i] <- round(eff,1)
+candidates$DEO9A1_CL_n[i] <- n
+}
+
+candidates$DEO9A1_CL_eff <- unlist(candidates$DEO9A1_CL_eff)
+candidates$DEO9A1_CL_n <- unlist(candidates$DEO9A1_CL_n)
+
+```
+
+
+```{r}
+candidates <- candidates %>%
+  select(name, scaf, start, stop, BAP11A1_DD_eff, DEO9A1_DD_eff, BAP11A1_CL_eff, DEO9A1_CL_eff, BAP11A1_DD_n, DEO9A1_DD_n, BAP11A1_CL_n, DEO9A1_CL_n)
+
+write.csv(candidates,"~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/candidate_gene_check/candidate_genes_effect_250.csv")
+```
+

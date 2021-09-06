@@ -1,0 +1,256 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+```{r}
+library(tidyverse)
+theme_set(theme_bw(base_size=10))
+theme_update(panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), 
+  plot.title = element_text(),
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank(),
+  panel.margin = unit(0, "lines"),
+  strip.background = element_blank(),
+  panel.border = element_blank(),
+  legend.position = "none", 
+  strip.text.x = element_text(margin = margin(0,0,0,0, "cm")))
+```
+
+
+### Load in SNP files
+
+Read in the SNP effect files, then merge with position information from the map. Then calculate approximate lg position for each SNP. Finally, arrange the dataframe so that SNPs are in the order they are on each linkage group.
+
+```{r}
+DEO9A1_DD<- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/DEO9A1_DD_snp_eff_8.4.21.csv") %>% arrange(Chr, scaffold_lg_start, position) %>%   mutate(snp_lg_position = rowSums(select(.,scaffold_lg_start, position))) %>% 
+mutate(sig = case_when(p_lrt <= 0.01 ~ 1, p_lrt > 0.01 ~ 0)) %>% 
+  mutate(gamma_sig = case_when(gamma >= 0.01 ~ 1, gamma < 0.01 ~ 0)) %>% 
+  filter(Chr != "")
+```
+
+
+## Quick SNP plot
+
+Plot SNPs in lg positions, coloring red if p LRT < 0.01
+
+```{r}
+
+DEO9A1_DD %>%
+  filter(allele_frequency > .1, Chr < 32) %>%
+  ggplot(aes(y = abs(additive_effect), x = as.numeric(snp_lg_position), color = as.factor(Chr))) +
+  geom_point(alpha = 0.5, cex = 6) +
+  scale_color_manual(values = rep(c("grey15", "grey65"), times = 24)) +
+  labs(x = "Linkage group", y = "additive effect", color = "LRT p-vaule") +
+  geom_point(data = DEO9A1_DD %>% filter(sig == 1, Chr != "", allele_frequency > .1, Chr < 32), color = "red", cex = 6) +
+  facet_wrap(~Chr, nrow = 1, strip.position = "bottom") +
+  theme(text=element_text(size = 16)) 
+
+```
+
+## Make windows of significant p LRT SNPs
+
+Identify significant snp widows based upon p LRT < 0.01, and make a table of significant p LRT windows
+
+```{r}
+in_window <- 0
+sig_window <- 0
+window_start_row <- list()
+window_end_row <- list()
+window_start_pos <- list()
+window_end_pos <- list()
+window_start_chr <- list()
+window_end_chr <- list()
+window_lg_start <- list()
+window_lg_end <- list()
+n_snps <- 0
+window_n_snps <- list()
+window_start_pos_scaf <- list()
+window_end_pos_scaf <- list()
+
+for (i in 1:nrow(DEO9A1_DD)) {
+  if (DEO9A1_DD$p_lrt[i] < 0.01) { 
+    if (in_window == 1) {
+      if (DEO9A1_DD$Chr[i] == DEO9A1_DD$Chr[i-1]){ ## expand window if on same lg 
+        n_snps <- n_snps + 1}
+      else {## end the prior window and start a new window if on different lg
+        window_end_row <- c(window_end_row, i-1)
+        window_end_pos <- c(window_end_pos, DEO9A1_DD$snp_lg_position[i-1])
+        window_end_chr <- c(window_end_chr, DEO9A1_DD$scaffold[i-1])
+        window_lg_end <- c(window_lg_end, DEO9A1_DD$Chr[i-1])
+        window_end_pos_scaf <- c(window_end_pos_scaf, DEO9A1_DD$position[i-1])
+        window_n_snps <- c(window_n_snps, n_snps)
+        n_snps <- 0
+        window_start_row <- c(window_start_row, i)
+        window_start_pos <- c(window_start_pos, DEO9A1_DD$snp_lg_position[i])
+        window_start_chr <- c(window_start_chr, DEO9A1_DD$scaffold[i])
+        window_lg_start <- c(window_lg_start, DEO9A1_DD$Chr[i])
+        window_start_pos_scaf <- c(window_start_pos_scaf, DEO9A1_DD$position[i])
+        n_snps <- 1
+      }}
+    if (in_window == 0) { ## if first significant snp make new window
+      window_start_row <- c(window_start_row, i)
+      window_start_pos <- c(window_start_pos, DEO9A1_DD$snp_lg_position[i])
+      window_start_chr <- c(window_start_chr, DEO9A1_DD$scaffold[i])
+      window_lg_start <- c(window_lg_start, DEO9A1_DD$Chr[i])
+      window_start_pos_scaf <- c(window_start_pos_scaf, DEO9A1_DD$position[i])
+      n_snps <- 1
+      in_window <- 1
+    }}
+  else {# if one snp not significant in window - continue to expand as long as one snps in the next 20 snps is sig
+    if (in_window == 1) {
+    sig_window <- 0
+    for (j in 1:20){ # Check the next 20 snps for significance
+      if(i+(j-1) < nrow(DEO9A1_DD) & DEO9A1_DD$p_lrt[i+j] < 0.01 & DEO9A1_DD$Chr[i+j] == DEO9A1_DD$Chr[i-1]){
+         sig_window <- sig_window + 1}}
+    if (sig_window != 0){ }
+    else{ ## if twenty non-sig snps in a row, close window
+      if (in_window == 1) {
+        window_end_row <- c(window_end_row, i-1)
+        window_end_pos <- c(window_end_pos, DEO9A1_DD$snp_lg_position[i-1])
+        window_end_chr <- c(window_end_chr, DEO9A1_DD$scaffold[i-1])
+        window_lg_end <- c(window_lg_end, DEO9A1_DD$Chr[i-1])
+        window_end_pos_scaf <- c(window_end_pos_scaf, DEO9A1_DD$position[i-1])
+        window_n_snps <- c(window_n_snps, n_snps)
+        n_snps <- 0
+        in_window <- 0
+      }}}}}
+
+windows_DEO9A1_DD <- data.frame(cbind(unlist(window_start_row), unlist(window_start_pos), unlist(window_start_chr), unlist(window_lg_start), unlist(window_end_row), unlist(window_end_pos), unlist(window_end_chr), unlist(window_lg_end), unlist(window_n_snps), unlist(window_start_pos_scaf), unlist(window_end_pos_scaf)))
+
+names(windows_DEO9A1_DD) <- c("window_start_row", "window_start_pos","window_start_chr","window_lg_start", "window_end_row", "window_end_pos", "window_end_chr", "window_lg_end", "window_n_snps", "window_start_pos_scaf", "window_end_pos_scaf")
+```
+
+
+### Check if each SNP is in window
+
+## Add window information to SNP file
+
+```{r}
+DEO9A1_DD$sig_window <- 0
+
+for (i in 1:nrow(windows_DEO9A1_DD)) {
+DEO9A1_DD <- mutate(DEO9A1_DD, sig_window = case_when(as.numeric(windows_DEO9A1_DD[i,2]) <= snp_lg_position & snp_lg_position <= as.numeric(windows_DEO9A1_DD[i,6]) & Chr == windows_DEO9A1_DD[i,4]~ as.numeric(windows_DEO9A1_DD[i,1]) , TRUE ~ sig_window))
+}
+```
+
+## Select only windows containing a PIP significant SNP
+
+```{r}
+gamma_sig_windows <- list()
+
+for (i in 1:nrow(windows_DEO9A1_DD)) {
+  current_window <- (filter(DEO9A1_DD, sig_window == windows_DEO9A1_DD[i,1]) %>%
+    group_by(gamma_sig) %>%
+    summarize(n = n()) %>%
+      filter(n != 0 & gamma_sig == 1))
+  if (nrow(current_window >= 1)) {
+    gamma_sig_windows <- c(gamma_sig_windows, windows_DEO9A1_DD[i,1])
+  }
+}
+
+windows_DEO9A1_DD <- subset(windows_DEO9A1_DD, windows_DEO9A1_DD[,1] %in% gamma_sig_windows)
+```
+
+## Add gamma significant window info to SNPs
+
+```{r}
+DEO9A1_DD$gamma_sig_window <- 0
+
+for (i in 1:nrow(windows_DEO9A1_DD)) {
+DEO9A1_DD <- mutate(DEO9A1_DD, gamma_sig_window = case_when(as.numeric(windows_DEO9A1_DD[i,2]) <= snp_lg_position & snp_lg_position <= as.numeric(windows_DEO9A1_DD[i,6]) & Chr == windows_DEO9A1_DD[i,4] ~ 1 , TRUE ~ gamma_sig_window))
+}
+
+```
+
+
+## Plot sig windows
+
+
+```{r}
+
+DEO9A1_DD %>%
+  filter(Chr != "", allele_frequency > .1, Chr < 32) %>%
+  ggplot(aes(y = abs(additive_effect), x = as.numeric(snp_lg_position), color = as.factor(Chr))) +
+  geom_point(alpha = 0.5, cex = 6) +
+  scale_color_manual(values = rep(c("grey15", "grey65"), times = 24)) +
+  labs(x = "Linkage group", y = "Additive effect", color = "LRT p-vaule") +
+  geom_point(data = DEO9A1_DD %>% filter(gamma_sig_window == 1, Chr != "", allele_frequency > .1, Chr < 32), color = "red", cex = 6) +
+  facet_wrap(~Chr, nrow = 1, strip.position = "bottom")+
+  theme(text=element_text(size=16)) +
+  ylim (0,55)
+
+```
+
+## Conver from LG windows to scaffold windows
+
+
+```{r}
+scaffold_lengths <- read.table ("/Users/Katie/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/Hzea_1.0_genomic.fasta.scaf.length.txt", header = TRUE)
+
+map <- read.table ("/Users/Katie/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/Hzea_superScaf_genome_8.4.21.txt", header = TRUE)
+
+map <- merge(map, scaffold_lengths, by.x = "Scaf", by.y = "Scaffold") %>% arrange(Chr, scaffold_lg_start)
+```
+
+
+```{r}
+windows <- windows_DEO9A1_DD
+
+window_start_pos <- list()
+window_end_pos <- list()
+window_scaf <- list()
+
+count <- 1
+in_window <- 0
+
+for (i in 1:nrow(windows)){
+  for (j in 1:nrow(map)){
+    if (windows$window_start_chr[i] == map$Scaf[j]){ # If current chrom is window start
+        in_window <- 1
+      window_start_pos <- c(window_start_pos, windows$window_start_pos_scaf[i]) # use SNP position for window start
+      window_scaf <- c(window_scaf, map$Scaf[j])
+      if (windows$window_end_chr[i] == map$Scaf[j]){
+        window_end_pos <- c(window_end_pos, windows$window_end_pos_scaf[i]) # If current chrom is window end use SNP position for window start
+        in_window <- 0}
+      else{ #otherwise end window at the scaffolds length
+          window_end_pos <- c(window_end_pos, map$length[j])
+        }}
+    else{
+      if(map$Scaf[j] != windows$window_end_chr[i] & in_window == 1){ # if in window but not start or end
+        window_start_pos <- c(window_start_pos, 0) # start at zero
+        window_scaf <- c(window_scaf, map$Scaf[j])
+        window_end_pos <- c(window_end_pos, map$length[j]) # end a scaffold length
+      }
+      if(map$Scaf[j] == windows$window_end_chr[i]){ ## if scaffold at end of window
+        window_start_pos <- c(window_start_pos, 0) # start window at zero
+        window_scaf <- c(window_scaf, map$Scaf[j])
+        window_end_pos <- c(window_end_pos, windows$window_end_pos_scaf[i]) # end at radtag pos
+        in_window <- 0}
+    }
+  }}
+
+scaffold_windows_DEO9A1_DD <- data.frame(cbind(unlist(window_scaf), unlist(window_start_pos), unlist(window_end_pos)))
+
+names(scaffold_windows_DEO9A1_DD) <- c("window_scaf", "window_start_pos", "window_end_pos")
+```
+
+
+
+## Export windows in both formats and SNP files with window information
+
+```{r}
+write.csv(as.data.frame(scaffold_windows_DEO9A1_DD), "/Users/Katie/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/scaffold_windows_DEO9A1_DD.csv", row.names = FALSE)
+
+windows_DEO9A1_DD %>%
+  select(window_lg_start, window_start_pos, window_end_pos) %>%
+  write.csv("/Users/Katie/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_DD.csv", row.names = FALSE)
+
+```
+
+```{r}
+write.csv(DEO9A1_DD, "/Users/Katie/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/DEO9A1_DD_window_snps.csv")
+```
+
+

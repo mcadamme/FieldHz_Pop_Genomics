@@ -1,0 +1,68 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(regioneR)
+library(tidyverse)
+```
+
+## Define the genome
+
+```{r}
+genome_LG <- getGenome(read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/genome_files/LG_lengths.csv", header = TRUE))
+```
+
+
+## Input significant QTL and FST windows
+
+```{r}
+LG_QTL_windows_DEO9A1_DD <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/define_windows/LG_windows_DEO9A1_DD.csv", header = TRUE)
+
+LG_FST_windows_2002_2017 <- read.csv("~/Desktop/UMD/Crosses_Analysis/reanalysis_8.4.21/FST_windows/LG_windows_FST_2002_2017.csv", header = TRUE)
+
+```
+
+
+## Conver to G ranges
+
+```{r}
+LG_FST_windows_2002_2017 <- toGRanges(LG_FST_windows_2002_2017)
+LG_QTL_windows_DEO9A1_DD <- toGRanges(LG_QTL_windows_DEO9A1_DD)
+```
+
+
+## Count overlaps 
+
+```{r, warning=FALSE}
+numOverlaps(LG_QTL_windows_DEO9A1_DD, LG_FST_windows_2002_2017, genome = genome_LG, count.once=TRUE)
+```
+
+## Describe overlaps
+
+```{r, warning= FALSE}
+overlapRegions(LG_FST_windows_2002_2017, LG_QTL_windows_DEO9A1_DD)
+```
+
+## Run the permutation test
+
+```{r, warning=FALSE}
+pt_DEO9A1_DD_LG_2002_2017 <- overlapPermTest(B = LG_FST_windows_2002_2017, A = LG_QTL_windows_DEO9A1_DD, ntimes = 10000, genome = genome_LG)
+```
+
+
+## View permutation test results
+
+```{r}
+pt_DEO9A1_DD_LG_2002_2017
+```
+
+```{r}
+plot(pt_DEO9A1_DD_LG_2002_2017)
+```
+
+```{r}
+mean(pt_DEO9A1_DD_LG_2002_2017$numOverlaps$permuted)
+```
