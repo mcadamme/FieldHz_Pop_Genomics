@@ -33,6 +33,7 @@ done
 
 ~/programs/stacks-2.55/gstacks -I ~/xspace/aligned/sorted_bam/ -M ~/xspace/aligned/sorted_bam/pop_map.txt -O ~/xspace/stacks -t 4
 
+
 #### Populations
 
 ~/programs/stacks-2.55/populations -P ~/xspace/stacks \
@@ -47,75 +48,125 @@ done
 --map-type F2 --map-format rqtl --vcf --plink \
 -t 4 --write-single-snp --min-mac 3 -r .1 --hwe
 
+
+
+##### Filter offspring genotypes to only include sites fixed in the parents using command line R
+
+
+library(tidyverse)
+
+parent_vcf_recode <- read.table("~/xspace/VCF/all_parent_calls.vcf", header = FALSE)
+
+colnames(parent_vcf_recode) <- c("CHROM","POS", "ID", "REF", "ALT",	"QUAL",	"FILTER", "INFO","FORMAT", "Field_1", "Benzon_1", "Benzon_2", "Field_2")
+
+BAP11A1_VCF <- read.table("~/xspace/stacks/populations_BAP11A1/BAP11A1.snps.vcf", header = FALSE)
+
+DEO9A1_VCF <- read.table("~/xspace/stacks/populations_DEO9A1/DEO9A1.snps.vcf", header = FALSE)
+
+DEO9A1_merged <- merge(DEO9A1_VCF, parent_vcf_recode, by.x = c("V1", "V2"), by.y = c("CHROM", "POS")) 
+
+BAP11A1_merged <- merge(BAP11A1_VCF, parent_vcf_recode, by.x = c("V1", "V2"), by.y = c("CHROM", "POS")) 
+
+
+DEO9A1_fixed <- DEO9A1_merged %>% 
+  separate(Benzon_1, sep = ":", into = c("Benzon_1", "Benzon_1_PL")) %>% 
+  separate(Benzon_2, sep = ":", into = c("Benzon_2", "Benzon_2_PL")) %>% 
+  separate(Field_1, sep = ":", into = c("Field_1", "Field_1_PL")) %>% 
+  separate(Field_2, sep = ":", into = c("Field_2", "Field_2_PL")) %>%
+  filter(Benzon_2 == "0/0" & Field_2 == "1/1" |Benzon_2 == "1/1" & Field_2 == "0/0") 
+  
+  
+BAP11A1_fixed <- BAP11A1_merged %>% 
+  separate(Benzon_1, sep = ":", into = c("Benzon_1", "Benzon_1_PL")) %>% 
+  separate(Benzon_2, sep = ":", into = c("Benzon_2", "Benzon_2_PL")) %>% 
+  separate(Field_1, sep = ":", into = c("Field_1", "Field_1_PL")) %>% 
+  separate(Field_2, sep = ":", into = c("Field_2", "Field_2_PL")) %>%
+  filter(Benzon_1 == "0/0" & Field_1 == "1/1" | Benzon_1 == "1/1" & Field_1 == "0/0") 
+  
+  
+BAP11A1_snp_list <- BAP11A1_fixed$V3
+
+DEO9A1_snp_list <- DEO9A1_fixed$V3
+
+write.table(DEO9A1_snp_list, "~/xspace/reanalysis_8.3.21/filter_VCF/DEO9A1_fixed_snp_list.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(BAP11A1_snp_list, "~/xspace/reanalysis_8.3.21/filter_VCF/BAP11A1_fixed_snp_list.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+grep -f BAP11A1_fixed_snp_list.txt ~/xspace/stacks/populations_BAP11A1/BAP11A1.snps.vcf > ./BAP11A1.fixed.vcf
+grep -f DEO9A1_fixed_snp_list.txt ~/xspace/stacks/populations_DEO9A1/DEO9A1.snps.vcf > ./DEO9A1.fixed.vcf
+
+
+
+
 ##### Plink file filtering and format conversion 
 
-~/programs/plink --vcf DEO9A1.snps.vcf --make-bed --out DEO9A1_vcf --const-fid 0 --allow-extra-chr 
-~/programs/plink --bfile DEO9A1_vcf --make-bed --out DEO9A1_filter --const-fid 0 --allow-extra-chr --mind 0.8 --geno 0.2 --hwe2 0.01 --mac 3
-~/programs/plink --bfile DEO9A1_filter --make-bed --out DEO9A1_nophen --allow-extra-chr --allow-no-sex 
-~/programs/plink --bfile DEO9A1_nophen --pheno DEO9A1.plink.phen.txt --make-bed --allow-extra-chr --allow-no-sex --out DEO9A1_phen
-~/programs/plink --bfile DEO9A1_phen --recode --out DEO9A1 --allow-extra-chr --allow-no-sex
+
+~/programs/plink --vcf BAP11A1.fixed.vcf --make-bed --out BAP11A1_sorted --allow-extra-chr --const-fid "progeny"
+
+~/programs/plink --bfile BAP11A1_sorted --const-fid "progeny" --allow-extra-chr --allow-no-sex \
+--geno 0.7 --hwe2 0.001 --mac 3 --pheno BAP11A1.plink.phen.txt \
+--keep keep_list_BAP11A1_DD.txt --recode --make-bed --out BAP11A1_DD
+
+~/programs/plink --bfile BAP11A1_sorted --const-fid "progeny" --allow-extra-chr --allow-no-sex \
+--geno 0.7 --hwe2 0.001 --mac 3 --pheno BAP11A1.plink.phen.txt \
+--keep keep_list_BAP11A1_CL.txt --recode --make-bed --out BAP11A1_CL
+
+~/programs/plink --vcf DEO9A1.fixed.vcf --make-bed --out DEO9A1_sorted --allow-extra-chr --const-fid "progeny"
+
+~/programs/plink --bfile DEO9A1_sorted --const-fid "progeny" --allow-extra-chr --allow-no-sex \
+--geno 0.7 --hwe2 0.001 --mac 3 --pheno DEO9A1.plink.phen.txt \
+--keep keep_list_DEO9A1_DD.txt --recode --make-bed --out DEO9A1_DD
+
+~/programs/plink --bfile DEO9A1_sorted --const-fid "progeny" --allow-extra-chr --allow-no-sex \
+--geno 0.7 --hwe2 0.001 --mac 3 --pheno DEO9A1.plink.phen.txt \
+--keep keep_list_DEO9A1_CL.txt --recode --make-bed --out DEO9A1_CL
 
 
-~/programs/plink --vcf BAP11A1.snps.vcf --make-bed --out BAP11A1_vcf --const-fid 0 --allow-extra-chr 
-~/programs/plink --bfile BAP11A1_vcf --make-bed --out BAP11A1_filter --const-fid 0 --allow-extra-chr --mind 0.8 --geno 0.2 --hwe2 0.01 --mac 3
-~/programs/plink --bfile BAP11A1_filter --make-bed --out BAP11A1_nophen --allow-extra-chr --allow-no-sex 
-~/programs/plink --bfile BAP11A1_nophen --pheno BAP11A1.plink.phen.txt --make-bed --allow-extra-chr --allow-no-sex --out BAP11A1_phen
-~/programs/plink --bfile BAP11A1_phen --recode --out BAP11A1 --allow-extra-chr --allow-no-sex
+## Link impute
 
-##### Link impute 
-
-java -jar ~/programs/LinkImpute.jar -q DEO9A1.ped DEO9A1.impute.ped
-java -jar ~/programs/LinkImpute.jar -q BAP11A1.ped BAP11A1.impute.ped
+java -jar ~/programs/LinkImpute.jar -q ../filter_VCF/DEO9A1_DD.ped DEO9A1_DD.impute.ped
+java -jar ~/programs/LinkImpute.jar -q ../filter_VCF/BAP11A1_DD.ped BAP11A1_DD.impute.ped
+java -jar ~/programs/LinkImpute.jar -q ../filter_VCF/DEO9A1_CL.ped DEO9A1_CL.impute.ped
+java -jar ~/programs/LinkImpute.jar -q ../filter_VCF/BAP11A1_CL.ped BAP11A1_CL.impute.ped
 
 
-##### Plink file convert
-~/programs/plink --script plink_script_BAP11A1_CL.txt
-~/programs/plink --script plink_script_DEO9A1_DD.txt
-~/programs/plink --script plink_script_DEO9A1_CL.txt
-~/programs/plink --script plink_script_BAP11A1_DD.txt
+### Format file for gemma
+~/programs/plink --ped BAP11A1_CL.impute.ped --map ../filter_VCF/BAP11A1_CL.map --allow-no-sex --make-bed --out ../gemma/BAP11A1_CL --allow-extra-chr
+~/programs/plink --ped BAP11A1_DD.impute.ped --map ../filter_VCF/BAP11A1_DD.map --allow-no-sex --make-bed --out ../gemma/BAP11A1_DD --allow-extra-chr
+~/programs/plink --ped DEO9A1_DD.impute.ped --map ../filter_VCF/DEO9A1_DD.map --allow-no-sex --make-bed --out ../gemma/DEO9A1_DD --allow-extra-chr
+~/programs/plink --ped DEO9A1_CL.impute.ped --map ../filter_VCF/DEO9A1_CL.map --allow-no-sex --make-bed --out ../gemma/DEO9A1_CL --allow-extra-chr
 
-plink_script_BAP11A1_DD.txt:
-
---ped BAP11A1.impute.ped 
---map BAP11A1_phen.map 
---allow-no-sex
---allow-extra-chr
---make-bed 
---out ../BAP11A1_DD
---keep keep_list_BAP11A1_DD.txt 
 
 ##### Gemma LMM
 
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -lm 4 -o refilter_DEO9A1_DD
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -lm 4 -o refilter_DEO9A1_CL
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -lm 4 -o refilter_BAP11A1_DD
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -lm 4 -o refilter_BAP11A1_CL
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_DD -lm 4 -o DEO9A1_DD
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_CL -lm 4 -o DEO9A1_CL
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_DD -lm 4 -o BAP11A1_DD
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_CL -lm 4 -o BAP11A1_CL
 
 ##### Gemma BSLMM
 
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_1
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_1
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_1
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_1
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_DD -bslmm 1 -o DEO9A1_DD_BSLMM_1 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_CL -bslmm 1 -o DEO9A1_CL_BSLMM_1 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_DD -bslmm 1 -o BAP11A1_DD_BSLMM_1 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_CL -bslmm 1 -o BAP11A1_CL_BSLMM_1 -w 500000 -s 5000000
 
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_DD -bslmm 1 -o DEO9A1_DD_BSLMM_2 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_CL -bslmm 1 -o DEO9A1_CL_BSLMM_2 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_DD -bslmm 1 -o BAP11A1_DD_BSLMM_2 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_CL -bslmm 1 -o BAP11A1_CL_BSLMM_2 -w 500000 -s 5000000
 
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_2
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_2
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_2
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_2
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_DD -bslmm 1 -o DEO9A1_DD_BSLMM_3 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_CL -bslmm 1 -o DEO9A1_CL_BSLMM_3 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_DD -bslmm 1 -o BAP11A1_DD_BSLMM_3 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_CL -bslmm 1 -o BAP11A1_CL_BSLMM_3 -w 500000 -s 5000000
 
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_3
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_3
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_3
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_3
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_DD -bslmm 1 -o DEO9A1_DD_BSLMM_4 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_CL -bslmm 1 -o DEO9A1_CL_BSLMM_4 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_DD -bslmm 1 -o BAP11A1_DD_BSLMM_4 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_CL -bslmm 1 -o BAP11A1_CL_BSLMM_4 -w 500000 -s 5000000
 
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_4
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_4
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_4
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_4
-
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_DD -bslmm 1 -o refilter_DEO9A1_DD_5
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_DEO9A1_CL -bslmm 1 -o refilter_DEO9A1_CL_5
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_DD -bslmm 1 -o refilter_BAP11A1_DD_5
-~/programs/gemma-0.98.4-linux-static-AMD64 -bfile refilter_BAP11A1_CL -bslmm 1 -o refilter_BAP11A1_CL_5
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_DD -bslmm 1 -o DEO9A1_DD_BSLMM_5 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile DEO9A1_CL -bslmm 1 -o DEO9A1_CL_BSLMM_5 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_DD -bslmm 1 -o BAP11A1_DD_BSLMM_5 -w 500000 -s 5000000
+~/programs/gemma-0.98.4-linux-static-AMD64 -bfile BAP11A1_CL -bslmm 1 -o BAP11A1_CL_BSLMM_5 -w 500000 -s 5000000
 
